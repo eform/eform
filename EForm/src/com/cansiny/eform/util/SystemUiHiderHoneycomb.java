@@ -42,8 +42,7 @@ public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
 	 * Constructor not intended to be called by clients. Use
 	 * {@link SystemUiHider#getInstance} to obtain an instance.
 	 */
-	protected SystemUiHiderHoneycomb(Activity activity, View anchorView,
-			int flags) {
+	protected SystemUiHiderHoneycomb(Activity activity, View anchorView, int flags) {
 		super(activity, anchorView, flags);
 
 		mShowFlags = View.SYSTEM_UI_FLAG_VISIBLE;
@@ -72,8 +71,7 @@ public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
 	/** {@inheritDoc} */
 	@Override
 	public void setup() {
-		mAnchorView
-				.setOnSystemUiVisibilityChangeListener(mSystemUiVisibilityChangeListener);
+		mAnchorView.setOnSystemUiVisibilityChangeListener(mSystemUiVisibilityChangeListener);
 	}
 
 	/** {@inheritDoc} */
@@ -107,24 +105,19 @@ public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
 							WindowManager.LayoutParams.FLAG_FULLSCREEN,
 							WindowManager.LayoutParams.FLAG_FULLSCREEN);
 				}
-
-				// Trigger the registered listener and cache the visibility
-				// state.
+				// Trigger the registered listener and cache the visibility state.
 				mOnVisibilityChangeListener.onVisibilityChange(false);
 				mVisible = false;
-
 			} else {
 				mAnchorView.setSystemUiVisibility(mShowFlags);
 				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
 					// Pre-Jelly Bean, we must manually show the action bar
 					// and use the old window flags API.
 					mActivity.getActionBar().show();
-					mActivity.getWindow().setFlags(0,
-							WindowManager.LayoutParams.FLAG_FULLSCREEN);
+					mActivity.getWindow().setFlags(0, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 				}
 
-				// Trigger the registered listener and cache the visibility
-				// state.
+				// Trigger the registered listener and cache the visibility state.
 				mOnVisibilityChangeListener.onVisibilityChange(true);
 				mVisible = true;
 			}

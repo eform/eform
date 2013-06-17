@@ -10,7 +10,7 @@ import android.view.View;
  * techniques described in <a href=
  * "http://developer.android.com/training/backward-compatible-ui/index.html">
  * Creating Backward-Compatible UIs</a> to ensure that devices running any
- * version of ndroid OS are supported. More specifically, there are separate
+ * version of android OS are supported. More specifically, there are separate
  * implementations of this abstract class: for newer devices,
  * {@link #getInstance} will return a {@link SystemUiHiderHoneycomb} instance,
  * while on older devices {@link #getInstance} will return a
@@ -94,8 +94,7 @@ public abstract class SystemUiHider {
 	 *            {@link #FLAG_HIDE_NAVIGATION}, and
 	 *            {@link #FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES}.
 	 */
-	public static SystemUiHider getInstance(Activity activity, View anchorView,
-			int flags) {
+	public static SystemUiHider getInstance(Activity activity, View anchorView, int flags) {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			return new SystemUiHiderHoneycomb(activity, anchorView, flags);
 		} else {
@@ -150,7 +149,6 @@ public abstract class SystemUiHider {
 		if (listener == null) {
 			listener = sDummyListener;
 		}
-
 		mOnVisibilityChangeListener = listener;
 	}
 
