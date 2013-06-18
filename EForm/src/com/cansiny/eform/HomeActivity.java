@@ -12,17 +12,13 @@ package com.cansiny.eform;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-
 import org.xml.sax.SAXException;
-
-import com.cansiny.eform.IDLIndexReader.IDLIndexItem;
 
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.res.Resources;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -30,19 +26,21 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
-import android.widget.TableLayout.LayoutParams;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 /**
  * Home Activity, efrom will start form this activity.
  */
-public class HomeActivity extends Activity
+public class HomeActivity extends Activity implements OnClickListener, OnLongClickListener
 {
 	/**
 	 * Whether or not the system UI should be auto-hidden after
@@ -89,7 +87,10 @@ public class HomeActivity extends Activity
 
 		Log.d("HomeActivity", "onCreate");
 
+		/* save application to a static variable */
 		_app_context = getApplicationContext();
+
+		/* set interface layout from file */
 		setContentView(R.layout.activity_home);
 
 		try {
@@ -103,6 +104,9 @@ public class HomeActivity extends Activity
 
 		rebuildLayout();
 
+		View contents_layout = this.findViewById(R.id.contents_layout);
+		contents_layout.setLongClickable(true);
+		contents_layout.setOnLongClickListener(this);
 
 		// Set up an instance of SystemUiHider to control the system UI for
 		// this activity.
@@ -211,17 +215,50 @@ public class HomeActivity extends Activity
 //		mHideHandler.removeCallbacks(mHideRunnable);
 //		mHideHandler.postDelayed(mHideRunnable, delayMillis);
 //	}
+
+	@Override
+	public void onClick(View view) {
+		if (view.getClass() == ImageButton.class) {
+			Object object = view.getTag();
+			if (object == null || !(object instanceof String)) {
+				Log.e("HomeActivity", "ImageButton missing tag");
+				return;
+			}
+			Intent intent = new Intent(this, IDLItemActivity.class);
+			intent.putExtra(IDLItemActivity.INTENT_MESSAGE_NAME, (String) object);
+			startActivity(intent);
+		}
+	}
+
+	@Override
+	public boolean onLongClick(View view) {
+		if (view.getId() == R.id.contents_layout) {
+			Log.d("", "Long clicked");
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * This method converts dp unit to equivalent pixels, depending on device density. 
 	 * 
 	 * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
-	 * @param context Context to get resources and device specific display metrics
 	 * @return A float value to represent px equivalent to dp depending on device density
 	 */
 	public float convertDpToPixel(float dp) {
-	    Resources resources = getResources();
-	    DisplayMetrics metrics = resources.getDisplayMetrics();
+	    DisplayMetrics metrics = getResources().getDisplayMetrics();
 	    return dp * (metrics.densityDpi / 160f);
+	}
+
+	/**
+	 * This method converts device specific pixels to density independent pixels.
+	 * 
+	 * @param px A value in px (pixels) unit. Which we need to convert into db
+	 * @return A float value to represent dp equivalent to px value
+	 */
+	public float convertPixelsToDp(float px){
+	    DisplayMetrics metrics = getResources().getDisplayMetrics();
+	    return px / (metrics.densityDpi / 160f);
 	}
 
 	/**
@@ -255,31 +292,35 @@ public class HomeActivity extends Activity
 		}
 	}
 
-	private View createIconButton(String icon_name, int icon_size,
-			String text, int text_size) throws IOException {
+	private View createIconButton(IDLIndexReader.IDLIndexItem item, int icon_size, int text_size)
+			throws IOException {
 		LinearLayout button = new LinearLayout(getApplicationContext());
 		button.setOrientation(LinearLayout.VERTICAL);
 
-		ImageButton icon_view = new ImageButton(getApplicationContext());
-		icon_view.setBackgroundResource(R.drawable.btn_background_black);
+		ImageButton icon_button = new ImageButton(getApplicationContext());
+		icon_button.setId(item.name.hashCode());
+		icon_button.setTag(item.name);
+		icon_button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		icon_button.setBackgroundResource(R.drawable.btn_background_black);
+		String icon_name = item.name + ".png";
 		InputStream stream = idl_archive.getIconInputStream(icon_name);
 		Drawable drawable = Drawable.createFromStream(stream, icon_name);
-		icon_view.setImageDrawable(drawable);
-		icon_view.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		icon_button.setImageDrawable(drawable);
+		icon_button.setClickable(true);
+		icon_button.setOnClickListener(this);
 
 		int icon_size_pixel = (int) convertDpToPixel(icon_size);
-		Log.d("", String.format("icon size: %d->%d", icon_size, icon_size_pixel));
-		icon_size_pixel = 96;
 		LinearLayout.LayoutParams button_layout_params = new LinearLayout.LayoutParams(
 				icon_size_pixel, icon_size_pixel);
 		button_layout_params.bottomMargin = 8;
 		button_layout_params.gravity = Gravity.CENTER_HORIZONTAL;
-		button.addView(icon_view, button_layout_params);
+		button.addView(icon_button, button_layout_params);
 
 		TextView text_view = new TextView(getApplicationContext());
-		text_view.setText(text);
+		text_view.setText(item.text);
 		text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, text_size);
 		text_view.setTextColor(getResources().getColor(R.color.white));
+
 		button_layout_params = new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -294,45 +335,49 @@ public class HomeActivity extends Activity
 		reader.parse(idl_archive.getIndexInputStream());
 
 		TableLayout table = new TableLayout(getApplicationContext());
-		//table.setBackgroundResource(R.color.red);
-
-		int table_columns = reader.getTableColumns();
-		int table_xpad = reader.getTableXPad();
-		int table_ypad = reader.getTableYPad();
-		int button_icon_size = reader.getButtonIconSize();
-		int button_text_size = reader.getButtonTextSize();
-		ArrayList<IDLIndexItem> items = reader.getItems();
 
 		TableRow table_row = new TableRow(getApplicationContext());
-		table_row.setBackgroundResource(R.color.translucence);
+//		table_row.setBackgroundResource(R.color.translucence);
 		table_row.setGravity(Gravity.CENTER_HORIZONTAL);
-		int curr_column = 0;
+		int curr_column = 1;
 
-		for (IDLIndexItem item : items) {
-			View button = createIconButton(item.getName() + ".png", button_icon_size,
-					item.getText(), button_text_size);
+		for (IDLIndexReader.IDLIndexItem item : reader.items) {
+			View button = createIconButton(item, reader.button_icon_size, reader.button_text_size);
 			TableRow.LayoutParams row_layout_params = new TableRow.LayoutParams(
 					ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT);
-			row_layout_params.rightMargin = (int) convertDpToPixel(table_xpad);
+			if (curr_column < reader.table_columns) {
+				row_layout_params.rightMargin = (int) convertDpToPixel(reader.table_xpad);
+			}
 			table_row.addView(button, row_layout_params);
 
-			if (curr_column++ > table_columns) {
+			if (++curr_column > reader.table_columns) {
 				TableLayout.LayoutParams table_layout_params = new TableLayout.LayoutParams(
 						ViewGroup.LayoutParams.MATCH_PARENT,
 						ViewGroup.LayoutParams.WRAP_CONTENT);
-				table_layout_params.bottomMargin = table_ypad;
+				table_layout_params.bottomMargin = reader.table_ypad;
 				table.addView(table_row, table_layout_params);
 
 				table_row = new TableRow(getApplicationContext());
 				table_row.setGravity(Gravity.CENTER_HORIZONTAL);
-				curr_column = 0;
+				curr_column = 1;
 			}
 		}
-		table.addView(table_row);
+		if (curr_column > 0) {
+			for (; curr_column <= reader.table_columns; curr_column++) {
+				LinearLayout placeholder = new LinearLayout(getApplicationContext());
+				table_row.addView(placeholder);
+			}
+			table.addView(table_row);
+		}
 
+		FrameLayout.LayoutParams contents_params = new FrameLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.MATCH_PARENT);
+		contents_params.topMargin = (int) convertDpToPixel(reader.table_top_margin);
 		ViewGroup group = (ViewGroup) findViewById(R.id.contents_layout);
-		group.addView(table);
+		group.removeAllViews();
+		group.addView(table, contents_params);
 	}
 
 	private void show_recovery_flagment(int reason) {
@@ -345,6 +390,7 @@ public class HomeActivity extends Activity
 		fragmentTransaction.add(R.id.contents_layout, fragment);
 		fragmentTransaction.commit();
 	}
+
 }
 
 

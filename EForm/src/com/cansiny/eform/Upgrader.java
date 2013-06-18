@@ -27,6 +27,7 @@ abstract public class Upgrader
 	}
 
 	abstract public void getUpgradeIDL();
+//	abstract public void reverse();
 }
 
 /**

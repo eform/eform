@@ -26,39 +26,22 @@ import android.util.Log;
 
 public class IDLIndexReader
 {
-	private int table_columns;
-	private int table_xpad;
-	private int table_ypad;
-	private int button_icon_size;
-	private int button_text_size;
-	private ArrayList<IDLIndexItem> items;
+	public int table_columns;
+	public int table_top_margin;
+	public int table_xpad;
+	public int table_ypad;
+	public int button_icon_size;
+	public int button_text_size;
+	public ArrayList<IDLIndexItem> items;
 
 	public IDLIndexReader() {
 		table_columns = 5;
+		table_top_margin = 30;
 		table_xpad = 30;
 		table_ypad = 30;
 		button_icon_size = 48;
 		button_text_size = 32;
 		items = new ArrayList<IDLIndexItem>();
-	}
-
-	public int getTableColumns() {
-		return table_columns;
-	}
-	public int getTableXPad() {
-		return table_xpad;
-	}
-	public int getTableYPad() {
-		return table_ypad;
-	}
-	public int getButtonIconSize() {
-		return button_icon_size;
-	}
-	public int getButtonTextSize() {
-		return button_text_size;
-	}
-	public ArrayList<IDLIndexItem> getItems() {
-		return items;
 	}
 	
 	public void parse(InputStream inputStream) throws SAXException, IOException {
@@ -79,15 +62,8 @@ public class IDLIndexReader
 	 */
 	public class IDLIndexItem
 	{
-		private String name;
-		private String text;
-
-		public String getName() {
-			return name;
-		}
-		public String getText() {
-			return text;
-		}
+		public String name;
+		public String text;
 	}
 
 	/**
@@ -96,12 +72,14 @@ public class IDLIndexReader
 	private class IDLIndexHandler extends DefaultHandler
 	{
 		private IDLIndexReader reader;
+		private int version;
 		private int level;
 		private boolean inside_config;
 		private boolean inside_items;
 
 		public IDLIndexHandler(IDLIndexReader reader) {
 			this.reader = reader;
+			version = 1;
 		}
 
 		@Override
@@ -121,28 +99,34 @@ public class IDLIndexReader
 		public void startElement(String uri, String localName, String qName, Attributes attrs)
 				throws SAXException {
 			if (level == 0) {
-				if (localName != "index")
+				if (!localName.equalsIgnoreCase("index"))
 					throw new SAXException("Root element must be 'index'");
+				String value = attrs.getValue("", "version");
+				if (value != null)
+					version = Integer.parseInt(value);
+				if (version < 1)
+					throw new SAXException(String.format("Version '%s' is not recognizable", value));
 			}
+
 			level++;
 			
-			if (localName == "config") {
+			if (localName.equalsIgnoreCase("config")) {
 				if (level != 2)
 					throw new SAXException("Elements 'config' must be child of root element");
 				inside_config = true;
-			} else if (localName == "table") {
+			} else if (localName.equalsIgnoreCase("table")) {
 				if (level != 3 || !inside_config)
 					throw new SAXException("Elements 'table' must be child of 'config'");
 				parseConfigTable(attrs);
-			} else if (localName == "button") {
+			} else if (localName.equalsIgnoreCase("button")) {
 				if (level != 3 || !inside_config)
 					throw new SAXException("Elements 'button' must be child of 'config'");
 				parseConfigButton(attrs);
-			} else if (localName == "items") {
+			} else if (localName.equalsIgnoreCase("items")) {
 				if (level != 2)
 					throw new SAXException("Elements 'items' must be child of root element");
 				inside_items = true;
-			} else if (localName == "item") {
+			} else if (localName.equalsIgnoreCase("item")) {
 				if (level != 3 || !inside_items)
 					throw new SAXException("Element 'item' must be child of 'items'");
 				this.parseItemsItem(attrs);
@@ -153,9 +137,9 @@ public class IDLIndexReader
         public void endElement(String uri, String localName, String qName) throws SAXException {
 			level--;
 
-			if (localName == "config") {
+			if (localName.equalsIgnoreCase("config")) {
 				inside_config = false;
-			} else if (localName == "items") {
+			} else if (localName.equalsIgnoreCase("items")) {
 				inside_items = false;
 			}
 		}
@@ -175,6 +159,18 @@ public class IDLIndexReader
 				if (reader.table_columns <= 0) {
 					throw new SAXException(String.format("Table columns '%d' too small",
 							reader.table_columns));
+				}
+			}
+
+			value = attrs.getValue("", "top_margin");
+			if (value == null) {
+				Log.w("IDLIndexReader",
+					"Element 'table' missing 'top_margin' attribut, will use default value");
+			} else {
+				reader.table_top_margin = Integer.parseInt(value);
+				if (reader.table_top_margin <= 0) {
+					throw new SAXException(String.format("Table top margin '%d' too small",
+							reader.table_top_margin));
 				}
 			}
 
@@ -236,6 +232,13 @@ public class IDLIndexReader
 			if (item.name == null)
 				throw new SAXException("Element 'item' missing attribute 'name'");
 
+			for (IDLIndexItem i : reader.items) {
+				if (i.name.equalsIgnoreCase(item.name)) {
+					Log.w("IDLIndexReader",
+						String.format("Item '%s' already exists, skip repeated item", i.name));
+					return;
+				}
+			}
 			item.text = attrs.getValue("", "text");
 			if (item.text == null)
 				throw new SAXException("Element 'item' missing attribute 'text'");

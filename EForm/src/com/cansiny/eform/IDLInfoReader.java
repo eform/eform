@@ -41,12 +41,14 @@ public class IDLInfoReader
 	 */
 	private class IDLInfoHandler extends DefaultHandler
 	{
+		private int version;
 		private int level;
 		private boolean customer_appear;
 		private IDLInfoReader reader;
 		
 		public IDLInfoHandler(IDLInfoReader reader) {
 			this.reader = reader;
+			version = 1;
 		}
 
 		@Override
@@ -65,12 +67,18 @@ public class IDLInfoReader
 		public void startElement(String uri, String localName, String qName, Attributes attrs)
 				throws SAXException {
 			if (level == 0) {
-				if (localName != "info")
+				if (!localName.equalsIgnoreCase("info"))
 					throw new SAXException("The root element must be 'info");
+
+				String value = attrs.getValue("", "version");
+				if (value != null)
+					version = Integer.parseInt(value);
+				if (version < 1)
+					throw new SAXException(String.format("Version '%s' is not recognizable", value));
 			}
 			level++;
 
-			if (localName == "customer") {
+			if (localName.equalsIgnoreCase("customer")) {
 				String value = attrs.getValue("", "id");
 				if (value == null)
 					throw new SAXException("Element 'customer' missing 'id' attribute");

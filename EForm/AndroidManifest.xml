@@ -23,7 +23,7 @@
       </intent-filter>
     </activity>
     <activity
-	android:name="com.cansiny.eform.ItemActivity">
+	android:name="com.cansiny.eform.IDLItemActivity">
     </activity>
   </application>
 
