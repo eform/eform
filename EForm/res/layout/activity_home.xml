@@ -22,12 +22,11 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:contentDescription="@string/logo_image"
-            android:maxHeight="130dp"
-            android:scaleType="fitStart"
-            android:src="@drawable/logo_cib" />
+            android:maxHeight="120dp"
+            android:scaleType="fitStart" />
 
         <WebView
-            android:id="@+id/logo_flash"
+            android:id="@+id/logo_webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
@@ -35,7 +34,7 @@
     <LinearLayout
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@+id/logo_layout"
         android:orientation="vertical" >
 
@@ -52,18 +51,98 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:text="@string/choose_business"
+                android:textColor="@color/yellow"
                 android:textSize="40sp" />
+
         </RelativeLayout>
+
+        <FrameLayout
+            android:id="@+id/contents_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="0dp" >
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center_horizontal" >
+
+                    <TextView
+                        android:id="@+id/textView1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="100dp"
+                        android:text="Large Text"
+                        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                    <Button
+                        android:id="@+id/button1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Button" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/launcher"
+                    android:showDividers="middle" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" >
+
+                        <Button
+                            android:id="@+id/button2"
+                            android:layout_width="146dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="Button" />
+
+                        <TextView
+                            android:id="@+id/textView3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="Large Text"
+                            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/imageButton1"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/error"
+                        android:src="@android:drawable/btn_star" />
+
+                    <ImageButton
+                        android:id="@+id/imageButton2"
+                        android:layout_width="180dp"
+                        android:layout_height="180dp"
+                        android:background="@drawable/btn_background_black"
+                        android:src="@drawable/error" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+                </TableRow>
+            </TableLayout>
+
+        </FrameLayout>
+
     </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/contents_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/main_layout"
-        android:layout_marginTop="0dp" >
-
-    </FrameLayout>
 
 </RelativeLayout>

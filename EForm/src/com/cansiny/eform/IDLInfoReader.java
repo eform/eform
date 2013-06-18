@@ -13,10 +13,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class IDLInfoReader
 {
-	private IDLInfo info;
+	private int customer_id;
 
 	public IDLInfoReader() {
-		info = new IDLInfo();
+		customer_id = 0;
 	}
 
 	/* parse index.idl.xml */
@@ -24,7 +24,7 @@ public class IDLInfoReader
 		try {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			SAXParser parser = factory.newSAXParser();
-			IDLInfoHandler handler = new IDLInfoHandler(info);
+			IDLInfoHandler handler = new IDLInfoHandler(this);
 			parser.parse(inputStream, handler);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
@@ -33,15 +33,7 @@ public class IDLInfoReader
 	}
 	
 	public int getCustomerID() {
-		return info.customerid;
-	}
-
-	/**
-	 * A class to hold information
-	 */
-	private class IDLInfo
-	{
-		public int customerid;
+		return customer_id;
 	}
 
 	/**
@@ -51,10 +43,10 @@ public class IDLInfoReader
 	{
 		private int level;
 		private boolean customer_appear;
-		private IDLInfo info;
+		private IDLInfoReader reader;
 		
-		public IDLInfoHandler(IDLInfo info) {
-			this.info = info;
+		public IDLInfoHandler(IDLInfoReader reader) {
+			this.reader = reader;
 		}
 
 		@Override
@@ -84,8 +76,8 @@ public class IDLInfoReader
 					throw new SAXException("Element 'customer' missing 'id' attribute");
 
 				try {
-					info.customerid = Integer.parseInt(value);
-					if (info.customerid <= 0)
+					reader.customer_id = Integer.parseInt(value);
+					if (reader.customer_id <= 0)
 						throw new SAXException("Value of attribute 'customer->id' must large than 0");
 				} catch (NumberFormatException e) {
 					throw new SAXException("Value of attribute 'customer->id' must be integer");

@@ -15,6 +15,7 @@ public class IDLArchive
 {
 	static private final String IDL_ARCHIVE_NAME = "eform.idl.zip";
 	private ZipFile zfile;
+	private String customer_name;
 
 	static private IDLArchive _singleInstance = null;
 	static public IDLArchive getIDLArchive() throws IOException {
@@ -27,6 +28,7 @@ public class IDLArchive
 
 	private IDLArchive(File basepath) throws IOException {
 		zfile = new ZipFile(new File(basepath, IDL_ARCHIVE_NAME), ZipFile.OPEN_READ);
+		customer_name = null;
 	}
 
 	public void close() throws IOException {
@@ -34,6 +36,26 @@ public class IDLArchive
 			zfile.close();
 			_singleInstance = null;
 		}
+	}
+
+	private String buildStreamPath(String... args) {
+		String basepath = "idl";
+		for (String arg : args) {
+			basepath += File.separator;
+			basepath += arg;
+		}
+		return basepath;
+	}
+
+	public void setCustomerName(String name) throws IOException {
+		if (zfile == null)
+			throw new IOException("Archive not open yet");
+
+		String path = buildStreamPath(name, "index.idl.xml");
+		if (zfile.getEntry(path) == null)
+			throw new IOException(String.format("Customer '%s' not found", name));
+
+		customer_name = name;
 	}
 
 	public InputStream getInputStream(String filename) throws IOException {
@@ -48,10 +70,24 @@ public class IDLArchive
 	}
 
 	public InputStream getInfoInputStream() throws IOException {
-		return getInputStream("idl/info.idl.xml");
+		String path = buildStreamPath("info.idl.xml");
+		return getInputStream(path);
+	}
+
+	
+	private InputStream getCustomerInputStream(String path) throws IOException {
+		if (customer_name == null)
+			throw new IOException("Customer name not set yet");
+		return getInputStream(path);
 	}
 
 	public InputStream getIndexInputStream() throws IOException {
-		return getInputStream("idl/index.idl.xml");
+		String path = buildStreamPath(customer_name, "index.idl.xml");
+		return getCustomerInputStream(path);
+	}
+	
+	public InputStream getIconInputStream(String icon_name) throws IOException {
+		String path = buildStreamPath(customer_name, "icons", icon_name);
+		return getCustomerInputStream(path);
 	}
 }

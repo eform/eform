@@ -3,7 +3,7 @@
     <string name="app_name">电子填单</string>
     <string name="dummy_button">哑巴按钮</string>
     <string name="error_title">系统出现错误</string>
-    <string name="error_idl_io">不能打开或读取IDL档案文件，可能文件不存在或文件数据已被破坏</string>
+    <string name="error_idl_io">不能打开或读取IDL档案文件，可能文件不存在或文件数据已破坏</string>
     <string name="error_reason_title">错误原因:</string>
     <string name="error_recovery_title">如何修复:</string>
     <string name="error_recovery">1. 点击此处恢复到最近的正确设置</string>
