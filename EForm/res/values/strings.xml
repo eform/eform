@@ -12,5 +12,8 @@
     <string name="error_idl_parse">Parse IDL file failed, maybe file format error or data corrupt</string>
     <string name="settings">Settings</string>
     <string name="choose_business">Please choose business</string>
+    <string name="exit">Exit</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
 
 </resources>

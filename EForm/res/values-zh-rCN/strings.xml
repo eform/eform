@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">电子填单</string>
-    <string name="dummy_button">哑巴按钮</string>
     <string name="error_title">系统出现错误</string>
     <string name="error_idl_io">不能打开或读取IDL档案文件，可能文件不存在或文件数据已破坏</string>
     <string name="error_reason_title">错误原因:</string>
@@ -12,4 +11,7 @@
     <string name="logo_image">Logo 图片</string>
     <string name="settings">设置</string>
     <string name="choose_business">请选择要办理的业务</string>
+    <string name="exit">退 出</string>
+    <string name="next">下一步</string>
+    <string name="previous">上一步</string>
 </resources>
