@@ -7,13 +7,17 @@
     <string name="error_idl_io">Cannot open or read IDL archive, maybe it is lost or corrupt</string>
     <string name="error_recovery_title">How to recovery:</string>
     <string name="error_reason_title">Error reason:</string>
-    <string name="error_recovery">1. Click here to recovery to last right settings</string>
-    <string name="error_contact">2. Contact our technology supporter to fix this problem</string>
+    <string name="error_recovery">2. Click here to recovery to last right version</string>
+    <string name="error_contact">3. Contact our technology supporter to fix this problem</string>
     <string name="error_idl_parse">Parse IDL file failed, maybe file format error or data corrupt</string>
     <string name="settings">Settings</string>
     <string name="choose_business">Please choose business</string>
     <string name="exit">Exit</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="error_refresh_home">1. Click here to return home</string>
+    <string name="error_idl_syntax">Some IDL file has syntax error</string>
+    <string name="close">Close</string>
+    <string name="error_detail">Detail</string>
 
 </resources>

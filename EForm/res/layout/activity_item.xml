@@ -25,7 +25,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
         </LinearLayout>
-
     </LinearLayout>
 
     <RelativeLayout
@@ -74,16 +73,14 @@
             android:padding="20dp"
             android:text="@string/exit"
             android:textSize="32sp" />
-
     </RelativeLayout>
 
-    <FrameLayout
-        android:id="@+id/middle_layout"
+    <ViewFlipper
+        android:id="@+id/flipper_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_above="@id/bottom_layout"
         android:layout_below="@id/top_layout" >
-
-    </FrameLayout>
+    </ViewFlipper>
 
 </RelativeLayout>

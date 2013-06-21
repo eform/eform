@@ -12,6 +12,8 @@ package com.cansiny.eform;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +28,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,10 +38,18 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 public class IDLItemActivity extends Activity implements OnClickListener
 {
@@ -52,8 +63,54 @@ public class IDLItemActivity extends Activity implements OnClickListener
 	private IDLArchive idl_archive;
 	private AtomicInteger atomic_int;
 	private String name;
-	ArrayList<IDLItemPage> pages;
+	private ArrayList<IDLItemPage> pages;
+	private int curr_step;
 
+	public static Animation inFromRightAnimation() {
+		Animation inFromRight = new TranslateAnimation(
+				Animation.RELATIVE_TO_PARENT, +1.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f);
+		inFromRight.setDuration(350);
+		inFromRight.setInterpolator(new AccelerateInterpolator());
+		return inFromRight;
+	}
+
+	public static Animation outToLeftAnimation() {
+		Animation outtoLeft = new TranslateAnimation(
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, -1.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f);
+		outtoLeft.setDuration(350);
+		outtoLeft.setInterpolator(new AccelerateInterpolator());
+		return outtoLeft;
+	}
+
+	// for the next movement
+	public static Animation inFromLeftAnimation() {
+		Animation inFromLeft = new TranslateAnimation(
+				Animation.RELATIVE_TO_PARENT, -1.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f);
+		inFromLeft.setDuration(350);
+		inFromLeft.setInterpolator(new AccelerateInterpolator());
+		return inFromLeft;
+	}
+
+	public static Animation outToRightAnimation() {
+		Animation outtoRight = new TranslateAnimation(
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, +1.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f);
+		outtoRight.setDuration(350);
+		outtoRight.setInterpolator(new AccelerateInterpolator());
+		return outtoRight;
+	}
+    
 	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
 	@Override
@@ -87,14 +144,18 @@ public class IDLItemActivity extends Activity implements OnClickListener
 			reader.parse(stream);
 			stream.close();
 
+			/* top-left corner name */
 			TextView text_view = (TextView) findViewById(R.id.name_textview);
 			text_view.setText(name);
 			text_view.setTextColor(getResources().getColor(R.color.white));
 			text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 
 			ViewGroup step_layout = (ViewGroup) findViewById(R.id.step_layout);
-
+			ViewFlipper flipper = (ViewFlipper) findViewById(R.id.flipper_view);
+			flipper.setInAnimation(inFromLeftAnimation());
+			flipper.setOutAnimation(outToRightAnimation());
 			for (IDLItemPage page : pages) {
+				/* step buttons */
 				View button = createStepButton(page.title);
 				
 //				LinearLayout.LayoutParams button_params = new LinearLayout.LayoutParams(
@@ -102,17 +163,84 @@ public class IDLItemActivity extends Activity implements OnClickListener
 //						ViewGroup.LayoutParams.WRAP_CONTENT);
 //				top_layout.addView(button, button_params);
 				step_layout.addView(button);
+
+				/* contents */
+				TableLayout table_layout = new TableLayout(getApplicationContext());
+				table_layout.setId(atomic_int.incrementAndGet());
+
+				ScrollView scroll = new ScrollView(getApplicationContext());
+				scroll.setId(atomic_int.incrementAndGet());
+				scroll.addView(table_layout);
+				
+				FrameLayout.LayoutParams table_params = new FrameLayout.LayoutParams(
+						ViewGroup.LayoutParams.MATCH_PARENT,
+						ViewGroup.LayoutParams.MATCH_PARENT);
+				table_params.leftMargin = 120;
+				table_params.topMargin = 100;
+				table_params.rightMargin = 120;
+				flipper.addView(scroll, table_params);
+
+				for (IDLItemRow row : page.rows) {
+					TableRow table_row = new TableRow(getApplicationContext());
+					table_row.setId(atomic_int.incrementAndGet());
+					table_layout.addView(table_row);
+
+					text_view = new TextView(getApplicationContext());
+					text_view.setId(atomic_int.incrementAndGet());
+					text_view.setText(row.title);
+					table_row.addView(text_view);
+
+					LinearLayout linear = new LinearLayout(getApplicationContext());
+					for (IDLItemEntry entry : row.entries) {
+						View view = createItemEntryView(entry);
+						if (view != null)
+							linear.addView(view);
+					}
+				}
 			}
+			
+			/* active the first step */
 			resetStepLayout();
+			curr_step = -1;
 			gotoStep(0);
 		} catch (IOException e) {
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_io);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (SAXException e) {
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_parse);
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		} catch (InstantiationException e) {
+			RecoveryFragment.writeLog(e);
+			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		} catch (IllegalAccessException e) {
+			RecoveryFragment.writeLog(e);
+			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		} catch (ClassNotFoundException e) {
+			RecoveryFragment.writeLog(e);
+			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		} catch (IllegalArgumentException e) {
+			RecoveryFragment.writeLog(e);
+			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		} catch (InvocationTargetException e) {
+			RecoveryFragment.writeLog(e);
+			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
+			setResult(RESULT_CANCELED, intent);
+			finish();
+		} catch (NoSuchMethodException e) {
+			RecoveryFragment.writeLog(e);
+			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		}
@@ -171,9 +299,17 @@ public class IDLItemActivity extends Activity implements OnClickListener
 	}
 
 	private void gotoStep(int index) {
-		resetStepLayout();
+		if (index == curr_step)
+			return;
 
 		LinearLayout step_layout = (LinearLayout) findViewById(R.id.step_layout);
+
+		if (index >= step_layout.getChildCount()) {
+			Log.e("IDLItemActivity", String.format("Try to goto unexists step %d", index));
+			return;
+		}
+		resetStepLayout();
+
 		LinearLayout button_layout = (LinearLayout) step_layout.getChildAt(index);
 
 		Button button = (Button) button_layout.getChildAt(0);
@@ -182,8 +318,67 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		
 		ImageView image = (ImageView) button_layout.getChildAt(1);
 		image.setBackgroundResource(R.color.red);
+
+		ViewFlipper flipper = (ViewFlipper) findViewById(R.id.flipper_view);
+		if (curr_step != index)
+			flipper.setDisplayedChild(index);
+
+		curr_step = index;
+
+		button = (Button) findViewById(R.id.prev_button);
+		if (curr_step == 0) {
+			button.setEnabled(false);
+//			button.setVisibility(View.INVISIBLE);
+		} else {
+			button.setEnabled(true);
+//			button.setVisibility(View.VISIBLE);
+		}
+
+		button = (Button) findViewById(R.id.next_button);
+		if (curr_step + 1 == pages.size()) {
+			button.setEnabled(false);
+//			button.setVisibility(View.INVISIBLE);
+		} else {
+			button.setEnabled(true);
+//			button.setVisibility(View.VISIBLE);
+		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private View createItemEntryView(IDLItemEntry entry)
+			throws InstantiationException, IllegalAccessException,
+			ClassNotFoundException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException {
+		if (entry.klass == null || entry.klass.length() == 0)
+			throw new ClassNotFoundException("Entry must has a class");
+
+		Class klass = Class.forName(entry.klass);
+		Context context = getApplicationContext();
+		Constructor constructor = klass.getConstructor(context.getClass());
+		Object object = constructor.newInstance(context);
+		if (object instanceof View)
+			return (View) object;
+
+		throw new InstantiationException(
+			String.format("Class '%s' is not subclass of 'android.view.View'", entry.klass)
+		);
+	}
+
+	public void onPrevButtonClicked(View view) {
+		if (curr_step > 0)
+			gotoStep(curr_step - 1);
+	}
+
+	public void onNextButtonClicked(View view) {
+		if (curr_step + 1 < pages.size())
+			gotoStep(curr_step + 1);
+	}
+
+	public void onExitButtonClicked(View view) {
+		setResult(RESULT_OK);
+		finish();
+	}
+	
 	@Override
 	public void onClick(View view) {
 		Object object = view.getTag();
@@ -203,23 +398,11 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		}
 	}
 	
-	public void onExitButtonClicked(View view) {
-		Log.d("", "Exit");
-	}
-	
-	public void onPrevButtonClicked(View view) {
-		Log.d("", "Previous");
-	}
-
-	public void onNextButtonClicked(View view) {
-		Log.d("", "Next");
-	}
-
 	
 	/**
 	 * class for hold item page information
 	 */
-	public class IDLItemPage
+	private class IDLItemPage
 	{
 		public String title;
 		public ArrayList<IDLItemRow> rows;
@@ -233,7 +416,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 	/**
 	 * class for hold item row information
 	 */
-	public class IDLItemRow
+	private class IDLItemRow
 	{
 		public String title;
 		public ArrayList<IDLItemEntry> entries;
@@ -247,7 +430,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 	/**
 	 * class for hold item entry information
 	 */
-	public class IDLItemEntry
+	private class IDLItemEntry
 	{
 		public String id;
 		public String klass;
@@ -269,7 +452,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 				IDLItemHandler handler = new IDLItemHandler();
 				parser.parse(inputStream, handler);
 			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
+				RecoveryFragment.writeLog(e);
 				throw new SAXException("Configure XML parser error");
 			}
 		}
@@ -405,15 +588,17 @@ public class IDLItemActivity extends Activity implements OnClickListener
 				IDLItemEntry entry = new IDLItemEntry();
 
 				entry.id = attrs.getValue("", "id");
-				if (entry.id == null)
+				if (entry.id == null) {
 					throw new SAXException(
 						formatMessage("Element 'entry' missing 'id' attribute")
 					);
+				}
 				entry.klass = attrs.getValue("", "class");
-				if (entry.klass == null)
+				if (entry.klass == null) {
 					throw new SAXException(
 						formatMessage("Element 'entry' missing 'class' attribute")
 					);
+				}
 				row.entries.add(entry);
 			}
 		}

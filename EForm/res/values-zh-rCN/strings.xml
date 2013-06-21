@@ -5,8 +5,8 @@
     <string name="error_idl_io">不能打开或读取IDL档案文件，可能文件不存在或文件数据已破坏</string>
     <string name="error_reason_title">错误原因:</string>
     <string name="error_recovery_title">如何修复:</string>
-    <string name="error_recovery">1. 点击此处恢复到最近的正确设置</string>
-    <string name="error_contact">2. 联系技术支持人员来解决此问题</string>
+    <string name="error_recovery">2. 点击此处恢复到最近的正确版本</string>
+    <string name="error_contact">3. 联系技术支持人员来解决此问题</string>
     <string name="error_idl_parse">解析IDL文件失败，可能文件格式错误或文件数据已损坏</string>
     <string name="logo_image">Logo 图片</string>
     <string name="settings">设置</string>
@@ -14,4 +14,8 @@
     <string name="exit">退 出</string>
     <string name="next">下一步</string>
     <string name="previous">上一步</string>
+    <string name="error_refresh_home">1. 点击这里返回到主页面</string>
+    <string name="error_idl_syntax">某些 IDL 文件存在语法错误，可能是文件数据被损坏或设计错误</string>
+    <string name="close">关闭</string>
+    <string name="error_detail">详细信息</string>
 </resources>

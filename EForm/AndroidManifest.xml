@@ -25,6 +25,7 @@
     <activity
 	android:name="com.cansiny.eform.IDLItemActivity">
     </activity>
+    <activity android:name="com.cansiny.eform.LogActivity"></activity>
   </application>
 
 </manifest>

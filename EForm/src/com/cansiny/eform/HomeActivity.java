@@ -58,9 +58,9 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 
 	/* get application context object, since SDK has no static method
 	 * to get this object, so we add one. */
-	static private Context _app_context = null;
+	static private Context app_context = null;
 	static public Context getAppContext() {
-		return _app_context;
+		return app_context;
 	}
 
 	/**
@@ -93,23 +93,26 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 
 		Log.d("HomeActivity", "onCreate");
 
-		_app_context = getApplicationContext();
+		app_context = getApplicationContext();
 		atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
+
+		RecoveryFragment.clearLog();
+
 		setContentView(R.layout.activity_home);
 
 		try {
 			idl_archive = IDLArchive.getIDLArchive(this);
 		} catch (IOException e) {
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 			show_recovery_flagment(R.string.error_idl_io);
 			return;
 		} catch (SAXException e) {
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 			show_recovery_flagment(R.string.error_idl_parse);
 			return;
 		}
 
-		rebuildLayout();
+		buildLayout();
 
 		View contents_layout = this.findViewById(R.id.contents_layout);
 		contents_layout.setLongClickable(true);
@@ -149,7 +152,7 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 				idl_archive.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 		}
 	}
 
@@ -199,7 +202,7 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 	 */
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
-	private void rebuildLayout() {
+	private void buildLayout() {
 		try {
 			/* setup home user interface. */
 			ImageView logo_view = (ImageView)findViewById(R.id.logo_image);
@@ -211,12 +214,12 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 				main_layout.setBackgroundDrawable(idl_archive.getBackgroundDrawable());
 
 			/* add items to home contents area. */
-			addItemsFromIDL();
+			updateContentsLayout();
 		} catch (SAXException e) {
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 			show_recovery_flagment(R.string.error_idl_parse);
 		} catch (IOException e) {
-			e.printStackTrace();
+			RecoveryFragment.writeLog(e);
 			show_recovery_flagment(R.string.error_idl_io);
 		}
 	}
@@ -261,7 +264,7 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 		return button;
 	}
 
-	private void addItemsFromIDL() throws SAXException, IOException {
+	private void updateContentsLayout() throws SAXException, IOException {
 		TableLayout table = new TableLayout(getApplicationContext());
 		table.setId(atomic_int.incrementAndGet());
 
@@ -309,6 +312,12 @@ public class HomeActivity extends Activity implements OnClickListener, OnLongCli
 		ViewGroup group = (ViewGroup) findViewById(R.id.contents_layout);
 		group.removeAllViews();
 		group.addView(table, contents_params);
+	}
+
+	public void refreshLayout() {
+		ViewGroup group = (ViewGroup) findViewById(R.id.contents_layout);
+		group.removeAllViews();
+		buildLayout();
 	}
 
 	private void show_recovery_flagment(int reason) {
