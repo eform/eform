@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="form_label_cib01">借记卡\n业务申请</string>
+    <string name="form_label_cib02">业务申请</string>
+    <string name="form_title_cib01_01">申请信息</string>
+    
+</resources>
