@@ -9,10 +9,14 @@
       android:targetSdkVersion="17" />
 
   <application
-      android:allowBackup="true"
+      android:name="EFormApplication"
+      android:logo="@drawable/launcher"
       android:icon="@drawable/launcher"
       android:label="@string/app_name"
-      android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+      android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
+      android:allowBackup="true"
+      android:allowClearUserData="false"
+      >
     <activity
         android:name="com.cansiny.eform.HomeActivity"
         android:configChanges="orientation|keyboardHidden|screenSize"
@@ -22,10 +26,8 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
-    <activity
-	android:name="com.cansiny.eform.IDLItemActivity">
-    </activity>
     <activity android:name="com.cansiny.eform.LogActivity"></activity>
+    <activity android:name="com.cansiny.eform.FormActivity"></activity>
   </application>
 
 </manifest>

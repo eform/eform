@@ -14,7 +14,7 @@
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
         android:layout_marginTop="40dp"
-        android:background="@drawable/button_background_black"
+        android:background="@drawable/home_button"
         android:onClick="onCloseButtonClicked"
         android:paddingBottom="20dp"
         android:paddingLeft="30dp"
@@ -38,7 +38,7 @@
         <EditText
             android:id="@+id/log_text"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/transparent"
             android:ems="10"
             android:enabled="false"

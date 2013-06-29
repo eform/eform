@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:contentDescription="@string/logo_image"
-            android:maxHeight="120dp"
+            android:maxHeight="100dp"
             android:scaleType="fitStart" />
 
         <WebView
@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="@string/choose_business"
+                android:text="@string/choose_item"
                 android:textColor="@color/yellow"
                 android:textSize="40sp" />
 

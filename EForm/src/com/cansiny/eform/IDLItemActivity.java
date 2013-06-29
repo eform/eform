@@ -12,7 +12,6 @@ package com.cansiny.eform;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,6 +49,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
+import android.widget.FrameLayout.LayoutParams;
 
 public class IDLItemActivity extends Activity implements OnClickListener
 {
@@ -120,7 +120,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		pages = new ArrayList<IDLItemPage>();
 
 		atomic_int = new AtomicInteger(HomeActivity.ITEM_VIEW_ID_BASE);
-		setContentView(R.layout.activity_item);
+		setContentView(R.layout.activity_form);
 		Intent intent = getIntent();
 
 		try {
@@ -145,7 +145,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 			stream.close();
 
 			/* top-left corner name */
-			TextView text_view = (TextView) findViewById(R.id.name_textview);
+			TextView text_view = (TextView) findViewById(R.id.label_textview);
 			text_view.setText(name);
 			text_view.setTextColor(getResources().getColor(R.color.white));
 			text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
@@ -170,6 +170,9 @@ public class IDLItemActivity extends Activity implements OnClickListener
 
 				ScrollView scroll = new ScrollView(getApplicationContext());
 				scroll.setId(atomic_int.incrementAndGet());
+//				FrameLayout.LayoutParams table_params = new FrameLayout.LayoutParams(
+//						ViewGroup.LayoutParams.MATCH_PARENT,
+//						ViewGroup.LayoutParams.MATCH_PARENT);
 				scroll.addView(table_layout);
 				
 				FrameLayout.LayoutParams table_params = new FrameLayout.LayoutParams(
@@ -188,6 +191,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 					text_view = new TextView(getApplicationContext());
 					text_view.setId(atomic_int.incrementAndGet());
 					text_view.setText(row.title);
+					text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 					table_row.addView(text_view);
 
 					LinearLayout linear = new LinearLayout(getApplicationContext());
@@ -196,6 +200,10 @@ public class IDLItemActivity extends Activity implements OnClickListener
 						if (view != null)
 							linear.addView(view);
 					}
+					TableRow.LayoutParams row_params = new TableRow.LayoutParams(
+							ViewGroup.LayoutParams.MATCH_PARENT,
+							ViewGroup.LayoutParams.WRAP_CONTENT);
+					table_row.addView(linear, row_params);
 				}
 			}
 			
@@ -204,42 +212,42 @@ public class IDLItemActivity extends Activity implements OnClickListener
 			curr_step = -1;
 			gotoStep(0);
 		} catch (IOException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_io);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (SAXException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_parse);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (InstantiationException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (IllegalAccessException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (ClassNotFoundException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (IllegalArgumentException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (InvocationTargetException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
 		} catch (NoSuchMethodException e) {
-			RecoveryFragment.writeLog(e);
+			LogActivity.writeLog(e);
 			intent.putExtra(INTENT_RESULT_ERRREASON, R.string.error_idl_syntax);
 			setResult(RESULT_CANCELED, intent);
 			finish();
@@ -328,23 +336,18 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		button = (Button) findViewById(R.id.prev_button);
 		if (curr_step == 0) {
 			button.setEnabled(false);
-//			button.setVisibility(View.INVISIBLE);
 		} else {
 			button.setEnabled(true);
-//			button.setVisibility(View.VISIBLE);
 		}
 
 		button = (Button) findViewById(R.id.next_button);
 		if (curr_step + 1 == pages.size()) {
 			button.setEnabled(false);
-//			button.setVisibility(View.INVISIBLE);
 		} else {
 			button.setEnabled(true);
-//			button.setVisibility(View.VISIBLE);
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private View createItemEntryView(IDLItemEntry entry)
 			throws InstantiationException, IllegalAccessException,
 			ClassNotFoundException, IllegalArgumentException,
@@ -352,10 +355,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		if (entry.klass == null || entry.klass.length() == 0)
 			throw new ClassNotFoundException("Entry must has a class");
 
-		Class klass = Class.forName(entry.klass);
-		Context context = getApplicationContext();
-		Constructor constructor = klass.getConstructor(context.getClass());
-		Object object = constructor.newInstance(context);
+		Object object = Class.forName(entry.klass).getConstructor(Context.class).newInstance(getApplicationContext());
 		if (object instanceof View)
 			return (View) object;
 
@@ -452,7 +452,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 				IDLItemHandler handler = new IDLItemHandler();
 				parser.parse(inputStream, handler);
 			} catch (ParserConfigurationException e) {
-				RecoveryFragment.writeLog(e);
+				LogActivity.writeLog(e);
 				throw new SAXException("Configure XML parser error");
 			}
 		}
