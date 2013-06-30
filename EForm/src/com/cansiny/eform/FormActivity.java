@@ -8,15 +8,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
@@ -71,10 +70,15 @@ public class FormActivity extends Activity implements OnClickListener
 				params.rightMargin = 120;
 
 				flipper.addView(page.layout, params);
+				form.pageVisibled(page);
 			}
 			/* default active the first step */
 			gotoStep(0);
-		} catch (InstantiationException e) {
+
+			/* hide the soft keyboard until user touch the edit text */
+			getWindow().setSoftInputMode(
+				      WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+			} catch (InstantiationException e) {
 			LogActivity.writeLog(e);
 			getIntent().putExtra(INTENT_RESULT_ERRREASON, R.string.error_instantiation_exception);
 			setResult(RESULT_CANCELED, getIntent());

@@ -8,8 +8,7 @@
         android:id="@+id/top_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/white_translucence" >
+        android:layout_alignParentTop="true" >
 
         <TextView
             android:id="@+id/label_textview"

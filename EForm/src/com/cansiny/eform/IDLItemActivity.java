@@ -51,6 +51,7 @@ import android.widget.TextView;
 import android.widget.ViewFlipper;
 import android.widget.FrameLayout.LayoutParams;
 
+@SuppressWarnings("unused")
 public class IDLItemActivity extends Activity implements OnClickListener
 {
 	/* constants uses for communication with previous activity. */

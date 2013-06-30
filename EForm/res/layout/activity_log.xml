@@ -14,14 +14,14 @@
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
         android:layout_marginTop="40dp"
-        android:background="@drawable/home_button"
+        android:background="@drawable/button"
         android:onClick="onCloseButtonClicked"
         android:paddingBottom="20dp"
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:paddingTop="20dp"
         android:text="@string/close"
-        android:textColor="@color/white"
+        android:textColor="@color/yellow"
         android:textSize="32sp" />
 
     <ScrollView
