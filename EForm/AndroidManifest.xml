@@ -16,7 +16,7 @@
       android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
       android:allowBackup="true"
       android:allowClearUserData="false"
-      >
+      android:largeHeap="true">
     <activity
         android:name="com.cansiny.eform.HomeActivity"
         android:configChanges="orientation|keyboardHidden|screenSize"

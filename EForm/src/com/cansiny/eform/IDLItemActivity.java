@@ -134,7 +134,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 				return;
 			}
 
-			View item_layout = findViewById(R.id.item_layout);
+			View item_layout = findViewById(R.id.form_layout);
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
 				item_layout.setBackground(idl_archive.getBackgroundDrawable());
 			else
@@ -146,13 +146,13 @@ public class IDLItemActivity extends Activity implements OnClickListener
 			stream.close();
 
 			/* top-left corner name */
-			TextView text_view = (TextView) findViewById(R.id.label_textview);
-			text_view.setText(name);
-			text_view.setTextColor(getResources().getColor(R.color.white));
-			text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+//			TextView text_view = (TextView) findViewById(R.id.page_textview);
+//			text_view.setText(name);
+//			text_view.setTextColor(getResources().getColor(R.color.white));
+//			text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 
-			ViewGroup step_layout = (ViewGroup) findViewById(R.id.step_layout);
-			ViewFlipper flipper = (ViewFlipper) findViewById(R.id.flipper_view);
+			ViewGroup page_title_layout = (ViewGroup) findViewById(R.id.page_title_layout);
+			ViewFlipper flipper = (ViewFlipper) findViewById(R.id.page_layout);
 			flipper.setInAnimation(inFromLeftAnimation());
 			flipper.setOutAnimation(outToRightAnimation());
 			for (IDLItemPage page : pages) {
@@ -163,7 +163,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 //						ViewGroup.LayoutParams.WRAP_CONTENT,
 //						ViewGroup.LayoutParams.WRAP_CONTENT);
 //				top_layout.addView(button, button_params);
-				step_layout.addView(button);
+				page_title_layout.addView(button);
 
 				/* contents */
 				TableLayout table_layout = new TableLayout(getApplicationContext());
@@ -189,7 +189,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 					table_row.setId(atomic_int.incrementAndGet());
 					table_layout.addView(table_row);
 
-					text_view = new TextView(getApplicationContext());
+					TextView text_view = new TextView(getApplicationContext());
 					text_view.setId(atomic_int.incrementAndGet());
 					text_view.setText(row.title);
 					text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
@@ -294,9 +294,9 @@ public class IDLItemActivity extends Activity implements OnClickListener
 	}
 
 	private void resetStepLayout() {
-		LinearLayout step_layout = (LinearLayout) findViewById(R.id.step_layout);
-		for (int i = 0; i < step_layout.getChildCount(); i++) {
-			LinearLayout button_layout = (LinearLayout) step_layout.getChildAt(i);
+		LinearLayout page_title_layout = (LinearLayout) findViewById(R.id.page_title_layout);
+		for (int i = 0; i < page_title_layout.getChildCount(); i++) {
+			LinearLayout button_layout = (LinearLayout) page_title_layout.getChildAt(i);
 
 			Button button = (Button) button_layout.getChildAt(0);
 			button.setBackgroundResource(R.color.translucence);
@@ -311,7 +311,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		if (index == curr_step)
 			return;
 
-		LinearLayout step_layout = (LinearLayout) findViewById(R.id.step_layout);
+		LinearLayout step_layout = (LinearLayout) findViewById(R.id.page_title_layout);
 
 		if (index >= step_layout.getChildCount()) {
 			Log.e("IDLItemActivity", String.format("Try to goto unexists step %d", index));
@@ -328,25 +328,25 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		ImageView image = (ImageView) button_layout.getChildAt(1);
 		image.setBackgroundResource(R.color.red);
 
-		ViewFlipper flipper = (ViewFlipper) findViewById(R.id.flipper_view);
+		ViewFlipper flipper = (ViewFlipper) findViewById(R.id.page_layout);
 		if (curr_step != index)
 			flipper.setDisplayedChild(index);
 
 		curr_step = index;
 
-		button = (Button) findViewById(R.id.prev_button);
-		if (curr_step == 0) {
-			button.setEnabled(false);
-		} else {
-			button.setEnabled(true);
-		}
-
-		button = (Button) findViewById(R.id.next_button);
-		if (curr_step + 1 == pages.size()) {
-			button.setEnabled(false);
-		} else {
-			button.setEnabled(true);
-		}
+//		button = (Button) findViewById(R.id.prev_button);
+//		if (curr_step == 0) {
+//			button.setEnabled(false);
+//		} else {
+//			button.setEnabled(true);
+//		}
+//
+//		button = (Button) findViewById(R.id.next_button);
+//		if (curr_step + 1 == pages.size()) {
+//			button.setEnabled(false);
+//		} else {
+//			button.setEnabled(true);
+//		}
 	}
 
 	private View createItemEntryView(IDLItemEntry entry)
@@ -391,7 +391,7 @@ public class IDLItemActivity extends Activity implements OnClickListener
 		if (object.getClass() == String.class) {
 			String string = (String) object;
 			if (string.equals(VIEW_TAG_STEP_BUTTON)) {
-				LinearLayout step_layout = (LinearLayout) findViewById(R.id.step_layout);
+				LinearLayout step_layout = (LinearLayout) findViewById(R.id.page_title_layout);
 				int index = step_layout.indexOfChild((View) view.getParent());
 				Log.d("", String.format("click %d", index));
 				gotoStep(index);

@@ -1,41 +1,29 @@
 package com.cansiny.eform;
 
 import android.app.Activity;
-import android.text.Editable;
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 public class FormCIB01 extends Form
 {
 
 	public FormCIB01(Activity activity) {
 		super(activity);
-		
-		addFormPage(R.string.form_title_cib01_1, R.layout.form_cib01_1);
-//		addFormPage(R.string.form_title_cib01_2, R.layout.form_cib01_2);
+
+		pages.add(new FormPage(R.string.form_title_cib01_1, R.layout.form_cib01_1));
+		pages.add(new FormPage(R.string.form_title_cib01_2, R.layout.form_cib01_2));
+
+		cardno_views.add(R.id.p1_oldcard_no_edittext);
+		cardno_views.add(R.id.p2_credit1_edittext);
+		cardno_views.add(R.id.p2_credit2_edittext);
 	}
 
 	
 	@Override
-	public void pageVisibled(Form.FormPage page) {
-		super.pageVisibled(page);
-
-		switch (pages.indexOf(page)) {
-		case 0:
-			cardno_textviews.add(findTextView(R.id.p1_oldcard_no_edittext));
-			break;
-		}
-	}
-
-	
-	@Override
-	public boolean validate() {
-		// TODO Auto-generated method stub
-		return false;
+	public void onPageStart(int page) {
+		super.onPageStart(page);
 	}
 
 	
@@ -52,6 +40,9 @@ public class FormCIB01 extends Form
 		case R.id.p1_oldcard_checkbox:
 			if (((CheckBox) view).isChecked()) {
 				findCheckBox(R.id.p1_newcard_checkbox).setChecked(false);
+				findCheckBox(R.id.p1_cardtype_standard_checkbox).setChecked(false);
+				findCheckBox(R.id.p1_cardtype_other_checkbox).setChecked(false);
+				findView(R.id.p1_oldcard_no_edittext).requestFocus();
 			}
 			break;
 		case R.id.p1_cardtype_standard_checkbox:
@@ -66,6 +57,7 @@ public class FormCIB01 extends Form
 				findCheckBox(R.id.p1_newcard_checkbox).setChecked(true);
 				findCheckBox(R.id.p1_oldcard_checkbox).setChecked(false);
 				findCheckBox(R.id.p1_cardtype_standard_checkbox).setChecked(false);
+				findView(R.id.p1_cardtype_other_edittext).requestFocus();
 			}
 			break;
 		case R.id.p1_oldcard_swipe_button:
@@ -73,48 +65,153 @@ public class FormCIB01 extends Form
 			edit_text.setText(swipeMagcard());
 			edit_text.requestFocus();
 			break;
-		}
-	}
-
-	private void p1_adjust_to_newcard(boolean to_newcard) {
-		LinearLayout newcard_linear = findLinearLayout(R.id.p1_newcard_linearlayout);
-		LinearLayout oldcard_linear = findLinearLayout(R.id.p1_oldcard_linearlayout);
-		for (int i = 0; i < newcard_linear.getChildCount(); i++) {
-			newcard_linear.getChildAt(i).setEnabled(to_newcard);
-		}
-		for (int i = 0; i < oldcard_linear.getChildCount(); i++) {
-			oldcard_linear.getChildAt(i).setEnabled(!to_newcard);
-		}
-		if (to_newcard) {
-			findCheckBox(R.id.p1_oldcard_checkbox).setChecked(false);
-			if (!findCheckBox(R.id.p1_cardtype_other_checkbox).isChecked()) {
-				findView(R.id.p1_cardtype_other_edittext).setEnabled(false);
+		case R.id.p1_idcard_button:
+			readIdCard();
+			break;
+		case R.id.p1_male_checkbox:
+		case R.id.p1_famale_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p1_idtype_idcard_checkbox:
+		case R.id.p1_idtype_other_checkbox:
+			checkOffSibling((CheckBox) view);
+			if (view.getId() == R.id.p1_idtype_other_checkbox)
+				findView(R.id.p1_idtype_other_edittext).requestFocus();
+			break;
+		case R.id.p1_resident_checkbox:
+		case R.id.p1_inresident_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p1_nationality_china_checkbox:
+		case R.id.p1_nationality_other_checkbox:
+			checkOffSibling((CheckBox) view);
+			if (view.getId() == R.id.p1_nationality_other_checkbox)
+				findView(R.id.p1_nationality_other_edittext).requestFocus();
+			break;
+		case R.id.p1_foreign_government_yes_checkbox:
+		case R.id.p1_foreign_government_no_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p1_job_01_checkbox:
+		case R.id.p1_job_02_checkbox:
+		case R.id.p1_job_03_checkbox:
+		case R.id.p1_job_04_checkbox:
+		case R.id.p1_job_05_checkbox:
+		case R.id.p1_job_06_checkbox:
+		case R.id.p1_job_07_checkbox:
+		case R.id.p1_job_08_checkbox:
+		case R.id.p1_job_09_checkbox:
+		case R.id.p1_job_10_checkbox:
+		case R.id.p1_job_11_checkbox:
+		case R.id.p1_job_12_checkbox:
+		case R.id.p1_job_13_checkbox:
+		case R.id.p1_job_14_checkbox:
+		case R.id.p1_job_15_checkbox:
+		case R.id.p1_job_16_checkbox:
+		case R.id.p1_job_17_checkbox:
+		case R.id.p1_job_18_checkbox:
+		case R.id.p1_job_19_checkbox:
+		case R.id.p1_job_20_checkbox:
+		case R.id.p1_job_21_checkbox:
+		case R.id.p1_job_22_checkbox:
+			if (((CheckBox) view).isChecked()) {
+				ViewGroup table = (ViewGroup) view.getParent().getParent();
+				for (int n = 0; n < table.getChildCount(); n++) {
+					ViewGroup row = (ViewGroup) table.getChildAt(n);
+					for (int i = 0; i < row.getChildCount(); i++) {
+						CheckBox child = (CheckBox) row.getChildAt(i);
+						if (child != view)
+							child.setChecked(false);
+					}
+				}
 			}
-		} else {
-			findCheckBox(R.id.p1_newcard_checkbox).setChecked(false);
+			break;
+		case R.id.p1_agent_idcard_button:
+			readIdCard();
+			break;
+		case R.id.p2_atm_transfer_open_checkbox:
+		case R.id.p2_atm_transfer_modify_checkbox:
+		case R.id.p2_atm_transfer_close_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_credit_open_checkbox:
+		case R.id.p2_credit_modify_checkbox:
+		case R.id.p2_credit_close_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_credit_repayment_full_checkbox:
+		case R.id.p2_credit_repayment_low_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_credit_currency_rmb_checkbox:
+		case R.id.p2_credit_currency_usd_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_reservation_transfer_rmb_checkbox:
+		case R.id.p2_reservation_transfer_currency_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_reservation_transfer_money_checkbox:
+		case R.id.p2_reservation_transfer_exchange_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_reservation_transfer_frequency_once_checkbox:
+		case R.id.p2_reservation_transfer_frequency_week_checkbox:
+		case R.id.p2_reservation_transfer_frequency_month_checkbox:
+		case R.id.p2_reservation_transfer_frequency_quarterly_checkbox:
+		case R.id.p2_reservation_transfer_frequency_halfyear_checkbox:
+		case R.id.p2_reservation_transfer_frequency_year_checkbox:
+		case R.id.p2_reservation_transfer_frequency_day_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_reservation_transfer_stop_count_checkbox:
+			if (((CheckBox) view).isChecked()) {
+				findCheckBox(R.id.p2_reservation_transfer_stop_amount_checkbox).setChecked(false);
+				findCheckBox(R.id.p2_reservation_transfer_stop_date_checkbox).setChecked(false);
+				findView(R.id.p2_reservation_transfer_stop_count_edittext).requestFocus();
+			}
+			break;
+		case R.id.p2_reservation_transfer_stop_amount_checkbox:
+			if (((CheckBox) view).isChecked()) {
+				findCheckBox(R.id.p2_reservation_transfer_stop_count_checkbox).setChecked(false);
+				findCheckBox(R.id.p2_reservation_transfer_stop_date_checkbox).setChecked(false);
+				findView(R.id.p2_reservation_transfer_stop_amount_edittext).requestFocus();
+			}
+			break;
+		case R.id.p2_reservation_transfer_stop_date_checkbox:
+			if (((CheckBox) view).isChecked()) {
+				findCheckBox(R.id.p2_reservation_transfer_stop_count_checkbox).setChecked(false);
+				findCheckBox(R.id.p2_reservation_transfer_stop_amount_checkbox).setChecked(false);
+				findView(R.id.p2_reservation_transfer_stop_year_edittext).requestFocus();
+			}
+			break;
+		case R.id.p2_ecash_open_checkbox:
+		case R.id.p2_ecash_modify_checkbox:
+		case R.id.p2_ecash_close_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
+		case R.id.p2_ecash_account_open_checkbox:
+		case R.id.p2_ecash_account_close_checkbox:
+			checkOffSibling((CheckBox) view);
+			if (view.getId() == R.id.p2_ecash_account_open_checkbox)
+				findView(R.id.p2_ecash_account_edittext).requestFocus();
+			break;
+		case R.id.p2_unionpay_open_checkbox:
+		case R.id.p2_unionpay_modify_checkbox:
+		case R.id.p2_unionpay_close_checkbox:
+			checkOffSibling((CheckBox) view);
+			break;
 		}
 	}
 
 	@Override
-	public void afterTextChanged(TextView textview, Editable editable) {
-		super.afterTextChanged(textview, editable);
+	public boolean verify() {
+		return false;
 	}
+
 
 	@Override
-	protected void beforeTextChanged(TextView textview, CharSequence sequence,
-			int start, int count, int after) {
-		super.beforeTextChanged(textview, sequence, start, count, after);
+	public boolean print() {
+		return true;
 	}
-
-	@Override
-	protected void onTextChanged(TextView textview, CharSequence sequence,
-			int start, int before, int count) {
-		super.onTextChanged(textview, sequence, start, before, count);
-	}
-
-	@Override
-	public void onFocusChange(View view, boolean hasfocus) {
-		super.onFocusChange(view, hasfocus);
-	}
-
 }

@@ -1,87 +1,272 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/item_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+		android:id="@+id/form_layout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" >
+
+  <LinearLayout
+      android:id="@+id/form_top_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentTop="true"
+      android:orientation="horizontal" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="20dp"
+        android:gravity="center_vertical"
+        android:text="页面切换："
+        android:textColor="#DDDDDD"
+        android:textIsSelectable="false"
+        android:textSize="22sp" />
 
     <LinearLayout
-        android:id="@+id/top_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" >
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:background="#111111"
+        android:orientation="horizontal" >
 
-        <TextView
-            android:id="@+id/label_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:textColor="@color/white"
-            android:textIsSelectable="false"
-            android:textSize="22sp" />
+      <Button
+          android:id="@+id/previous_button"
+          android:layout_width="40dp"
+          android:layout_height="40dp"
+          android:layout_gravity="center_vertical"
+          android:layout_marginLeft="20dp"
+          android:layout_marginRight="20dp"
+          android:background="@drawable/left"
+	  android:onClick="onPreviousButtonClick"
+	  android:enabled="false" />
 
-        <LinearLayout
-            android:id="@+id/step_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </LinearLayout>
+      <LinearLayout
+          android:id="@+id/page_title_layout"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent" >
+      </LinearLayout>
+
+      <Button
+          android:id="@+id/next_button"
+          android:layout_width="40dp"
+          android:layout_height="40dp"
+          android:layout_gravity="center_vertical"
+          android:layout_marginLeft="20dp"
+          android:layout_marginRight="20dp"
+          android:background="@drawable/right"
+	  android:onClick="onNextButtonClick"
+	  android:enabled="false" />
     </LinearLayout>
 
-    <RelativeLayout
-        android:id="@+id/bottom_layout"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
-        android:layout_marginTop="40dp"
-        android:gravity="center_vertical"
-        android:paddingBottom="40dp"
-        android:paddingTop="30dp" >
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+      <DigitalClock
+          android:id="@+id/digital_clock"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:text="DigitalClock"
+          android:textColor="#DDDDDD"
+          android:textSize="16sp" />
+
+      <TextView
+          android:id="@+id/date_textview"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:text="xxxx年xx月xx日"
+          android:textColor="#DDDDDD"
+          android:textSize="16sp" />
+    </LinearLayout>
+
+    <AnalogClock
+        android:id="@+id/analog_clock"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp" />
+  </LinearLayout>
+
+  <LinearLayout
+      android:id="@+id/form_main_layout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@id/form_top_layout"
+      android:baselineAligned="false"
+      android:orientation="horizontal" >
+
+    <FrameLayout
+        android:id="@+id/page_layout"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" >
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/sidebar_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/sidebar"
+        android:orientation="vertical" >
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:layout_marginRight="40dp"
+          android:layout_marginTop="40dp"
+          android:orientation="vertical" >
 
         <Button
-            android:id="@+id/next_button"
+            android:id="@+id/up_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/up"
+	    android:onClick="onScrollUpButtonClick" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="208dp"
-            android:onClick="onNextButtonClicked"
-            android:padding="20dp"
-            android:text="@string/next"
-            android:textSize="32sp" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="0dp"
+            android:text="上 翻"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+      </LinearLayout>
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:layout_marginRight="40dp"
+          android:layout_marginTop="20dp"
+          android:orientation="vertical" >
 
         <Button
-            android:id="@+id/prev_button"
+            android:id="@+id/down_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/down"
+	    android:onClick="onScrollDownButtonClick" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="158dp"
-            android:layout_toLeftOf="@+id/next_button"
-            android:onClick="onPrevButtonClicked"
-            android:padding="20dp"
-            android:text="@string/previous"
-            android:textSize="32sp" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="0dp"
+            android:text="下 翻"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+      </LinearLayout>
+
+      <View
+          android:layout_width="60dp"
+          android:layout_height="1dp"
+          android:layout_gravity="right"
+          android:layout_marginBottom="20dp"
+          android:layout_marginRight="40dp"
+          android:layout_marginTop="20dp"
+          android:background="#888888" />
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:layout_marginRight="40dp"
+          android:layout_marginTop="0dp"
+          android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/verify_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/verify"
+	    android:onClick="onVerifyButtonClick" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:text="检 查"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+      </LinearLayout>
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:layout_marginRight="40dp"
+          android:layout_marginTop="20dp"
+          android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/print_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/print"
+	    android:onClick="onPrintButtonClick" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:text="打 印"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+      </LinearLayout>
+
+      <View
+          android:layout_width="60dp"
+          android:layout_height="1dp"
+          android:layout_gravity="right"
+          android:layout_marginBottom="20dp"
+          android:layout_marginRight="40dp"
+          android:layout_marginTop="20dp"
+          android:background="#888888" />
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="right"
+          android:layout_marginRight="40dp"
+          android:layout_marginBottom="40dp"
+          android:orientation="vertical" >
 
         <Button
             android:id="@+id/exit_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/exit"
+	    android:onClick="onExitButtonClick" />
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="277dp"
-            android:onClick="onExitButtonClicked"
-            android:padding="20dp"
-            android:text="@string/exit"
-            android:textSize="32sp" />
-    </RelativeLayout>
-
-    <ViewFlipper
-        android:id="@+id/flipper_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/bottom_layout"
-        android:layout_below="@id/top_layout" >
-    </ViewFlipper>
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:text="退 出"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+      </LinearLayout>
+    </LinearLayout>
+  </LinearLayout>
 
 </RelativeLayout>

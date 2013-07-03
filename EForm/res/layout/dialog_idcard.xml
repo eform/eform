@@ -10,8 +10,8 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="刷卡图片"
-        android:src="@drawable/swipe_card" />
+        android:contentDescription="读身份证图片"
+        android:src="@drawable/read_idcard" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="left"
         android:layout_marginTop="20dp"
-        android:text="说明：读取的卡号仅被用来填写本页面相关要素，不作他用。"
+        android:text="说明：读取的身份证信息仅被用来填写本页面相关要素，不作他用。"
         android:textSize="14sp" />
 
 </LinearLayout>

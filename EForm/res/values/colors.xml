@@ -8,5 +8,6 @@
     <color name="purple">#990099</color>
     <color name="transparent">#00000000</color>
     <color name="translucence">#88000000</color>
+    <color name="drakgray">#444444</color>
     
 </resources>

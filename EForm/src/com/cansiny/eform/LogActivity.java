@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 public class LogActivity extends Activity
@@ -137,6 +138,8 @@ public class LogActivity extends Activity
 			EditText edit = (EditText) findViewById(R.id.log_text);
 			edit.setText(buffer);
 		}
+		/* hide the soft keyboard until user touch the edit text */
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 	}
 
 	public void onCloseButtonClicked(View view) {

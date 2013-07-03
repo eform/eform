@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.cansiny.eform.HomeInfo.HomeItem;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -89,6 +90,17 @@ public class HomeActivity extends Activity
 		super.onCreate(savedInstanceState);
 
 		Log.d("HomeActivity", "onCreate");
+
+		Runtime rt = Runtime.getRuntime();
+		long maxMemory = rt.maxMemory();
+		Log.v("onCreate", "maxMemory:" + Long.toString(maxMemory));
+
+		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		int memoryClass = am.getMemoryClass();
+		Log.v("onCreate", "memoryClass:" + Integer.toString(memoryClass));
+		
+//		dalvik.system.VMRuntime runtime = 	dalvik.system.VMRuntime.getRuntime();
+//		runtime.setMinimumHeapSize(64 * 1024 * 1024);
 
 		app_context = getApplicationContext();
 		atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
