@@ -206,16 +206,18 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 {
 	public ArrayList<FormPage> pages;
 	protected Activity activity;
-	protected ArrayList<Integer> cardno_views; 
 	private FormListener listener;
 	SwipeMagcardDialogFragment magcard_dialog;
 	ReadIdcardDialogFragment idcard_dialog;
-
+	protected ArrayList<Integer> cardno_views; 
+	protected ArrayList<Integer> verify_views;
+	
 	public Form(Activity activity) {
 		this.activity = activity;
+		listener = null;
 		pages = new ArrayList<FormPage>();
 		cardno_views = new ArrayList<Integer>();
-		listener = null;
+		verify_views = new ArrayList<Integer>();
 	}
 
 	/* set event listener */
@@ -224,16 +226,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 
-	public boolean verify() {
-		return true;
-	}
-	
-	
-	public boolean print() {
-		return true;
-	}
-
-	
 	/* convenient method to find view and cast to corresponding type */
 	protected View findView(int id) {
 		return activity.findViewById(id);
@@ -478,7 +470,32 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 		}
 	}
 
+	
+	protected void insertRedhand(ViewGroup parent) {
+		
+	}
 
+	public boolean verify() {
+		for (Integer viewid : verify_views) {
+			EditText view = findEditText(viewid.intValue());
+			if (view == null)
+				continue;
+			
+			if ((Object) view instanceof EditText) {
+				if (view.getText().length() == 0) {
+					insertRedhand((ViewGroup) view.getParent());
+				}
+			}
+		}
+		return true;
+	}
+	
+	
+	public boolean print() {
+		return true;
+	}
+
+	
 	/**
 	 * a class to hold a form page
 	 */
@@ -508,16 +525,16 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 			FormScrollView scroll = new FormScrollView(activity.getApplicationContext());
 			LayoutInflater inflater = activity.getLayoutInflater();
 			scroll_view = (ScrollView) inflater.inflate(layout, scroll);
-			storeViewState(scroll_view);
+			restoreViewState(scroll_view);
 			onPageRestored(this);
 			return scroll_view;
 		}
 
-		private void storeViewState(Object object) {
+		private void restoreViewState(Object object) {
 			if (object instanceof ViewGroup) {
 				ViewGroup group = (ViewGroup) object;
 				for (int i = 0; i < group.getChildCount(); i++) {
-					storeViewState(group.getChildAt(i));
+					restoreViewState(group.getChildAt(i));
 				}
 				return;
 			}
@@ -557,16 +574,19 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 				return;
 			}
 			
+			String key = Integer.valueOf(((View) object).getId()).toString();
+			bundle.remove(key);
+
 			if (object instanceof EditText) {
 				EditText edit_text = (EditText) object;
 				Editable text = edit_text.getText();
 				if (text.length() > 0) {
-					bundle.putCharSequence(Integer.valueOf(edit_text.getId()).toString(), text);
+					bundle.putCharSequence(key, text);
 				}
 			} else if (object instanceof CheckBox) {
 				CheckBox checkbox = (CheckBox) object;
 				if (checkbox.isChecked())
-					bundle.putBoolean(Integer.valueOf(checkbox.getId()).toString(), true);
+					bundle.putBoolean(key, true);
 			}
 		}
 

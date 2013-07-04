@@ -1,10 +1,12 @@
 package com.cansiny.eform;
 
+import java.util.Calendar;
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class FormCIB01 extends Form
 {
@@ -14,6 +16,8 @@ public class FormCIB01 extends Form
 
 		pages.add(new FormPage(R.string.form_title_cib01_1, R.layout.form_cib01_1));
 		pages.add(new FormPage(R.string.form_title_cib01_2, R.layout.form_cib01_2));
+		pages.add(new FormPage(R.string.form_title_cib01_3, R.layout.form_cib01_3));
+		pages.add(new FormPage(R.string.form_title_cib01_4, R.layout.form_cib01_3));
 
 		cardno_views.add(R.id.p1_oldcard_no_edittext);
 		cardno_views.add(R.id.p2_credit1_edittext);
@@ -24,6 +28,16 @@ public class FormCIB01 extends Form
 	@Override
 	public void onPageStart(int page) {
 		super.onPageStart(page);
+		
+		TextView year = findTextView(R.id.p1_date_year_edittext);
+		if (year != null && year.getText().length() == 0) {
+			Calendar cal = Calendar.getInstance();
+			year.setText(String.format("%d", cal.get(Calendar.YEAR)));
+			findTextView(R.id.p1_date_month_edittext).setText(
+					String.format("%d", cal.get(Calendar.MONTH) + 1));
+			findTextView(R.id.p1_date_day_edittext).setText(
+					String.format("%d", cal.get(Calendar.DAY_OF_MONTH)));
+		}
 	}
 
 	

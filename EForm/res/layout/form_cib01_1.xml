@@ -2271,11 +2271,11 @@
           android:paddingTop="8dp" >
 
         <EditText
-            android:id="@+id/todo"
+            android:id="@+id/p1_date_year_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="3"
+            android:layout_weight="0"
+            android:ems="4"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -2291,10 +2291,10 @@
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/todo"
+            android:id="@+id/p1_date_month_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:ems="2"
 	    android:singleLine="true"
             android:inputType="number"
@@ -2311,10 +2311,10 @@
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/todo"
+            android:id="@+id/p1_date_day_edittext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="0"
             android:ems="2"
 	    android:singleLine="true"
             android:inputType="number"
