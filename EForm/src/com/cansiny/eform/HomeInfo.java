@@ -39,7 +39,7 @@ public final class HomeInfo
 
 		items.clear();
 		items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 20));
-		items.add(new HomeItem("FormCIB02", R.drawable.launcher, R.string.form_label_cib02));
+		items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
 	}
 
 	private void setCustomerCCB() {

@@ -66,7 +66,8 @@
         android:background="#3366FF" >
 
       <TextView
-          android:layout_width="match_parent"
+          android:id="@+id/p1_request_info_textview"
+          android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:gravity="center_vertical"
           android:paddingLeft="10dp"
@@ -293,7 +294,7 @@
           android:gravity="center_vertical"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="姓名**"
+          android:text="姓  名**"
           android:textColor="@color/red"
           android:textSize="18sp" />
 
@@ -333,8 +334,8 @@
           android:gravity="center_vertical"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="性别*"
-          android:textColor="@color/red"
+          android:text="性  别*"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -489,7 +490,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="发证机关*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -528,7 +529,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="证件有效\n期截止日*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -616,7 +617,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="户籍地址*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -660,7 +661,7 @@
           android:gravity="center_vertical"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="民族"
+          android:text="民  族"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -774,7 +775,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="居民性质*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -821,8 +822,8 @@
           android:gravity="center_vertical"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="国籍*"
-          android:textColor="@color/red"
+          android:text="国  籍*"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -931,7 +932,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="工作单位*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -945,7 +946,7 @@
           android:paddingTop="8dp" >
 
         <EditText
-            android:id="@+id/company"
+            android:id="@+id/p1_company_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -975,11 +976,11 @@
           android:gravity="center_vertical"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="职业*"
-          android:textColor="@color/red"
+          android:text="职  业*"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
-      <TableLayout
+      <LinearLayout
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_span="5"
@@ -989,268 +990,274 @@
           android:paddingRight="12dp"
           android:paddingTop="8dp" >
 
-        <TableRow
+	<TableLayout
+	    android:id="@+id/p1_job_tablelayout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+	    android:layout_height="wrap_content" >
 
-          <CheckBox
-              android:id="@+id/p1_job_01_checkbox"
+          <TableRow
               android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="金融业"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
+              android:layout_height="wrap_content" >
 
-          <CheckBox
-              android:id="@+id/p1_job_02_checkbox"
+            <CheckBox
+		android:id="@+id/p1_job_01_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="金融业"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_02_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="农林牧渔"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_03_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="采矿业"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_04_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="制造业"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_05_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="水电气供应"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_06_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="建筑业"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+          </TableRow>
+
+          <TableRow
               android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="农林牧渔"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
+              android:layout_height="wrap_content" >
 
-          <CheckBox
-              android:id="@+id/p1_job_03_checkbox"
+            <CheckBox
+		android:id="@+id/p1_job_07_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="交通运输"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_08_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="计算机"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_09_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="批发零售"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_10_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="酒店餐饮"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_11_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="房地产"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_12_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="商业贸易"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+          </TableRow>
+
+          <TableRow
               android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="采矿业"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
+              android:layout_height="wrap_content" >
 
-          <CheckBox
-              android:id="@+id/p1_job_04_checkbox"
+            <CheckBox
+		android:id="@+id/p1_job_13_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="科学研究"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_14_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="环境和公共设施"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_15_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="居民服务"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_16_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="教育"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_17_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="卫生医疗"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <CheckBox
+		android:id="@+id/p1_job_18_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="社会保障和福利"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+          </TableRow>
+
+          <TableRow
               android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="制造业"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
+              android:layout_height="wrap_content" >
 
-          <CheckBox
-              android:id="@+id/p1_job_05_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="水电气供应"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
+            <CheckBox
+		android:id="@+id/p1_job_19_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="文体娱乐"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
 
-          <CheckBox
-              android:id="@+id/p1_job_06_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="建筑业"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-        </TableRow>
+            <CheckBox
+		android:id="@+id/p1_job_20_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="机关团体"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            <CheckBox
+		android:id="@+id/p1_job_21_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="国籍组织"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
 
-          <CheckBox
-              android:id="@+id/p1_job_07_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="交通运输"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_08_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="计算机"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_09_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="批发零售"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_10_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="酒店餐饮"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_11_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="房地产"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_12_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="商业贸易"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-          <CheckBox
-              android:id="@+id/p1_job_13_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="科学研究"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_14_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="环境和公共设施"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_15_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="居民服务"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_16_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="教育"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_17_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="卫生医疗"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_18_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="社会保障和福利"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-          <CheckBox
-              android:id="@+id/p1_job_19_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="文体娱乐"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_20_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="机关团体"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_21_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="国籍组织"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <CheckBox
-              android:id="@+id/p1_job_22_checkbox"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:gravity="center_vertical"
-              android:paddingLeft="30dp"
-              android:paddingRight="12dp"
-              android:text="其他"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-        </TableRow>
-      </TableLayout>
+            <CheckBox
+		android:id="@+id/p1_job_22_checkbox"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="30dp"
+		android:paddingRight="12dp"
+		android:text="其他"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+          </TableRow>
+	</TableLayout>
+      </LinearLayout>
     </TableRow>
   </TableLayout>
 
@@ -1287,7 +1294,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="常用电话*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -1527,7 +1534,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="常用地址*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -1540,6 +1547,7 @@
           android:paddingTop="8dp" >
 
         <CheckBox
+	    android:id="@+id/p1_address_office_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -1550,6 +1558,7 @@
             android:textSize="18sp" />
 
         <CheckBox
+	    android:id="@+id/p1_address_home_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
@@ -1578,8 +1587,8 @@
           android:gravity="center_vertical"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="电子邮件"
-          android:textColor="@color/black"
+          android:text="电子邮箱*"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -1643,7 +1652,7 @@
           android:paddingTop="8dp" >
 
         <EditText
-	    android:id="@+id/p1_work_address_edittext"
+	    android:id="@+id/p1_address_office_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
@@ -1682,7 +1691,7 @@
           android:paddingTop="8dp" >
 
         <EditText
-	    android:id="@+id/p1_work_post_edittext"
+	    android:id="@+id/p1_address_office_post_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -1729,7 +1738,7 @@
           android:paddingTop="8dp" >
 
         <EditText
-	    android:id="@+id/p1_home_address_edittext"
+	    android:id="@+id/p1_address_home_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
@@ -1768,7 +1777,7 @@
           android:paddingTop="8dp" >
 
         <EditText
-	    android:id="@+id/p1_home_post_edittext"
+	    android:id="@+id/p1_address_home_post_edittext"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -2258,7 +2267,7 @@
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
           android:text="申请日期*"
-          android:textColor="@color/red"
+          android:textColor="@color/drakred"
           android:textSize="18sp" />
 
       <LinearLayout
@@ -2382,7 +2391,6 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="4dp"
-      android:layout_marginBottom="2dp"
       android:text="注：申请新卡时带'**'和'*'的项目为必填项；功能维护时带'**'的项目为必填项；代办开卡时，所有代理人信息必填。"
       android:textColor="@color/black"
       android:textSize="14sp" />

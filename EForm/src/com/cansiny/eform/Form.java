@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,8 +25,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 
@@ -169,21 +173,6 @@ class FormScrollView extends ScrollView
 		setSmoothScrollingEnabled(true);
 	}
 
-	/* check if scroll view at top/bottom */
-	public boolean isAtTop() {
-		return getScrollY() == 0;
-	}
-	public boolean isAtBottom() {
-		if (getChildCount() == 0)
-			return true;
-		
-		if (getBottom() == 0)
-			return false;
-
-		View child = getChildAt(getChildCount() - 1);
-		return child.getBottom() == getScrollY() + getBottom();
-	}
-	
 	/* event listener */
 	public void setListener(ScrollViewListener listener) {
 		this.listener = listener;
@@ -204,18 +193,20 @@ class FormScrollView extends ScrollView
 
 public abstract class Form implements OnClickListener, OnFocusChangeListener, ScrollViewListener
 {
-	public ArrayList<FormPage> pages;
 	protected Activity activity;
-	private FormListener listener;
-	SwipeMagcardDialogFragment magcard_dialog;
-	ReadIdcardDialogFragment idcard_dialog;
+	protected ArrayList<FormPage> pages;
+	protected int active_page;
+	protected SwipeMagcardDialogFragment magcard_dialog;
+	protected ReadIdcardDialogFragment idcard_dialog;
 	protected ArrayList<Integer> cardno_views; 
 	protected ArrayList<Integer> verify_views;
+	private FormListener listener;
 	
 	public Form(Activity activity) {
 		this.activity = activity;
 		listener = null;
 		pages = new ArrayList<FormPage>();
+		active_page = -1;
 		cardno_views = new ArrayList<Integer>();
 		verify_views = new ArrayList<Integer>();
 	}
@@ -272,6 +263,29 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 
+	public View setActivePage(int index) {
+		if (index < 0 || index >= pages.size() || index == active_page)
+			return null;
+
+		/* save current page state */
+		if (active_page >= 0) {
+			pages.get(active_page).saveState();
+		}
+		/* restore new page state */
+		View view = pages.get(index).restoreState();
+
+		active_page = index;
+		return view;
+	}
+
+	public int getActivePage() {
+		return active_page;
+	}
+
+	public FormPage getActiveFormPage() {
+		return pages.get(active_page);
+	}
+
 	/* call by page when its state be saved */
 	public void onPageSaved(FormPage page) {
 		/* save card no tag */
@@ -313,11 +327,11 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 
 
 	/* call by activity when page be insert to layout */
-	public void onPageStart(int page_no) {
-		if (page_no < 0 || page_no >= pages.size())
+	public void onPageStart() {
+		if (active_page < 0 || active_page >= pages.size())
 			return;
 		
-		FormPage page = pages.get(page_no);
+		FormPage page = pages.get(active_page);
 		
 		/* restore view focus */
 		int focus_id = page.bundle.getInt("focus-view");
@@ -353,6 +367,22 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 	
+	public boolean scrollUp() {
+		FormPage page = pages.get(active_page);
+		if (page == null || !page.canScrollUp())
+			return false;
+		page.scrollUp();
+		return true;
+	}
+
+	public boolean scrollDown() {
+		FormPage page = pages.get(active_page);
+		if (page == null || !page.canScrollDown())
+			return false;
+		page.scrollDown();
+		return true;
+	}
+
 	@Override
 	public void onScollChanged(ScrollView scroll_view) {
 		/* notify activity the from has scrolled. */
@@ -404,9 +434,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	
 	@Override
 	public void onFocusChange(View view, boolean hasfocus) {
-		if (hasfocus) {
-		}
-
 		/* switch card no display format */
 		for (Integer viewid : cardno_views) {
 			if (view.getId() == viewid.intValue()) {
@@ -424,10 +451,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 	/* callback for edit text listener */
-	protected void afterTextChanged(TextView textview, Editable editable) {
-	}
-
-	/* callback for edit text listener */
 	protected void beforeTextChanged(TextView textview, CharSequence sequence,
 				int start, int count, int after) {
 	}
@@ -440,6 +463,18 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 			if (textview.getId() == viewid.intValue()) {
 				if (sequence.toString().matches("[0-9]*"))
 					textview.setTag(sequence);
+			}
+		}
+	}
+
+	/* callback for edit text listener */
+	protected void afterTextChanged(TextView textview, Editable editable) {
+		/* clear warning image for verify edit text */
+		for (Integer viewid : verify_views) {
+			if (textview.getId() == viewid.intValue()) {
+				if (editable.length() > 0) {
+					removeWarningImage(textview);
+				}
 			}
 		}
 	}
@@ -471,23 +506,114 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 	
-	protected void insertRedhand(ViewGroup parent) {
-		
+	protected ImageView createWarningImage(CharSequence description) {
+		ImageView image = new ImageView(activity.getApplicationContext());
+		image.setTag("verify-warning-image");
+		image.setContentDescription(description);
+		image.setImageResource(R.drawable.warning);
+		image.setBackgroundResource(R.color.transparent);
+		image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		image.setAdjustViewBounds(true);
+		image.setMaxHeight((int) HomeActivity.convertDpToPixel(28));
+		image.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View image) {
+				CharSequence desc = image.getContentDescription();
+				if (desc.length() > 0)
+					((FormActivity) activity).showToast(desc);
+			}
+		});
+		return image;
 	}
 
-	public boolean verify() {
+	protected void insertWarningImage(View slibing, CharSequence description) {
+		if (slibing.getParent() == null)
+			return;
+
+		ViewGroup parent = (ViewGroup) slibing.getParent();
+
+		int index = parent.indexOfChild(slibing);
+		/* skip if warning image already exists */
+		if (index > 0) {
+			Object tag = parent.getChildAt(index - 1).getTag();
+			if (tag instanceof String && tag.equals("verify-warning-image"))
+				return;
+		}
+
+		ImageView image = createWarningImage(description);
+		if (parent.getClass() == LinearLayout.class) {
+			LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER_VERTICAL;
+			parent.addView(image, parent.indexOfChild(slibing), params);
+		} else if (parent.getClass() == TableRow.class) {
+			TableRow.LayoutParams params = new TableRow.LayoutParams(
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+			params.gravity = Gravity.CENTER_VERTICAL;
+			parent.addView(image, parent.indexOfChild(slibing), params);
+		} else {
+			parent.addView(image, parent.indexOfChild(slibing));
+		}
+	}
+
+	protected void removeWarningImage(View slibing) {
+		ViewGroup parent = (ViewGroup) slibing.getParent();
+		int index = parent.indexOfChild(slibing);
+		if (index > 0) {
+			Object tag = parent.getChildAt(index - 1).getTag();
+			if (tag != null && tag.equals("verify-warning-image")) {
+				parent.removeViewAt(index - 1);
+			}
+		}
+	}
+
+	protected void clearWarningImage() {
+		FormPage page = pages.get(active_page);
+		if (page == null || page.scroll_view == null)
+			return;
+
+		while (true) {
+			View view = page.scroll_view.findViewWithTag("verify-warning-image");
+			if (view == null)
+				break;
+			ViewGroup parent = (ViewGroup) view.getParent();
+			parent.removeView(view);
+		}
+	}
+
+
+	public int verify() {
+		int retval = 0;
+		View focus_view = null;
+
+		/* clear all warning images first */
+		clearWarningImage();
+
 		for (Integer viewid : verify_views) {
-			EditText view = findEditText(viewid.intValue());
+			View view = findView(viewid.intValue());
 			if (view == null)
 				continue;
 			
+			/* check for edit text */
 			if ((Object) view instanceof EditText) {
-				if (view.getText().length() == 0) {
-					insertRedhand((ViewGroup) view.getParent());
+				if (((EditText) view).getText().length() == 0) {
+					insertWarningImage(view, "此项为必填项");
+					retval++;
+
+					if (focus_view == null)
+						focus_view = view;
 				}
 			}
 		}
-		return true;
+		
+		/* let problem view get focus */
+		if (focus_view != null) {
+			focus_view.requestFocus();
+		}
+		/* return problem count */
+		return retval;
 	}
 	
 	
@@ -561,7 +687,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 					bundle.remove("focus-view");
 
 				onPageSaved(this);
-				scroll_view = null;
 			}
 		}
 
@@ -593,20 +718,28 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 
 		/* handler scroll view */
 		public boolean canScrollUp() {
-			if (scroll_view == null || !((Object) scroll_view instanceof ScrollView))
+			if (scroll_view == null)
 				return false;
-			return ((FormScrollView) scroll_view).isAtTop() ? false : true;
+			return scroll_view.getScrollY() == 0 ? false : true;
 		}
+
 		public boolean canScrollDown() {
-			if (scroll_view == null || !((Object) scroll_view instanceof ScrollView))
+			if (scroll_view == null || scroll_view.getChildCount() == 0)
 				return false;
-			return ((FormScrollView) scroll_view).isAtBottom() ? false : true;
+
+			if (scroll_view.getBottom() == 0)
+				return false;
+
+			View child = scroll_view.getChildAt(scroll_view.getChildCount() - 1);
+			return child.getBottom() > scroll_view.getScrollY() + scroll_view.getBottom();
 		}
+
 		public void scrollUp() {
 			if (scroll_view == null || !((Object) scroll_view instanceof ScrollView))
 				return;
 			scroll_view.smoothScrollBy(0, -100);
 		}
+
 		public void scrollDown() {
 			if (scroll_view == null || !((Object) scroll_view instanceof ScrollView))
 				return;

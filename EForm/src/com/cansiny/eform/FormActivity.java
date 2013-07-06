@@ -20,6 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FormActivity extends Activity implements OnClickListener, Form.FormListener
 {
@@ -33,13 +34,12 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 
 	private AtomicInteger atomic_int;
 	private Form form;
-	private int active_page;
+	private long last_verify_time = 0;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		atomic_int = new AtomicInteger(HomeActivity.ITEM_VIEW_ID_BASE);
-		active_page = -1;
 
 		setContentView(R.layout.activity_form);
 
@@ -159,13 +159,14 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	}
 
 	private void setActivePage(int index) {
-		if (index == active_page)
+		View page_view = form.setActivePage(index);
+		if (page_view == null)
 			return;
 
 		LinearLayout title_layout = (LinearLayout) findViewById(R.id.page_title_layout);
 
 		if (index >= title_layout.getChildCount()) {
-			Log.e("ItemActivity", String.format("Try to goto unexists step %d", index));
+			Log.e("ItemActivity", String.format("Try to goto unexists page %d", index));
 			return;
 		}
 		resetTitleButtons();
@@ -184,29 +185,16 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 		button = (Button) findViewById(R.id.next_button);
 		button.setEnabled(index + 1 < form.pages.size());
 
-		/* save current page state */
-		if (active_page >= 0) {
-			Form.FormPage page = form.pages.get(active_page);
-			page.saveState();
-		}
-
-		/* restore new page state and insert into layout */
-		Form.FormPage page = form.pages.get(index);
-		View view = page.restoreState();
-
 		FrameLayout page_layout = (FrameLayout) findViewById(R.id.page_layout);
 		page_layout.removeAllViews();
-		page_layout.addView(view, new FrameLayout.LayoutParams(
+		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.MATCH_PARENT));
+				ViewGroup.LayoutParams.WRAP_CONTENT);
+		params.gravity = Gravity.CENTER_VERTICAL;
+		page_layout.addView(page_view, params);
+		page_layout.forceLayout();
 
-		/* change up/down button state */
-		findViewById(R.id.up_button).setEnabled((page.canScrollUp()));
-		findViewById(R.id.down_button).setEnabled((page.canScrollDown()));
-
-		/* save active page no and notify form start */
-		active_page = index;
-		form.onPageStart(index);
+		form.onPageStart();
 
 		/* hide the soft keyboard until user touch the edit text */
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -232,34 +220,68 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	}
 
 	public void onPreviousButtonClick(View view) {
-		if (active_page > 0)
-			setActivePage(active_page - 1);
+		if (form.getActivePage() > 0)
+			setActivePage(form.getActivePage() - 1);
 	}
+
 	public void onNextButtonClick(View view) {
-		if (active_page + 1 < form.pages.size())
-			setActivePage(active_page + 1);
+		if (form.getActivePage() + 1 < form.pages.size())
+			setActivePage(form.getActivePage() + 1);
 	}
 
 	public void onScrollUpButtonClick(View view) {
-		Form.FormPage page = form.pages.get(active_page);
-		page.scrollUp();
+		if (!form.scrollUp())
+			findViewById(R.id.up_button).setEnabled(false);
 	}
+
 	public void onScrollDownButtonClick(View view) {
-		Form.FormPage page = form.pages.get(active_page);
-		page.scrollDown();
+		if (!form.scrollDown())
+			findViewById(R.id.down_button).setEnabled(false);
 	}
 
 
 	@Override
 	public void onScrollViewScrolled(Form form, ScrollView scroll_view) {
-		Form.FormPage page = form.pages.get(active_page);
+		Form.FormPage page = form.getActiveFormPage();
 		findViewById(R.id.up_button).setEnabled((page.canScrollUp()));
 		findViewById(R.id.down_button).setEnabled((page.canScrollDown()));
 	}
 	
 	
+	public void showToast(CharSequence sequence) {
+		TextView text_view = new TextView(getApplicationContext());
+		text_view.setText(sequence);
+		text_view.setTextColor(getResources().getColor(R.color.yellow));
+		text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+
+		LinearLayout layout = new LinearLayout(getApplicationContext());
+		layout.setBackgroundResource(R.color.translucence);
+		layout.setPadding(30, 20, 30, 20);
+		layout.addView(text_view);
+
+		Toast toast = new Toast(getApplicationContext());
+		toast.setView(layout);
+		toast.setDuration(Toast.LENGTH_SHORT);
+		View sidebar = findViewById(R.id.sidebar_layout);
+		toast.setGravity(Gravity.CENTER, 0 - sidebar.getWidth() / 2, 0);
+		toast.show();
+	}
+
 	public void onVerifyButtonClick(View view) {
-		form.verify();
+		/* prevent click too fast */
+		long time = System.currentTimeMillis() / 1000;
+		if (time - last_verify_time < 3)
+			return;
+
+		last_verify_time = time;
+
+		int retval = form.verify();
+		if (retval > 0) {
+			showToast(String.format("本页共 %d 个未完成项，请继续填写...", retval)
+			);
+		} else {
+			showToast("本页面已填写完整");
+		}
 	}
 
 	
