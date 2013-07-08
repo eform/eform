@@ -36,7 +36,7 @@
           android:paddingLeft="10dp"
           android:paddingTop="8dp"
           android:paddingBottom="8dp"
-          android:text="基本功能"
+          android:text="电子银行"
           android:textColor="@color/white"
           android:textSize="20sp" />
 
@@ -53,7 +53,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="ATM转账"
+          android:text="短信银行"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -76,7 +76,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="必填项* 可选择开通或关闭ATM转账功能，每日转账限额不超过5万元。"
+              android:text="开通本功能后您在网上银行、手机银行、电话银行办理转账、缴费、支付等业务时，系统将自动发送一次性随机密码到您本人的手机，输入该密码后才可办理相关业务。您可登陆网上银行使用短信口令自助设置网上银行、手机银行、电话银行的转账、支付、缴费等功能及限额。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -93,7 +93,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="功能"
+              android:text="申请内容"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -114,18 +114,7 @@
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
                 android:paddingRight="12dp"
-                android:text="开通"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_atm_transfer_modify_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="修改"
+		android:text="开通/修改"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
@@ -140,40 +129,13 @@
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
-          </LinearLayout>
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="日限额"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
 	    <TextView
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
+		android:layout_marginLeft="60dp"
 		android:layout_marginRight="10dp"
 		android:gravity="center_vertical"
-		android:text="日累计转账不超过"
+		android:text="手机号码"
 		android:textColor="@color/black"
 		android:textSize="18sp" />
 
@@ -181,29 +143,14 @@
                 android:id="@+id/p2_atm_transfer_limit_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
+                android:layout_weight="1"
 		android:ems="6"
-		android:inputType="numberDecimal"
+		android:inputType="phone"
                 android:textColor="@color/blue" />
 
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元，最高50000元"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	  </LinearLayout>
+          </LinearLayout>
 	</TableRow>
+
       </TableLayout>
 
     </TableRow>
@@ -219,7 +166,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="ATM取款"
+          android:text="网盾"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -242,7 +189,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="默认开通境内每日2万元(含)和境外每日1万元(含)人民币取款功能。"
+              android:text="开通本功能后您在网上银行办理转账、缴费、支付等业务时提供网盾保护。您可登陆网上银行使用网盾自助设置网上银行、手机银行、电话银行的转账、支付、缴费等功能及限额。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -259,7 +206,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="境内"
+              android:text="申请内容"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -273,102 +220,8 @@
               android:paddingRight="12dp"
               android:paddingTop="8dp" >
 
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="每日累计取款不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
 
-            <EditText
-                android:id="@+id/p2_atm_withdrawals_territory_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元(最高20000元，关闭功能为0元)"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
           </LinearLayout>
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="境外"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="每日累计取款折合人民币不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/p2_atm_withdrawals_overseas_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元(最高10000元，关闭功能为0元)"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-          </LinearLayout>
-
 	</TableRow>
 
       </TableLayout>
@@ -386,7 +239,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="刷卡消费"
+          android:text="令牌"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -409,7 +262,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="默认开通境内刷卡消费功能。境外特殊地区每日限额50万元，一般地区每日限额100万元。"
+              android:text="开通本功能后您在网上银行、电话银行、手机银行办理转账、缴费、支付等业务时提供令牌保护。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -426,7 +279,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="境内"
+              android:text="申请内容"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -440,100 +293,6 @@
               android:paddingRight="12dp"
               android:paddingTop="8dp" >
 
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="每日累计消费不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/p2_consume_territory_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元(关闭功能为0元)"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-          </LinearLayout>
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="境外"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="每日累计消费折合人民币不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/p2_consume_overseas_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元(关闭功能为0元)"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
           </LinearLayout>
 	</TableRow>
 
@@ -552,7 +311,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="信用卡\n关联还款"
+          android:text="精灵信使"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -575,7 +334,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="将此帐户设置为本行信用卡关联自动还款帐户。"
+              android:text="开通本功能后，在帐户发生资金变动、预约转账自动扣款失败、交易密码输错时会收到短信通知。您还可在网上银行、手机银行、电话银行自助设置余额超限通知、基金净值通知、贵金属行情通知等短信服务。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -592,7 +351,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="功能"
+              android:text="申请内容"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -863,7 +622,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="预约转账"
+          android:text="网上支付"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -886,7 +645,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="可设定按固定金额、固定期限等条件自动向指定帐户转账。"
+              android:text="开通本功能后可在兴业银行的互联网商户上进行在线支付。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -1683,7 +1442,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="固话终端\n转账"
+          android:text="转账汇款"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -1835,7 +1594,7 @@
           android:gravity="center"
           android:paddingLeft="12dp"
           android:paddingRight="12dp"
-          android:text="电子现金\n(仅限IC卡)"
+          android:text="自助缴费"
           android:textColor="@color/black"
           android:textSize="18sp" />
 
@@ -2052,184 +1811,6 @@
                 android:textSize="18sp" />
 
           </LinearLayout>
-	</TableRow>
-
-      </TableLayout>
-
-    </TableRow>
-
-  </TableLayout>
-
-  <TableLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:stretchColumns="1" >
-
-    <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#3366FF" >
-
-      <TextView
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-	  android:layout_span="2"
-          android:gravity="center_vertical"
-          android:paddingLeft="10dp"
-          android:paddingTop="8dp"
-          android:paddingBottom="8dp"
-          android:text="第三方支付"
-          android:textColor="@color/white"
-          android:textSize="20sp" />
-
-    </TableRow>
-
-    <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-
-      <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="match_parent"
-          android:background="@drawable/cell_cib01"
-          android:gravity="center"
-          android:paddingLeft="12dp"
-          android:paddingRight="12dp"
-          android:text="银联在线\n支付"
-          android:textColor="@color/black"
-          android:textSize="18sp" />
-
-      <TableLayout
-	  android:layout_width="match_parent"
-	  android:layout_height="wrap_content"
-	  android:stretchColumns="1" >
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-	      android:layout_span="3"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-	      android:paddingTop="8dp"
-	      android:paddingBottom="8dp"
-              android:text="通过银联指定渠道自助办理无卡支付业务。"
-              android:textColor="@color/black"
-              android:textSize="16sp" />
-
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="功能"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-            <CheckBox
-                android:id="@+id/p2_unionpay_open_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="开通"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_unionpay_modify_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="修改"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_unionpay_close_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="关闭"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-          </LinearLayout>
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-                android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="每日累计消费不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/p2_unionpay_amount_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	  </LinearLayout>
-
 	</TableRow>
 
       </TableLayout>

@@ -1,3 +1,13 @@
+/* EForm - Electronic Form System
+ *
+ * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
+ * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
+ * 
+ * HomeActivity - The application entry
+ *
+ * Authors:
+ *   Xiaohu <xiaohu417@gmail.com>, 2013.7.1, hefei
+ */
 package com.cansiny.eform;
 
 import java.lang.reflect.InvocationTargetException;
@@ -73,6 +83,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 				page_title.addView(buildPageButton(n, page.title), params);
 				n++;
 			}
+			setResult(RESULT_OK, getIntent());
 		} catch (InstantiationException e) {
 			LogActivity.writeLog(e);
 			getIntent().putExtra(INTENT_RESULT_ERRREASON, R.string.error_instantiation_exception);
@@ -277,10 +288,9 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 
 		int retval = form.verify();
 		if (retval > 0) {
-			showToast(String.format("本页共 %d 个未完成项，请继续填写...", retval)
-			);
+			showToast(String.format("本页共 %d 个还未填写的必填项", retval));
 		} else {
-			showToast("本页面已填写完整");
+			showToast("本页面没有还未填写的必填项");
 		}
 	}
 

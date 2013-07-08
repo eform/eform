@@ -321,6 +321,8 @@ public final class R {
         public static final int exit=0x7f050003;
         public static final int form_label_cib01=0x7f050016;
         public static final int form_label_cib02=0x7f05001b;
+        public static final int form_label_cib03=0x7f05001e;
+        public static final int form_label_cib04=0x7f05001f;
         public static final int form_title_cib01_1=0x7f050017;
         public static final int form_title_cib01_2=0x7f050018;
         public static final int form_title_cib01_3=0x7f050019;

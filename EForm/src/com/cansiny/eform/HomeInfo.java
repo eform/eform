@@ -40,6 +40,8 @@ public final class HomeInfo
 		items.clear();
 		items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 20));
 		items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+		items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+		items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 20));
 	}
 
 	private void setCustomerCCB() {
@@ -73,7 +75,7 @@ public final class HomeInfo
 			this.klass = EFormApplication.getContext().getPackageName() + "." + klass;
 			this.image = image;
 			this.label = label;
-			this.label_size = 24;
+			this.label_size = 22;
 		}
 		
 		public HomeItem(String klass, int image, int label, int label_size) {
