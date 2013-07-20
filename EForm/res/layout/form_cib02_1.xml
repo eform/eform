@@ -449,7 +449,6 @@
                         android:ems="6"
                         android:inputType="number" />
                 </TableRow>
-	-->
 
                 <TableRow
                     android:layout_width="wrap_content"

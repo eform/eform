@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="left"
         android:layout_marginTop="20dp"
-        android:text="说明：读取的卡号仅被用来填写本页面相关要素，不作他用。"
-        android:textSize="14sp" />
+        android:text="读取的卡号仅被用来填写本页面相关要素，不作他用。"
+        android:textSize="16sp" />
 
 </LinearLayout>

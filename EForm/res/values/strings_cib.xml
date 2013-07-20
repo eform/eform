@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="form_label_cib01">借记卡\n业务申请</string>
+    <string name="form_title_cib01_1">申请信息</string>
+    <string name="form_title_cib01_2">基本功能</string>
+    <string name="form_title_cib01_3">电子银行</string>
+    <string name="form_title_cib01_4">投资理财</string>
+    <string name="form_label_cib02">储蓄转账</string>
+    <string name="form_title_cib02_1">转账凭条(正面)</string>
+    <string name="form_title_cib02_2">转账凭条(背面)</string>
+    <string name="form_label_cib03">现金存款</string>
+    <string name="form_label_cib04">活期存款无折续存</string>
+    
+</resources>

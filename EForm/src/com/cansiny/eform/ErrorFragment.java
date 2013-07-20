@@ -29,89 +29,89 @@ import android.widget.TextView;
  */
 public class ErrorFragment extends Fragment implements OnClickListener
 {
-	private int error_reason_id;
-	private Button recovery_button;
-	private Button log_button;
-	private Button refresh_button;
+    private int error_reason_id;
+    private Button recovery_button;
+    private Button log_button;
+    private Button refresh_button;
 
-	public ErrorFragment() {
-		error_reason_id = 0;
-		recovery_button = null;
-		log_button = null;
-		refresh_button = null;
-	}
+    public ErrorFragment() {
+	error_reason_id = 0;
+	recovery_button = null;
+	log_button = null;
+	refresh_button = null;
+    }
 
-	public void setErrorReason(int reason_resid) {
-		this.error_reason_id = reason_resid;
-	}
+    public void setErrorReason(int reason_resid) {
+	this.error_reason_id = reason_resid;
+    }
 
-	@Override
-	public void onAttach (Activity activity) {
-		super.onAttach(activity);
-		Log.d("RecoveryFragment", "Fragment attached.");
-	}
+    @Override
+    public void onAttach (Activity activity) {
+	super.onAttach(activity);
+	Log.d("RecoveryFragment", "Fragment attached.");
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState)
-	{
-		Log.d("RecoveryFragment", "Fragment view created.");
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			     Bundle savedInstanceState)
+    {
+	Log.d("RecoveryFragment", "Fragment view created.");
 		
-		View view = inflater.inflate(R.layout.flagment_error, container, false);
+	View view = inflater.inflate(R.layout.flagment_error, container, false);
 		
-		if (error_reason_id != 0) {
-			TextView reasonView = (TextView)view.findViewById(R.id.error_reason);
-			reasonView.setText(error_reason_id);
-		}
-
-		recovery_button = (Button) view.findViewById(R.id.error_recovery_button);
-		recovery_button.setOnClickListener(this);
-		
-		log_button = (Button) view.findViewById(R.id.error_log_button);
-		log_button.setOnClickListener(this);
-
-		refresh_button = (Button) view.findViewById(R.id.error_refresh_button);
-		refresh_button.setOnClickListener(this);
-
-		return view;
+	if (error_reason_id != 0) {
+	    TextView reasonView = (TextView)view.findViewById(R.id.error_reason);
+	    reasonView.setText(error_reason_id);
 	}
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Log.d("RecoveryFragment", "Fragment created.");
-	}
+	recovery_button = (Button) view.findViewById(R.id.error_recovery_button);
+	recovery_button.setOnClickListener(this);
+		
+	log_button = (Button) view.findViewById(R.id.error_log_button);
+	log_button.setOnClickListener(this);
+
+	refresh_button = (Button) view.findViewById(R.id.error_refresh_button);
+	refresh_button.setOnClickListener(this);
+
+	return view;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+	Log.d("RecoveryFragment", "Fragment created.");
+    }
 	
-	@Override
-	public void onPause() {
-		super.onPause();
-		Log.d("RecoveryFragment", "Fragment pasued.");
-	}
+    @Override
+    public void onPause() {
+	super.onPause();
+	Log.d("RecoveryFragment", "Fragment pasued.");
+    }
 
-	@Override
-	public void onClick(View view) {
-		if (view == recovery_button) {
-			onRecoveryButtonClicked(view);
-		} else if (view == log_button) {
-			onLogButtonClicked(view);
-		} else if (view == refresh_button) {
-			onRefreshHomeButtonClicked(view);
-		}
+    @Override
+    public void onClick(View view) {
+	if (view == recovery_button) {
+	    onRecoveryButtonClicked(view);
+	} else if (view == log_button) {
+	    onLogButtonClicked(view);
+	} else if (view == refresh_button) {
+	    onRefreshHomeButtonClicked(view);
 	}
+    }
 
-	public void onLogButtonClicked(View view) {
-		Intent intent = new Intent(getActivity(), LogActivity.class);
-		startActivity(intent);
-	}
+    public void onLogButtonClicked(View view) {
+	Intent intent = new Intent(getActivity(), LogActivity.class);
+	startActivity(intent);
+    }
 
-	public void onRefreshHomeButtonClicked(View view) {
-		Activity activity = getActivity();
-		if (activity instanceof HomeActivity)
-			((HomeActivity) activity).refreshLayout();
-	}
+    public void onRefreshHomeButtonClicked(View view) {
+	Activity activity = getActivity();
+	if (activity instanceof HomeActivity)
+	    ((HomeActivity) activity).refreshLayout();
+    }
 
-	public void onRecoveryButtonClicked(View button) {
-		Log.d("RecoveryFragment", "Recovery button click...");
-	}
+    public void onRecoveryButtonClicked(View button) {
+	Log.d("RecoveryFragment", "Recovery button click...");
+    }
 
 }

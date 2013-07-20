@@ -203,9 +203,9 @@
 	    android:layout_weight="1"
             android:layout_marginRight="0dp"
             android:ems="10"
-	    android:hint="提示：可以刷卡来填写本项内容 -->>"
             android:inputType="number"
             android:textColor="@color/blue"
+	    android:hint="提示：可以刷卡来填写本项内容 -->>"
             android:textColorHint="#888888" />
 
         <Button

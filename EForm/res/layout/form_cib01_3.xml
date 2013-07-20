@@ -108,7 +108,7 @@
               android:paddingTop="8dp" >
 
             <CheckBox
-                android:id="@+id/p2_atm_transfer_open_checkbox"
+                android:id="@+id/p3_msgbank_open_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
@@ -119,7 +119,7 @@
                 android:textSize="18sp" />
 
             <CheckBox
-                android:id="@+id/p2_atm_transfer_close_checkbox"
+                android:id="@+id/p3_msgbank_close_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
@@ -140,13 +140,21 @@
 		android:textSize="18sp" />
 
             <EditText
-                android:id="@+id/p2_atm_transfer_limit_edittext"
+                android:id="@+id/p3_msgbank_phone_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
 		android:ems="6"
 		android:inputType="phone"
                 android:textColor="@color/blue" />
+
+            <Button
+                android:tag="edittext_clear_button"
+		android:layout_width="26dp"
+		android:layout_height="26dp"
+		android:background="@drawable/clear"
+		android:layout_marginLeft="0dp"
+		android:layout_marginRight="0dp" />
 
           </LinearLayout>
 	</TableRow>
@@ -220,6 +228,93 @@
               android:paddingRight="12dp"
               android:paddingTop="8dp" >
 
+            <CheckBox
+                android:id="@+id/p3_shield_apply_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="申领"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_bind_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="绑定"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_unbind_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="解除绑定"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_change_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="更换"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_reset_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="重置"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_resend_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="下载码重发"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_extension_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="展期"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_shield_repeal_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="废除"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
 
           </LinearLayout>
 	</TableRow>
@@ -293,7 +388,137 @@
               android:paddingRight="12dp"
               android:paddingTop="8dp" >
 
+	    <TableLayout
+		android:id="@+id/p3_token_tablelayout"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" >
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_token_apply_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="申领"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_bind_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="绑定"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_unbind_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="解除绑定"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_change_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="更换"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_reset_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="重置令牌密码"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_token_unlock_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="解锁"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_sync_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="同步"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_repeal_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="废除"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_lost_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="挂失"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_token_unlost_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="解除挂失"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+	    </TableLayout>
+
           </LinearLayout>
+
 	</TableRow>
 
       </TableLayout>
@@ -327,7 +552,7 @@
 	  <TextView
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
-	      android:layout_span="6"
+	      android:layout_span="4"
               android:background="@drawable/cell_border"
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
@@ -358,7 +583,7 @@
           <LinearLayout
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_span="1"
+              android:layout_span="3"
               android:background="@drawable/cell_border"
               android:paddingBottom="8dp"
               android:paddingLeft="8dp"
@@ -366,125 +591,24 @@
               android:paddingTop="8dp" >
 
             <CheckBox
-                android:id="@+id/p2_credit_open_checkbox"
+                android:id="@+id/p3_emissary_open_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
                 android:paddingRight="10dp"
-                android:text="开通"
+		android:text="开通/修改"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
             <CheckBox
-                android:id="@+id/p2_credit_modify_checkbox"
+                android:id="@+id/p3_emissary_close_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
                 android:paddingRight="10dp"
-                android:text="修改"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_credit_close_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="10dp"
-                android:text="撤销"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-          </LinearLayout>
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="还款方式"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="8dp"
-              android:paddingRight="8dp"
-              android:paddingTop="8dp" >
-
-            <CheckBox
-                android:id="@+id/p2_credit_repayment_full_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="10dp"
-                android:text="全额还款"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_credit_repayment_low_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="10dp"
-                android:text="最低还款额还款"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-          </LinearLayout>
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="币种"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="8dp"
-              android:paddingRight="8dp"
-              android:paddingTop="8dp" >
-
-            <CheckBox
-                android:id="@+id/p2_credit_currency_rmb_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="10dp"
-                android:text="人民币"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_credit_currency_usd_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="0dp"
-                android:text="美元"
+                android:text="关闭"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
@@ -503,14 +627,14 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="信用卡1"
+              android:text="手机号码1"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
           <LinearLayout
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_span="5"
+              android:layout_span="1"
               android:background="@drawable/cell_border"
               android:paddingBottom="8dp"
               android:paddingLeft="12dp"
@@ -518,13 +642,12 @@
               android:paddingTop="8dp" >
 
             <EditText
-                android:id="@+id/p2_credit1_edittext"
+                android:id="@+id/p3_emissary_phone1_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
 		android:ems="6"
-		android:inputType="number"
-		android:hint="提示：可以刷卡来填写本项内容 -->>"
+		android:inputType="phone"
                 android:textColor="@color/blue"
 		android:textColorHint="#888888" />
 
@@ -534,24 +657,9 @@
 		android:layout_height="26dp"
 		android:background="@drawable/clear"
 		android:layout_marginLeft="0dp"
-		android:layout_marginRight="20dp" />
+		android:layout_marginRight="0dp" />
 
-	    <Button
-                android:id="@+id/p2_credit1_swipe_button"
-		android:layout_width="wrap_content"
-		android:layout_height="40dp"
-		android:background="@drawable/button"
-		android:paddingLeft="20dp"
-		android:paddingRight="20dp"
-		android:text="刷 卡"
-		android:textColor="@color/purple" />
           </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
 
 	  <TextView
               android:layout_width="wrap_content"
@@ -560,14 +668,14 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="信用卡2"
+              android:text="手机号码2"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
           <LinearLayout
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_span="5"
+              android:layout_span="1"
               android:background="@drawable/cell_border"
               android:paddingBottom="8dp"
               android:paddingLeft="12dp"
@@ -575,13 +683,12 @@
               android:paddingTop="8dp" >
 
             <EditText
-                android:id="@+id/p2_credit2_edittext"
+                android:id="@+id/p3_emissary_phone2_edittext"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-		android:ems="6"
-		android:inputType="number"
-		android:hint="提示：可以刷卡来填写本项内容 -->>"
+		android:ems="12"
+		android:inputType="phone"
                 android:textColor="@color/blue"
 		android:textColorHint="#888888" />
 
@@ -591,17 +698,7 @@
 		android:layout_height="26dp"
 		android:background="@drawable/clear"
 		android:layout_marginLeft="0dp"
-		android:layout_marginRight="20dp" />
-
-	    <Button
-                android:id="@+id/p2_credit2_swipe_button"
-		android:layout_width="wrap_content"
-		android:layout_height="40dp"
-		android:background="@drawable/button"
-		android:paddingLeft="20dp"
-		android:paddingRight="20dp"
-		android:text="刷 卡"
-		android:textColor="@color/purple" />
+		android:layout_marginRight="0dp" />
 
           </LinearLayout>
 
@@ -662,7 +759,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="转出帐户"
+              android:text="申请内容"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -677,753 +774,65 @@
               android:paddingTop="8dp" >
 
             <CheckBox
-                android:id="@+id/p2_reservation_transfer_rmb_checkbox"
+                android:id="@+id/p3_netpay_open_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
                 android:paddingRight="12dp"
-                android:text="人民币"
+		android:text="开通/修改"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
             <CheckBox
-                android:id="@+id/p2_reservation_transfer_currency_checkbox"
+                android:id="@+id/p3_netpay_close_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
-                android:paddingRight="2dp"
-                android:text="外币-币种"
+                android:paddingRight="12dp"
+                android:text="关闭"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:layout_marginLeft="60dp"
+		android:layout_marginRight="10dp"
+		android:gravity="center_vertical"
+		android:text="每日累计支付不得超过"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
 
             <EditText
-                android:id="@+id/p2_reservation_transfer_currency_edittext"
-                android:layout_width="0dp"
+                android:id="@+id/p3_netpay_limit_edittext"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-		android:ems="4"
-		android:inputType="text"
+		android:ems="6"
+		android:inputType="numberDecimal"
                 android:textColor="@color/blue" />
 
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="12dp"
-		android:paddingRight="2dp"
-		android:text="("
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_money_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="钞户"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_exchange_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="2dp"
-                android:text="汇户"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
+            <Button
+                android:tag="edittext_clear_button"
+		android:layout_width="26dp"
+		android:layout_height="26dp"
+		android:background="@drawable/clear"
+		android:layout_marginLeft="0dp"
+		android:layout_marginRight="0dp" />
 
 	    <TextView
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
+		android:layout_marginLeft="10dp"
+		android:layout_marginRight="10dp"
 		android:gravity="center_vertical"
-		android:text=")"
+		android:text="元(最高100万元)"
 		android:textColor="@color/black"
 		android:textSize="18sp" />
 
           </LinearLayout>
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_close_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="撤销转账"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-          </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="转账频度"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="4"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_once_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="一次性"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_week_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="每周"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_month_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="每月"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_quarterly_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="每季"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_halfyear_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="每半年"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_year_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="每年"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-	    <CheckBox
-                android:id="@+id/p2_reservation_transfer_frequency_day_checkbox"
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="30dp"
-		android:paddingRight="12dp"
-		android:text="每天"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	  </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" >
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="固定转出金额"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <LinearLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="match_parent"
-	      android:layout_span="1"
-	      android:background="@drawable/cell_border"
-	      android:paddingBottom="8dp"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:paddingTop="8dp" >
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_amount_edittext"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="6"
-		android:inputType="numberDecimal"
-		android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="0dp" />
-
-	  </LinearLayout>
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="首次转账日期"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <LinearLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:paddingBottom="8dp"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:paddingTop="8dp" >
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_start_year_edittext"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="3"
-		android:singleLine="true"
-		android:inputType="number"
-		android:textColor="@color/blue" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="12dp"
-		android:paddingRight="12dp"
-		android:text="年"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_start_month_edittext"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="2"
-		android:singleLine="true"
-		android:inputType="number"
-		android:textColor="@color/blue" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="12dp"
-		android:paddingRight="12dp"
-		android:text="月"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_start_day_edittext"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="2"
-		android:singleLine="true"
-		android:inputType="number"
-		android:textColor="@color/blue" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="12dp"
-		android:paddingRight="0dp"
-		android:text="日"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-	  </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" >
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="转入帐号"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <LinearLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="match_parent"
-	      android:layout_span="4"
-	      android:background="@drawable/cell_border"
-	      android:paddingBottom="8dp"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:paddingTop="8dp" >
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_to_account_edittext"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="2"
-		android:singleLine="true"
-		android:inputType="number"
-		android:hint="提示：可以刷卡来填写本项内容 -->>"
-		android:textColor="@color/blue"
-		android:textColorHint="#888888" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="20dp" />
-
-	    <Button
-                android:id="@+id/p2_reservation_transfer_to_account_swipe_button"
-		android:layout_width="wrap_content"
-		android:layout_height="40dp"
-		android:background="@drawable/button"
-		android:paddingLeft="20dp"
-		android:paddingRight="20dp"
-		android:text="刷 卡"
-		android:textColor="@color/purple" />
-	  </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" >
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="收款人姓名"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <LinearLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="match_parent"
-	      android:layout_span="1"
-	      android:background="@drawable/cell_border"
-	      android:paddingBottom="8dp"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:paddingTop="8dp" >
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_to_name_edittext"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="6"
-		android:inputType="numberDecimal"
-		android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="0dp" />
-
-	  </LinearLayout>
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="转入地点"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <LinearLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:paddingBottom="8dp"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:paddingTop="8dp" >
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_to_province_edittext"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="4"
-		android:singleLine="true"
-		android:inputType="text"
-		android:textColor="@color/blue" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="12dp"
-		android:paddingRight="12dp"
-		android:text="省"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_to_city_edittext"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="4"
-		android:singleLine="true"
-		android:inputType="text"
-		android:textColor="@color/blue" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:paddingLeft="12dp"
-		android:paddingRight="0dp"
-		android:text="市"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	  </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" >
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="转入网点名称"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <LinearLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="match_parent"
-	      android:layout_span="4"
-	      android:background="@drawable/cell_border"
-	      android:paddingBottom="8dp"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:paddingTop="8dp" >
-
-	    <EditText
-		android:id="@+id/p2_reservation_transfer_to_branch_edittext"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:ems="2"
-		android:singleLine="true"
-		android:inputType="number"
-		android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="0dp" />
-
-	  </LinearLayout>
-
-	</TableRow>
-
-	<TableRow
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" >
-
-	  <TextView
-	      android:layout_width="wrap_content"
-	      android:layout_height="match_parent"
-	      android:background="@drawable/cell_border"
-	      android:gravity="center_vertical"
-	      android:paddingLeft="12dp"
-	      android:paddingRight="12dp"
-	      android:text="终止条件"
-	      android:textColor="@color/black"
-	      android:textSize="18sp" />
-
-	  <TableLayout
-	      android:layout_width="match_parent"
-	      android:layout_height="wrap_content"
-	      android:layout_span="3"
-	      android:background="@drawable/cell_border"
-	      android:stretchColumns="1" >
-
-	    <TableRow
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" >
-
-	      <LinearLayout
-		  android:layout_width="match_parent"
-		  android:layout_height="match_parent"
-		  android:layout_span="4"
-		  android:paddingBottom="8dp"
-		  android:paddingLeft="12dp"
-		  android:paddingRight="12dp"
-		  android:paddingTop="8dp" >
-
-		<CheckBox
-		    android:id="@+id/p2_reservation_transfer_stop_count_checkbox"
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="30dp"
-		    android:paddingRight="12dp"
-		    android:text="累计次数"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-		<EditText
-		    android:id="@+id/p2_reservation_transfer_stop_count_edittext"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="1"
-		    android:ems="2"
-		    android:singleLine="true"
-		    android:inputType="number"
-		    android:textColor="@color/blue" />
-
-                <Button
-                    android:tag="edittext_clear_button"
-		    android:layout_width="26dp"
-		    android:layout_height="26dp"
-		    android:background="@drawable/clear"
-		    android:layout_marginLeft="0dp"
-		    android:layout_marginRight="5dp" />
-
-		<TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="0dp"
-		    android:paddingRight="60dp"
-		    android:text="次"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-		<CheckBox
-		    android:id="@+id/p2_reservation_transfer_stop_amount_checkbox"
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="30dp"
-		    android:paddingRight="12dp"
-		    android:text="累计金额"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-		<EditText
-		    android:id="@+id/p2_reservation_transfer_stop_amount_edittext"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="1"
-		    android:ems="2"
-		    android:singleLine="true"
-		    android:inputType="numberDecimal"
-		    android:textColor="@color/blue" />
-
-                <Button
-                    android:tag="edittext_clear_button"
-		    android:layout_width="26dp"
-		    android:layout_height="26dp"
-		    android:background="@drawable/clear"
-		    android:layout_marginLeft="0dp"
-		    android:layout_marginRight="5dp" />
-
-		<TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="0dp"
-		    android:paddingRight="0dp"
-		    android:text="元"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-	      </LinearLayout>
-	    </TableRow>
-	    <TableRow
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" >
-
-	      <LinearLayout
-		  android:layout_width="match_parent"
-		  android:layout_height="match_parent"
-		  android:layout_span="4"
-		  android:paddingBottom="8dp"
-		  android:paddingLeft="12dp"
-		  android:paddingRight="12dp"
-		  android:paddingTop="8dp" >
-
-		<CheckBox
-		    android:id="@+id/p2_reservation_transfer_stop_date_checkbox"
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="30dp"
-		    android:paddingRight="12dp"
-		    android:text="截止日期"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-		<EditText
-		    android:id="@+id/p2_reservation_transfer_stop_year_edittext"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="0"
-		    android:ems="3"
-		    android:singleLine="true"
-		    android:inputType="number"
-		    android:textColor="@color/blue" />
-
-		<TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="12dp"
-		    android:paddingRight="12dp"
-		    android:text="年"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-		<EditText
-		    android:id="@+id/p2_reservation_transfer_stop_month_edittext"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="0"
-		    android:ems="2"
-		    android:singleLine="true"
-		    android:inputType="number"
-		    android:textColor="@color/blue" />
-
-		<TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="12dp"
-		    android:paddingRight="12dp"
-		    android:text="月"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-		<EditText
-		    android:id="@+id/p2_reservation_transfer_stop_day_edittext"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_weight="0"
-		    android:ems="2"
-		    android:singleLine="true"
-		    android:inputType="number"
-		    android:textColor="@color/blue" />
-
-		<TextView
-		    android:layout_width="wrap_content"
-		    android:layout_height="match_parent"
-		    android:gravity="center_vertical"
-		    android:paddingLeft="12dp"
-		    android:paddingRight="12dp"
-		    android:text="日"
-		    android:textColor="@color/black"
-		    android:textSize="18sp" />
-
-	      </LinearLayout>
-
-	    </TableRow>
-
-	  </TableLayout>
 
 	</TableRow>
 
@@ -1465,7 +874,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="可选择开通或关闭固话终端转账功能。"
+              android:text="开通本功能后可通过网上银行、手机银行、电话银行向兴业银行或他行帐户转账汇款(须开通短信口令、令牌或网盾，任意转账与定向转账在同一渠道不能同时开通)。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -1482,7 +891,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="功能"
+              android:text="网上银行"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -1490,90 +899,915 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:layout_span="1"
+	      android:orientation='vertical' >
+
+	    <TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_span="1"
+		android:background="@drawable/cell_border"
+		android:paddingBottom="8dp"
+		android:paddingLeft="12dp"
+		android:paddingRight="12dp"
+		android:paddingTop="8dp" >
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_netbank_transfer_free_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="任意转账，每日累计转出金额不超过"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_netbank_transfer_free_limit_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue" />
+
+		<Button
+                    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="元"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_netbank_transfer_direct_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="定向转账，每日累计转出金额不超过"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_netbank_transfer_direct_limit_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue" />
+
+		<Button
+                    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="元"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_netbank_transfer_delete_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="删除定向转账收款帐户"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_netbank_transfer_close_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="关闭转账"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+	    </TableLayout>
+
+	    <TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_span="1"
+		android:stretchColumns="1"
+		android:background="@drawable/cell_border"
+		android:paddingBottom="8dp"
+		android:paddingLeft="12dp"
+		android:paddingRight="12dp"
+		android:paddingTop="8dp" >
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="定向帐户 (1) 帐号："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_netbank_direct_cardno1_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+		    android:textColor="@color/blue"
+		    android:hint="提示：可以刷卡来填写本项内容 -->>"
+		    android:textColorHint="#888888" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="20dp" />
+
+		<Button
+		    android:id="@+id/p3_netbank_direct_cardno1_swipe_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="40dp"
+		    android:background="@drawable/button"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp"
+		    android:text="刷 卡"
+		    android:textColor="@color/purple" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="户名："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_netbank_direct_name1_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="text"
+                    android:textColor="@color/blue" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+	      </TableRow>
+
+              <TableRow
+		  android:layout_marginTop="5dp"
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="定向帐户 (2) 帐号："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_netbank_direct_cardno2_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue"
+		    android:hint="提示：可以刷卡来填写本项内容 -->>"
+		    android:textColorHint="#888888" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="20dp" />
+
+		<Button
+		    android:id="@+id/p3_netbank_direct_cardno2_swipe_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="40dp"
+		    android:background="@drawable/button"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp"
+		    android:text="刷 卡"
+		    android:textColor="@color/purple" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="户名："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_netbank_direct_name2_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="text"
+                    android:textColor="@color/blue" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+	      </TableRow>
+
+	    </TableLayout>
+
+	  </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
               android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
+              android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-            <CheckBox
-                android:id="@+id/p2_landline_transfer_open_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="开通"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_landline_transfer_modify_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="修改"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_landline_transfer_close_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="关闭"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-          </LinearLayout>
+              android:text="手机银行"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
 
           <LinearLayout
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:layout_span="1"
+	      android:orientation='vertical' >
+
+	    <TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_span="1"
+		android:background="@drawable/cell_border"
+		android:paddingBottom="8dp"
+		android:paddingLeft="12dp"
+		android:paddingRight="12dp"
+		android:paddingTop="8dp" >
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_mobbank_transfer_free_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="任意转账，每日累计转出金额不超过"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_mobbank_transfer_free_limit_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue" />
+
+		<Button
+                    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="元"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_mobbank_transfer_direct_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="定向转账，每日累计转出金额不超过"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_mobbank_transfer_direct_limit_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue" />
+
+		<Button
+                    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="元"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_mobbank_transfer_delete_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="删除定向转账收款帐户"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_mobbank_transfer_close_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="关闭转账"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+	    </TableLayout>
+
+	    <TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_span="1"
+		android:stretchColumns="1"
+		android:background="@drawable/cell_border"
+		android:paddingBottom="8dp"
+		android:paddingLeft="12dp"
+		android:paddingRight="12dp"
+		android:paddingTop="8dp" >
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="定向帐户 (1) 帐号："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_mobbank_direct_cardno1_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue"
+		    android:hint="提示：可以刷卡来填写本项内容 -->>"
+		    android:textColorHint="#888888" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="20dp" />
+
+		<Button
+		    android:id="@+id/p3_mobbank_direct_cardno1_swipe_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="40dp"
+		    android:background="@drawable/button"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp"
+		    android:text="刷 卡"
+		    android:textColor="@color/purple" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="户名："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_mobbank_direct_name1_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="text"
+                    android:textColor="@color/blue" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+	      </TableRow>
+
+              <TableRow
+		  android:layout_marginTop="5dp"
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="定向帐户 (2) 帐号："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_mobbank_direct_cardno2_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue"
+		    android:hint="提示：可以刷卡来填写本项内容 -->>"
+		    android:textColorHint="#888888" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="20dp" />
+
+		<Button
+		    android:id="@+id/p3_mobbank_direct_cardno2_swipe_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="40dp"
+		    android:background="@drawable/button"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp"
+		    android:text="刷 卡"
+		    android:textColor="@color/purple" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="户名："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_mobbank_direct_name2_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="text"
+                    android:textColor="@color/blue" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+	      </TableRow>
+
+	    </TableLayout>
+
+	  </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
               android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
+              android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:paddingTop="8dp" >
+              android:text="电话银行"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
 
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-                android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="每日累计转账不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+	      android:orientation='vertical' >
 
-            <EditText
-                android:id="@+id/p2_landline_transfer_amount_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
+	    <TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_span="1"
+		android:background="@drawable/cell_border"
+		android:paddingBottom="8dp"
+		android:paddingLeft="12dp"
+		android:paddingRight="12dp"
+		android:paddingTop="8dp" >
 
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
 
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
+		<CheckBox
+		    android:id="@+id/p3_telbank_transfer_free_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="任意转账，每日累计转出金额不超过"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_telbank_transfer_free_limit_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue" />
+
+		<Button
+                    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="元"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_telbank_transfer_direct_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="定向转账，每日累计转出金额不超过"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_telbank_transfer_direct_limit_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue" />
+
+		<Button
+                    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="元"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<CheckBox
+		    android:id="@+id/p3_telbank_transfer_delete_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="删除定向转账收款帐户"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<CheckBox
+		    android:id="@+id/p3_telbank_transfer_close_checkbox"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:gravity="center_vertical"
+		    android:paddingLeft="30dp"
+		    android:paddingRight="12dp"
+		    android:text="关闭转账"
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+              </TableRow>
+
+	    </TableLayout>
+
+	    <TableLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_span="1"
+		android:stretchColumns="1"
+		android:background="@drawable/cell_border"
+		android:paddingBottom="8dp"
+		android:paddingLeft="12dp"
+		android:paddingRight="12dp"
+		android:paddingTop="8dp" >
+
+              <TableRow
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="定向帐户 (1) 帐号："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_telbank_direct_cardno1_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue"
+		    android:hint="提示：可以刷卡来填写本项内容 -->>"
+		    android:textColorHint="#888888" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="20dp" />
+
+		<Button
+		    android:id="@+id/p3_telbank_direct_cardno1_swipe_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="40dp"
+		    android:background="@drawable/button"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp"
+		    android:text="刷 卡"
+		    android:textColor="@color/purple" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="户名："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_telbank_direct_name1_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="text"
+                    android:textColor="@color/blue" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+	      </TableRow>
+
+              <TableRow
+		  android:paddingTop="5dp"
+		  android:layout_width="wrap_content"
+		  android:layout_height="wrap_content" >
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="10dp"
+		    android:gravity="center_vertical"
+		    android:text="定向帐户 (2) 帐号："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_telbank_direct_cardno2_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+		    android:ems="6"
+		    android:inputType="numberDecimal"
+                    android:textColor="@color/blue"
+		    android:hint="提示：可以刷卡来填写本项内容 -->>"
+		    android:textColorHint="#888888" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="20dp" />
+
+		<Button
+		    android:id="@+id/p3_telbank_direct_cardno2_swipe_button"
+		    android:layout_width="wrap_content"
+		    android:layout_height="40dp"
+		    android:background="@drawable/button"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp"
+		    android:text="刷 卡"
+		    android:textColor="@color/purple" />
+
+		<TextView
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_marginLeft="20dp"
+		    android:layout_marginRight="5dp"
+		    android:gravity="center_vertical"
+		    android:text="户名："
+		    android:textColor="@color/black"
+		    android:textSize="18sp" />
+
+		<EditText
+                    android:id="@+id/p3_telbank_direct_name2_edittext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+		    android:ems="6"
+		    android:inputType="text"
+                    android:textColor="@color/blue" />
+
+		<Button
+		    android:tag="edittext_clear_button"
+		    android:layout_width="26dp"
+		    android:layout_height="26dp"
+		    android:background="@drawable/clear"
+		    android:layout_marginLeft="0dp"
+		    android:layout_marginRight="0dp" />
+
+	      </TableRow>
+
+	    </TableLayout>
 
 	  </LinearLayout>
 
@@ -1610,14 +1844,14 @@
 	  <TextView
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
-	      android:layout_span="2"
+	      android:layout_span="4"
               android:background="@drawable/cell_border"
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="可在支持电子现金的终端上快速办理小额支付业务。"
+              android:text="开通本功能后可通过网上银行、手机银行和电话银行缴纳公共事业费。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -1634,7 +1868,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="功能"
+              android:text="网上银行"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -1649,7 +1883,7 @@
               android:paddingTop="8dp" >
 
             <CheckBox
-                android:id="@+id/p2_ecash_open_checkbox"
+                android:id="@+id/p3_netbank_payment_open_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
@@ -1660,18 +1894,7 @@
                 android:textSize="18sp" />
 
             <CheckBox
-                android:id="@+id/p2_ecash_modify_checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:paddingLeft="30dp"
-                android:paddingRight="12dp"
-                android:text="修改"
-                android:textColor="@color/black"
-                android:textSize="18sp" />
-
-            <CheckBox
-                android:id="@+id/p2_ecash_close_checkbox"
+                android:id="@+id/p3_netbank_payment_close_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
@@ -1682,11 +1905,6 @@
                 android:textSize="18sp" />
 
           </LinearLayout>
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
 
 	  <TextView
               android:layout_width="wrap_content"
@@ -1695,7 +1913,7 @@
               android:gravity="center_vertical"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
-              android:text="日限额"
+              android:text="电话银行"
               android:textColor="@color/black"
               android:textSize="18sp" />
 
@@ -1706,107 +1924,79 @@
               android:background="@drawable/cell_border"
               android:paddingBottom="8dp"
               android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:paddingTop="8dp" >
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_marginRight="10dp"
-		android:gravity="center_vertical"
-		android:text="单笔脱机消费金额不超过"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-            <EditText
-                android:id="@+id/p2_ecash_consume_amount_limit_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="6"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="5dp" />
-
-	    <TextView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:gravity="center_vertical"
-		android:text="元，最高1000元"
-		android:textColor="@color/black"
-		android:textSize="18sp" />
-
-	  </LinearLayout>
-	</TableRow>
-
-	<TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-	  <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:background="@drawable/cell_border"
-              android:gravity="center_vertical"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
-              android:text="指定帐户"
-              android:textColor="@color/black"
-              android:textSize="18sp" />
-
-          <LinearLayout
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout_span="1"
-              android:background="@drawable/cell_border"
-              android:paddingBottom="8dp"
-              android:paddingLeft="12dp"
-              android:paddingRight="12dp"
+              android:paddingRight="180dp"
               android:paddingTop="8dp" >
 
             <CheckBox
-                android:id="@+id/p2_ecash_account_open_checkbox"
+                android:id="@+id/p3_telbank_payment_open_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
                 android:paddingRight="12dp"
-                android:text="登记(默认为卡内主帐户)："
+                android:text="开通"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 
-            <EditText
-                android:id="@+id/p2_ecash_account_edittext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-		android:ems="14"
-		android:inputType="numberDecimal"
-                android:textColor="@color/blue" />
-
-            <Button
-                android:tag="edittext_clear_button"
-		android:layout_width="26dp"
-		android:layout_height="26dp"
-		android:background="@drawable/clear"
-		android:layout_marginLeft="0dp"
-		android:layout_marginRight="50dp" />
-
             <CheckBox
-                android:id="@+id/p2_ecash_account_close_checkbox"
+                android:id="@+id/p3_telbank_payment_close_checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:paddingLeft="30dp"
                 android:paddingRight="12dp"
-                android:text="撤销"
+                android:text="关闭"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="手机银行"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="3"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p3_mobbank_payment_open_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="开通"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p3_mobbank_payment_close_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="关闭"
                 android:textColor="@color/black"
                 android:textSize="18sp" />
 

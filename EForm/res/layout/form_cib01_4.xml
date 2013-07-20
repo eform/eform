@@ -1,0 +1,1168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	      android:layout_width="match_parent"
+	      android:layout_height="wrap_content"
+	      android:background="#75D6FF"
+	      android:orientation="vertical"
+	      android:paddingLeft="30dp"
+	      android:paddingRight="30dp"
+	      android:paddingTop="40dp"
+	      android:paddingBottom="40dp" >
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="2dp"
+      android:layout_marginTop="10dp"
+      android:text="提示：功能申请均需本人办理，不得代办。部分功能涉及收费，详见《兴业银行零售客户产品和服务销售价格》。"
+      android:textColor="@color/black"
+      android:textSize="14sp" />
+
+  <TableLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:stretchColumns="1" >
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#3366FF" >
+
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+	  android:layout_span="2"
+          android:gravity="center_vertical"
+          android:paddingLeft="10dp"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          android:text="投资理财"
+          android:textColor="@color/white"
+          android:textSize="20sp" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="智能通知存款"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <TableLayout
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:stretchColumns="1" >
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+	      android:layout_span="4"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+	      android:paddingTop="8dp"
+	      android:paddingBottom="8dp"
+              android:text="“便捷型”与活期存款关联为一个帐户，系统自动根据存款时间选择最合适的存期类型，实现受益最大化；\n“收益型”可将活期账户中扣除约定预留金额后超过5万元的千元整数倍资金转入相应帐户。"
+              android:textColor="@color/black"
+              android:textSize="16sp" />
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="便捷型"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="3"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_convenient_open_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="开通"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_convenient_close_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="撤销 (便捷型和收益型只能选择一项)"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="收益型"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_earnings_open_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="开通"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_earnings_modify_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="修改"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_earnings_close_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="撤销"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="留存金额"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingRight="5dp"
+		android:text="活期帐户内约定留存金额"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/p4_earnings_leave_amount_edittext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+		android:ems="6"
+		android:inputType="numberDecimal"
+                android:textColor="@color/blue"
+		android:textColorHint="#888888" />
+
+            <Button
+                android:tag="edittext_clear_button"
+		android:layout_width="26dp"
+		android:layout_height="26dp"
+		android:background="@drawable/clear"
+		android:layout_marginLeft="0dp"
+		android:layout_marginRight="0dp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+      </TableLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="基金代理"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <TableLayout
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:stretchColumns="1" >
+
+	<TableRow
+	    android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+	      android:layout_span="2"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+	      android:paddingTop="8dp"
+	      android:paddingBottom="8dp"
+              android:text="可投资本行代理的基金产品，并可通过网上银行、手机银行、电话银行等渠道自助办理。"
+              android:textColor="@color/black"
+              android:textSize="16sp" />
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="功能"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_fund_open_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="开户"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_fund_close_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="销户"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="基金公司"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <EditText
+                android:id="@+id/p4_fund_edittext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+		android:ems="6"
+		android:inputType="text"
+                android:textColor="@color/blue"
+		android:textColorHint="#888888" />
+
+            <Button
+                android:tag="edittext_clear_button"
+		android:layout_width="26dp"
+		android:layout_height="26dp"
+		android:background="@drawable/clear"
+		android:layout_marginLeft="0dp"
+		android:layout_marginRight="0dp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+      </TableLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="外汇买卖"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <TableLayout
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:stretchColumns="1" >
+
+	<TableRow
+	    android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+	      android:layout_span="2"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+	      android:paddingTop="8dp"
+	      android:paddingBottom="8dp"
+              android:text="可通过网上银行、手机银行、电话银行自助进行外汇买卖。"
+              android:textColor="@color/black"
+              android:textSize="16sp" />
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="业务协议"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_forex_protocol_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="本人已阅读并签署《兴业银行个人外汇交易服务协议》。"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="功能"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_forex_open_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="开通"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_forex_close_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="撤销"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+      </TableLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="贵金属买卖"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <TableLayout
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content"
+	  android:stretchColumns="1" >
+
+	<TableRow
+	    android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+	      android:layout_span="4"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+	      android:paddingTop="8dp"
+	      android:paddingBottom="8dp"
+              android:text="可通过网上银行、手机银行、电话银行、柜面办理黄金、白金等贵金属买卖交易。"
+              android:textColor="@color/black"
+              android:textSize="16sp" />
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="业务协议"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="3"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="8dp"
+              android:paddingRight="8dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_gold_protocol_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="本人已阅读并签署《兴业银行代理个人客户贵金属买卖业务协议书》。"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="功能"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <CheckBox
+                android:id="@+id/p4_gold_open_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+		android:text="签约"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_gold_close_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="解除签约"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+            <CheckBox
+                android:id="@+id/p4_gold_upgrade_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingLeft="30dp"
+                android:paddingRight="12dp"
+                android:text="原实物黄金交易客户升级"
+                android:textColor="@color/black"
+                android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="客户代码"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+            <EditText
+                android:id="@+id/p4_gold_customer_no_edittext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+		android:ems="6"
+		android:inputType="phone"
+                android:textColor="@color/blue"
+		android:textColorHint="#888888" />
+
+            <Button
+                android:tag="edittext_clear_button"
+		android:layout_width="26dp"
+		android:layout_height="26dp"
+		android:background="@drawable/clear"
+		android:layout_marginLeft="0dp"
+		android:layout_marginRight="20dp" />
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingRight="0dp"
+		android:text="(曾签约客户填写)"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+	<TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+	  <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="match_parent"
+              android:background="@drawable/cell_border"
+              android:gravity="center_vertical"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:text="帐户转移"
+              android:textColor="@color/black"
+              android:textSize="18sp" />
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_span="1"
+              android:background="@drawable/cell_border"
+              android:paddingBottom="8dp"
+              android:paddingLeft="12dp"
+              android:paddingRight="12dp"
+              android:paddingTop="8dp" >
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingRight="5dp"
+		android:text="原卡号："
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+            <EditText
+                android:id="@+id/p4_gold_move_old_cardno_edittext"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+		android:ems="6"
+		android:inputType="phone"
+                android:textColor="@color/blue"
+		android:hint="提示：可以刷卡来填写本项内容 -->>"
+		android:textColorHint="#888888" />
+
+            <Button
+                android:tag="edittext_clear_button"
+		android:layout_width="26dp"
+		android:layout_height="26dp"
+		android:background="@drawable/clear"
+		android:layout_marginLeft="0dp"
+		android:layout_marginRight="20dp" />
+
+	    <Button
+                android:id="@+id/p4_gold_move_old_cardno_swipe_button"
+		android:layout_width="wrap_content"
+		android:layout_height="40dp"
+		android:background="@drawable/button"
+		android:paddingLeft="20dp"
+		android:paddingRight="20dp"
+		android:text="刷 卡"
+		android:textColor="@color/purple" />
+
+	    <TextView
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingLeft="20dp"
+		android:paddingRight="0dp"
+		android:text="(变更资金帐户时填写)"
+		android:textColor="@color/black"
+		android:textSize="18sp" />
+
+          </LinearLayout>
+
+	</TableRow>
+
+      </TableLayout>
+
+    </TableRow>
+
+  </TableLayout>
+
+  <TableLayout
+      android:layout_marginTop="10px"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:stretchColumns="1" >
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#3366FF" >
+
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+	  android:layout_span="2"
+          android:gravity="center_vertical"
+          android:paddingLeft="10dp"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          android:text="业务推荐"
+          android:textColor="@color/white"
+          android:textSize="20sp" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="第三方存管"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+	<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingRight="5dp"
+            android:text="可通过柜面、网上银行、手机银行、电话银行办理银行与证券间的资金划转。"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="储蓄国债"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+	<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingRight="5dp"
+            android:text="可通过柜面、网上银行、手机银行、电话银行办理凭证式国债喝储蓄国债（电子式）业务。"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="理财产品"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+	<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingRight="5dp"
+            android:text="可购买兴业银行本、外币理财产品，并可通过网上银行、手机银行、电话银行自助办理。"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="银商转账"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+	<TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingRight="5dp"
+            android:text="可通过柜面、网上银行、手机银行、电话银行办理交易商银行结算帐户与市场资金帐户间资金划转。"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+      </LinearLayout>
+
+    </TableRow>
+
+  </TableLayout>
+
+  <TableLayout
+      android:layout_marginTop="10px"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:stretchColumns="1" >
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#3366FF" >
+
+      <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+	  android:layout_span="2"
+          android:gravity="center_vertical"
+          android:paddingLeft="10dp"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          android:text="新增业务"
+          android:textColor="@color/white"
+          android:textSize="20sp" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="业务名称"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+        <EditText
+            android:id="@+id/p4_new_business_name_edittext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+	    android:ems="6"
+	    android:inputType="text"
+            android:textColor="@color/blue"
+	    android:textColorHint="#888888" />
+
+        <Button
+            android:tag="edittext_clear_button"
+	    android:layout_width="26dp"
+	    android:layout_height="26dp"
+	    android:background="@drawable/clear"
+	    android:layout_marginLeft="0dp"
+	    android:layout_marginRight="0dp" />
+
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="业务种类"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+        <CheckBox
+            android:id="@+id/p4_new_business_open_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="12dp"
+	    android:text="开通"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/p4_new_business_modify_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="12dp"
+            android:text="修改"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/p4_new_business_close_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingLeft="30dp"
+            android:paddingRight="12dp"
+            android:text="关闭"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+      </LinearLayout>
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:background="@drawable/cell_cib01"
+          android:gravity="center"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:text="业务操作"
+          android:textColor="@color/black"
+          android:textSize="18sp" />
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_span="1"
+          android:background="@drawable/cell_border"
+          android:paddingBottom="8dp"
+          android:paddingLeft="12dp"
+          android:paddingRight="12dp"
+          android:paddingTop="8dp" >
+
+        <EditText
+            android:id="@+id/p4_new_business_operate_edittext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+	    android:ems="6"
+	    android:inputType="text"
+            android:textColor="@color/blue"
+	    android:textColorHint="#888888" />
+
+        <Button
+            android:tag="edittext_clear_button"
+	    android:layout_width="26dp"
+	    android:layout_height="26dp"
+	    android:background="@drawable/clear"
+	    android:layout_marginLeft="0dp"
+	    android:layout_marginRight="0dp" />
+
+      </LinearLayout>
+
+    </TableRow>
+
+  </TableLayout>
+
+</LinearLayout>
