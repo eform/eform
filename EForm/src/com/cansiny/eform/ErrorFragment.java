@@ -2,11 +2,6 @@
  *
  * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
  * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
- * 
- * RecoveryFragment - Recoverable error fragment
- *
- * Authors:
- *   Xiaohu <xiaohu417@gmail.com>, 2013.6.14, hefei
  */
 package com.cansiny.eform;
 

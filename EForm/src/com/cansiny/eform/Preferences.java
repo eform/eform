@@ -2,11 +2,6 @@
  *
  * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
  * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
- * 
- * Preferences - Remember user prefer settings.
- *
- * Authors:
- *   Xiaohu <xiaohu417@gmail.com>, 2013.6.12, hefei
  */
 package com.cansiny.eform;
 

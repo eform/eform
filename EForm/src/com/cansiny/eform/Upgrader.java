@@ -2,32 +2,27 @@
  *
  * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
  * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
- * 
- * Upgrade - Upgrade application and/or IDL from USB Disk or Network.
- *
- * Authors:
- *   Xiaohu <xiaohu417@gmail.com>, 2013.6.12, hefei
  */
 package com.cansiny.eform;
 
 abstract public class Upgrader
 {
-	public static final int UPGRADE_FROM_USBDISK = 1;
-	public static final int UPGRADE_FROM_NETWORK = 2;
+    public static final int UPGRADE_FROM_USBDISK = 1;
+    public static final int UPGRADE_FROM_NETWORK = 2;
 	
-	static public Upgrader getUpgrader(int from) throws Exception {
-		switch (from) {
-		case UPGRADE_FROM_USBDISK:
-			return new UpgradeUsbdisk();
-		case UPGRADE_FROM_NETWORK:
-			return new UpgradeNetwork();
-		default:
-			throw new Exception();
-		}
+    static public Upgrader getUpgrader(int from) throws Exception {
+	switch (from) {
+	case UPGRADE_FROM_USBDISK:
+	    return new UpgradeUsbdisk();
+	case UPGRADE_FROM_NETWORK:
+	    return new UpgradeNetwork();
+	default:
+	    throw new Exception();
 	}
+    }
 
-	abstract public void getUpgradeIDL();
-//	abstract public void reverse();
+    abstract public void getUpgradeIDL();
+    //	abstract public void reverse();
 }
 
 /**
@@ -35,14 +30,14 @@ abstract public class Upgrader
  */
 class UpgradeUsbdisk extends Upgrader
 {
-	public UpgradeUsbdisk() {
+    public UpgradeUsbdisk() {
 	
-	}
+    }
 
-	@Override
-	public void getUpgradeIDL() {
+    @Override
+    public void getUpgradeIDL() {
 		
-	}
+    }
 	
 }
 
@@ -51,12 +46,12 @@ class UpgradeUsbdisk extends Upgrader
  */
 class UpgradeNetwork extends Upgrader
 {
-	public UpgradeNetwork() {
+    public UpgradeNetwork() {
 		
-	}
+    }
 
-	@Override
-	public void getUpgradeIDL() {
+    @Override
+    public void getUpgradeIDL() {
 		
-	}
+    }
 }

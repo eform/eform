@@ -2,11 +2,6 @@
  *
  * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
  * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
- * 
- * HomeActivity - The application entry
- *
- * Authors:
- *   Xiaohu <xiaohu417@gmail.com>, 2013.7.2, hefei
  */
 package com.cansiny.eform;
 
@@ -39,70 +34,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableRow;
 import android.widget.TextView;
-
-
-/**
- * Swipe magcard dialog
- */
-class SwipeMagcardDialogFragment extends DialogFragment
-{
-    private int  total_seconds = 30;
-    private long starttime;
-
-    private Handler  handler = new Handler();
-    private Runnable runable = new Runnable() {
-	    @Override
-	    public void run() {
-		long currtime = System.currentTimeMillis();
-		long millis = currtime - starttime;
-		starttime = currtime;
-		int seconds = (int) (millis / 1000);
-
-		total_seconds -= seconds;
-		if (total_seconds <= 0) {
-		    dismiss();
-		    return;
-		}
-			
-		TextView textview = (TextView) getDialog().findViewById(R.id.second_textview);
-		textview.setText("" + total_seconds);
-			
-		handler.postDelayed(this, 1000);
-	    }
-	};
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-	super.onCreateDialog(savedInstanceState);
-
-	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle(R.string.swipe_card);
-	LayoutInflater inflater = getActivity().getLayoutInflater();
-	builder.setView(inflater.inflate(R.layout.dialog_magcard, null));
-	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-		}
-	    });
-	return builder.create();
-    }
-	
-    @Override
-    public void onStart() {
-	super.onStart();
-
-	starttime = System.currentTimeMillis();
-	TextView textview = (TextView) getDialog().findViewById(R.id.second_textview);
-	textview.setText("" + total_seconds);
-	handler.postDelayed(runable, 0);
-    }
-	
-    @Override
-    public void onDismiss (DialogInterface dialog) {
-	super.onDismiss(dialog);
-	handler.removeCallbacks(runable);
-    }
-}
 
 
 /**
@@ -205,7 +136,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
     protected Activity activity;
     protected ArrayList<FormPage> pages;
     protected int active_page;
-    protected SwipeMagcardDialogFragment magcard_dialog;
     protected ReadIdcardDialogFragment idcard_dialog;
     protected ArrayList<Integer> cardno_views; 
     protected ArrayList<Integer> verify_views;
@@ -249,19 +179,17 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	    ViewGroup parent = (ViewGroup) checkbox.getParent();
 	    for (int i = 0; i < parent.getChildCount(); i++) {
 		Object child = parent.getChildAt(i);
-		if (child instanceof CheckBox && child != checkbox)
+		if (child instanceof CheckBox && child != checkbox) {
 		    ((CheckBox) child).setChecked(false);
+		}
 	    }
 	}
     }
 
 
-    /* popup a dialog and read magcard */
-    protected CharSequence swipeMagcard() {
-	magcard_dialog = new SwipeMagcardDialogFragment();
-	magcard_dialog.show(activity.getFragmentManager(), "SwipeMagcardDialog");
+    protected void swipeMagcard(TextView textview) {
 	MagcardReader reader = new MagcardReader();
-	return reader.getCardno();
+	reader.readCardno(activity, textview);
     }
 
 

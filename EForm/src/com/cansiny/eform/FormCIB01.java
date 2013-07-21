@@ -2,11 +2,6 @@
  *
  * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
  * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
- * 
- * HomeActivity - The application entry
- *
- * Authors:
- *   Xiaohu <xiaohu417@gmail.com>, 2013.7.3, hefei
  */
 package com.cansiny.eform;
 
@@ -124,7 +119,7 @@ public class FormCIB01 extends Form
 
 	case R.id.p1_oldcard_swipe_button:
 	    EditText edit_text = findEditText(R.id.p1_oldcard_no_edittext);
-	    edit_text.setText(swipeMagcard());
+	    swipeMagcard(edit_text);
 	    edit_text.requestFocus();
 	    break;
 

@@ -390,13 +390,12 @@ public final class R {
         public static final int activity_home=0x7f030001;
         public static final int activity_log=0x7f030002;
         public static final int dialog_idcard=0x7f030003;
-        public static final int dialog_magcard=0x7f030004;
-        public static final int flagment_error=0x7f030005;
-        public static final int form_cib01_1=0x7f030006;
-        public static final int form_cib01_2=0x7f030007;
-        public static final int form_cib01_3=0x7f030008;
-        public static final int form_cib01_4=0x7f030009;
-        public static final int form_cib02_1=0x7f03000a;
+        public static final int flagment_error=0x7f030004;
+        public static final int form_cib01_1=0x7f030005;
+        public static final int form_cib01_2=0x7f030006;
+        public static final int form_cib01_3=0x7f030007;
+        public static final int form_cib01_4=0x7f030008;
+        public static final int form_cib02_1=0x7f030009;
     }
     public static final class string {
         public static final int app_name=0x7f050000;

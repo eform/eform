@@ -2,11 +2,6 @@
  *
  * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
  * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
- * 
- * HomeActivity - The application entry
- *
- * Authors:
- *   Xiaohu <xiaohu417@gmail.com>, 2013.7.6, hefei
  */
 package com.cansiny.eform;
 
