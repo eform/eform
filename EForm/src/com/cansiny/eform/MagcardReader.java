@@ -177,6 +177,11 @@ public class MagcardReader extends DialogFragment
 		Log.e("MagcardReaderTask", "输入参数必须是 TextView 实例");
 		return null;
 	    }
+	    SerialPortFinder finder = new SerialPortFinder();
+	    String[] devices = finder.getAllDevicesPath();
+	    for (String device : devices) {
+		Log.d("", device);
+	    }
 	    try {
 		Thread.sleep(5000);
 	    } catch (InterruptedException e) {

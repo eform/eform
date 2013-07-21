@@ -17,4 +17,9 @@ public class Preferences
     private Preferences() {
 		
     }
+    
+    public String magcardReaderPath() {
+	return "/dev/ttyS0";
+    }
+
 }
