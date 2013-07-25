@@ -60,7 +60,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	findViewById(R.id.form_layout).setBackgroundResource(home_info.background);
 
 	/* show today date */
-	String date = new SimpleDateFormat("yyyyÄêMMÔÂddÈÕ EEE",
+	String date = new SimpleDateFormat("yyyyå¹´MMæœˆddæ—¥ EEE",
 		   Locale.CHINA).format(Calendar.getInstance().getTime());
 	((TextView) findViewById(R.id.date_textview)).setText(date);
 
@@ -238,7 +238,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	
 	@Override
 	protected void onPreExecute() {
-	    this.toast = showToast("ÕýÔÚ¼ÓÔØÒ³Ãæ...");
+	    this.toast = showToast("æ­£åœ¨åŠ è½½é¡µé¢...");
 	}
 
 	@Override
@@ -361,10 +361,10 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 
 	int retval = form.verify();
 	if (retval > 0) {
-	    showToast(String.format("±¾Ò³¹² %d ¸ö±ØÌîÏîÐèÒªÍêÉÆ£¬µã»÷¾¯¸æ±êÖ¾¿É²é¿´ÏêÏ¸ËµÃ÷", retval),
+	    showToast(String.format("æœ¬é¡µå…± %d ä¸ªå¿…å¡«é¡¹æœªå¡«å†™ï¼Œç‚¹å‡»è­¦å‘Šæ ‡å¿—å¯æŸ¥çœ‹è¯¦ç»†è¯´æ˜Ž...", retval),
 		    TOAST_IMAGE_CRY);
 	} else {
-	    showToast("±¾Ò³ËùÓÐ±ØÌîÏîÒÑÌîÐ´ ...", TOAST_IMAGE_SMILE);
+	    showToast("æ£€æŸ¥å®Œæˆï¼Œæ²¡æœ‰å‘çŽ°é—®é¢˜ï¼", TOAST_IMAGE_SMILE);
 	}
     }
 

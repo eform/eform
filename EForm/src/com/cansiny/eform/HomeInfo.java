@@ -5,17 +5,20 @@
  */
 package com.cansiny.eform;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+
+import android.content.res.AssetManager;
 
 public final class HomeInfo
 {
-    /* Constants for customer id */
     static final public int CUSTOMER_CIB = 1;
     static final public int CUSTOMER_CCB = 2;
 
-    /* change this to match current customer */
     static final public int CUSTOMER_CURRENT = CUSTOMER_CIB;
-	
+
+
     static private HomeInfo single_home_info = null;
     static HomeInfo getHomeInfo() {
 	if (single_home_info == null) {
@@ -24,25 +27,49 @@ public final class HomeInfo
 	return single_home_info;
     }
 
-    public int logo;
+
     public int background;
-    public String flash;
-    public ArrayList<HomeItem> items;
+    public String banner_url;
     public int item_columns;
     public int item_image_size;
+    public ArrayList<HomeItem> items;
+    public ArrayList<String> slogans;
 
-    public HomeInfo() {
-	this.items = new ArrayList<HomeItem>();
+    private HomeInfo() {
+	items = new ArrayList<HomeItem>();
+	slogans = new ArrayList<String>();
+
+	background = R.drawable.dark;
 	item_columns = 6;
 	item_image_size = 88;
+
+	slogans.add("欢迎使用电子填单系统");
     }
 
-    private void setCustomerCIB() {
-	logo = R.drawable.logo_cib;
-	background = R.drawable.background_cib;
-	background = R.color.drakblue;
-	background = R.drawable.dark;
-	flash = "cib.fls";
+
+    private String getBannerURL(String root) {
+	return null;
+    }
+
+    private void getSlogans(String root) {
+	slogans.add("服务热线: 95559");
+	slogans.add("网站: http://www.cib.com.cn");
+    }
+
+    private void loadCIBRes() {
+	banner_url = getBannerURL("cib");
+	if (banner_url == null) {
+	    try {
+		AssetManager assets = EFormApplication.getContext().getAssets();
+		InputStream stream = assets.open("cib/banner.html");
+		stream.close();
+		banner_url = "file:///android_asset/cib/banner.html";
+	    } catch (IOException e) {
+		LogActivity.writeLog(e);
+		banner_url = null;
+	    }
+	}
+	getSlogans("cib");
 
 	items.clear();
 	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
@@ -58,42 +85,23 @@ public final class HomeInfo
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
 	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
-	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
-	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
-	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
 	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
     }
 
-    private void setCustomerCCB() {
-	logo = R.drawable.logo_cib;
-	flash = "ccb.fls";
+    private void loadCCBRes() {
+	banner_url = "file:///android_asset/cib/banner.html";
     }
 
-    public void setCustomer(int customer_id) {
-	switch (customer_id) {
-	case CUSTOMER_CIB:
-	    setCustomerCIB();
-	    break;
-	case CUSTOMER_CCB:
-	    setCustomerCCB();
-	    break;
+    
+    public void loadCustomerRes() {
+	switch (CUSTOMER_CURRENT) {
+	case CUSTOMER_CIB: loadCIBRes(); break;
+	case CUSTOMER_CCB: loadCCBRes(); break;
 	default:
-	    LogActivity.writeLog("Customer id %d unknown.", customer_id);
+	    LogActivity.writeLog("Customer id %d unknown.", CUSTOMER_CURRENT);
 	    break;
 	}
     }
@@ -120,5 +128,4 @@ public final class HomeInfo
 	    this.label_size = label_size;
 	}
     }
-	
 }

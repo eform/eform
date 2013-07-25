@@ -544,7 +544,7 @@ public class FormCIB01 extends Form
 	if (!findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_oldcard_checkbox).isChecked()) {
 	    insertWarningImage(findView(R.id.p1_request_info_textview),
-			       "\"ĞÂ¿¨ÉêÇë\"/\"¹¦ÄÜÎ¬»¤\"ÖĞ±ØĞëÑ¡ÔñÒ»Ïî");
+			       "è¯·é€‰æ‹©ä¸‹é¢çš„\"æ–°å¡ç”³è¯·\"æˆ–\"åŠŸèƒ½ç»´æŠ¤\"");
 	    retval++;
 	}
 
@@ -552,60 +552,67 @@ public class FormCIB01 extends Form
 	    !findCheckBox(R.id.p1_cardtype_standard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_cardtype_other_checkbox).isChecked()) {
 	    insertWarningImage(findView(R.id.p1_cardtype_standard_checkbox),
-			       "ĞÂ¿¨ÉêÇë±ØĞëÑ¡ÔñÒ»Ïî\"¿¨ÖÖÀà\"");
+			       "è¯·é€‰æ‹©å¡ç§ç±»");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    findCheckBox(R.id.p1_cardtype_other_checkbox).isChecked() &&
 	    findTextView(R.id.p1_cardtype_other_edittext).length() == 0) {
-	    insertWarningImage(findView(R.id.p1_cardtype_other_edittext), "ÇëÊäÈëÆäËû¿¨ÖÖÀàÃû");
+	    insertWarningImage(findView(R.id.p1_cardtype_other_edittext),
+		    	       "è¯·è¾“å…¥å…¶ä»–å¡ç§ç±»åç§°");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_oldcard_checkbox).isChecked() &&
 	    findTextView(R.id.p1_oldcard_no_edittext).length() == 0) {
 	    insertWarningImage(findView(R.id.p1_oldcard_no_edittext),
-			       "ÇëÊäÈëĞèÒªÎ¬»¤µÄ¿¨£¯ÕÊºÅ");
+			       "è¯·è¾“å…¥å¡å·æˆ–å¸å·");
 	    retval++;
 	}
 		
 	if (findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_male_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_famale_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_male_checkbox), "ÇëÑ¡ÔñĞÔ±ğ");
+	    insertWarningImage(findView(R.id.p1_male_checkbox),
+			       "è¯·é€‰æ‹©ç”³è¯·äººçš„æ€§åˆ«");
 	    retval++;
 	}
 
 	if (!findCheckBox(R.id.p1_idtype_idcard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_idtype_other_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_idtype_idcard_checkbox), "ÇëÑ¡ÔñÖ¤¼şÀàĞÍ");
+	    insertWarningImage(findView(R.id.p1_idtype_idcard_checkbox),
+			       "è¯·é€‰æ‹©ç”³è¯·äººçš„è¯ä»¶ç±»å‹");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_idtype_other_checkbox).isChecked() &&
 	    findTextView(R.id.p1_idtype_other_edittext).length() == 0) {
-	    insertWarningImage(findView(R.id.p1_idtype_other_edittext), "ÇëÊäÈëÖ¤¼şÀàĞÍ");
+	    insertWarningImage(findView(R.id.p1_idtype_other_edittext),
+			       "è¯·è¾“å…¥ç”³è¯·äººè¯ä»¶ç±»å‹");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_resident_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_inresident_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_resident_checkbox), "ÇëÑ¡Ôñ¾ÓÃñĞÔÖÊ");
+	    insertWarningImage(findView(R.id.p1_resident_checkbox),
+			       "è¯·é€‰æ‹©ç”³è¯·äººå±…æ°‘æ€§è´¨");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_nationality_china_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_nationality_other_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_nationality_china_checkbox), "ÇëÑ¡Ôñ¹ú¼®");
+	    insertWarningImage(findView(R.id.p1_nationality_china_checkbox),
+			       "è¯·é€‰æ‹©ç”³è¯·äººå›½ç±");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_nationality_other_checkbox).isChecked() &&
 	    findTextView(R.id.p1_nationality_other_edittext).length() == 0) {
-	    insertWarningImage(findView(R.id.p1_nationality_other_edittext), "ÇëÊäÈë¹ú¼®Ãû³Æ");
+	    insertWarningImage(findView(R.id.p1_nationality_other_edittext),
+			       "è¯·è¾“å…¥ç”³è¯·äººå›½ç±");
 	    retval++;
 	}
 
@@ -632,7 +639,8 @@ public class FormCIB01 extends Form
 	    !findCheckBox(R.id.p1_job_20_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_job_21_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_job_22_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_job_tablelayout), "ÇëÑ¡ÔñÒ»ÏîÖ°Òµ");
+	    insertWarningImage(findView(R.id.p1_job_tablelayout),
+			       "è¯·é€‰æ‹©ç”³è¯·äººçš„èŒä¸š");
 	    retval++;
 	}
 
@@ -640,20 +648,23 @@ public class FormCIB01 extends Form
 	    !findCheckBox(R.id.p1_contact_mobile_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_contact_home_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_contact_office_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_contact_mobile_checkbox), "ÇëÑ¡ÔñÖÁÉÙÒ»Ïî³£ÓÃµç»°");
+	    insertWarningImage(findView(R.id.p1_contact_mobile_checkbox),
+			       "è¯·é€‰æ‹©è‡³å°‘ä¸€é¡¹ç”³è¯·äººçš„å¸¸ç”¨ç”µè¯");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_address_office_checkbox).isChecked() &&
 	    !findCheckBox(R.id.p1_address_home_checkbox).isChecked()) {
-	    insertWarningImage(findView(R.id.p1_address_office_checkbox), "ÇëÑ¡ÔñÖÁÉÙÒ»Ïî³£ÓÃµØÖ·");
+	    insertWarningImage(findView(R.id.p1_address_office_checkbox),
+			       "è¯·é€‰æ‹©è‡³å°‘ä¸€é¡¹ç”³è¯·äººçš„å¸¸ç”¨åœ°å€Ö·");
 	    retval++;
 	}
 
 	if (findCheckBox(R.id.p1_newcard_checkbox).isChecked() &&
 	    findTextView(R.id.p1_contact_email_edittext).length() == 0) {
-	    insertWarningImage(findView(R.id.p1_contact_email_edittext), "ÇëÊäÈëµç×ÓÓÊÏä");
+	    insertWarningImage(findView(R.id.p1_contact_email_edittext),
+			       "è¯·è¾“å…¥ç”³è¯·äººç”µå­é‚®ç®±");
 	    retval++;
 	}
 

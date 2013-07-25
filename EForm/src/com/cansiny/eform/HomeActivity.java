@@ -9,12 +9,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cansiny.eform.HomeInfo.HomeItem;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -23,12 +25,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 /**
@@ -77,6 +83,21 @@ public class HomeActivity extends Activity
 	return px / (metrics.densityDpi / 160f);
     }
 
+
+    private int curr_slogan = 0;
+    private Handler  handler = new Handler();
+    private Runnable runable = new Runnable() {
+	@Override
+	public void run() {
+	    TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
+	    switcher.setText(home_info.slogans.get(curr_slogan++));
+	    if (curr_slogan >= home_info.slogans.size())
+		curr_slogan = 0;
+	    handler.postDelayed(this, 5000);
+	}
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
@@ -87,7 +108,7 @@ public class HomeActivity extends Activity
 	atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
 
 	home_info = HomeInfo.getHomeInfo();
-	home_info.setCustomer(HomeInfo.CUSTOMER_CURRENT);
+	home_info.loadCustomerRes();
 
 	LogActivity.clearLog();
 
@@ -95,10 +116,10 @@ public class HomeActivity extends Activity
 	buildLayout();
 
 	/* catch long click event to popup menu */
-	View view = this.findViewById(R.id.main_layout);
+	View view = findViewById(R.id.main_layout);
 	view.setLongClickable(true);
 	view.setOnLongClickListener(this);
-	view = this.findViewById(R.id.contents_layout);
+	view = findViewById(R.id.contents_layout);
 	view.setLongClickable(true);
 	view.setOnLongClickListener(this);
     }
@@ -106,21 +127,42 @@ public class HomeActivity extends Activity
     @Override
     protected void onPause() {
 	super.onPause();
+
+	WebView webview = (WebView) findViewById(R.id.logo_webview);
+	webview.onPause();
+
+	handler.removeCallbacks(runable);
 	Log.d("HomeActivity", "on Paused");
     }
 	
+    @Override
+    protected void onResume() {
+	super.onResume();
+
+	Log.d("HomeActivity", "on Resume");
+
+	WebView webview = (WebView) findViewById(R.id.logo_webview);
+	webview.onResume();
+
+	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
+	switcher.setCurrentText(home_info.slogans.get(curr_slogan++));
+
+	handler.postDelayed(runable, 5000);
+    }
+
+    @Override
+    protected void onStart() {
+	super.onStart();
+
+	Log.d("HomeActivity", "on Start");
+    }
+
     @Override
     protected void onStop() {
 	super.onStop();
 	Log.d("HomeActivity", "on Stoped");
     }
 	
-    @Override
-    protected void onResume() {
-	super.onResume();
-	Log.d("HomeActivity", "on Resume");
-    }
-
     @Override
     protected void onRestart() {
 	super.onRestart();
@@ -130,14 +172,35 @@ public class HomeActivity extends Activity
     @Override
     public void onDestroy() {
 	super.onDestroy();
+
+	handler.removeCallbacks(runable);
 	Log.d("HomeActivity", "on destory");
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void buildLayout() {
-	ImageView logo_view = (ImageView) findViewById(R.id.logo_image);
-	logo_view.setImageResource(home_info.logo);
-	View main_layout = findViewById(R.id.root_layout);
-	main_layout.setBackgroundResource(home_info.background);
+	View layout = findViewById(R.id.root_layout);
+	layout.setBackgroundResource(home_info.background);
+
+	WebView webview = (WebView) findViewById(R.id.logo_webview);
+	WebSettings settings = webview.getSettings();
+	settings.setJavaScriptEnabled(true);
+	settings.setPluginState(WebSettings.PluginState.ON);
+	if (home_info.banner_url != null) {
+	    webview.loadUrl(home_info.banner_url);
+	} else {
+	    String data = "<span style='color: red; font-size: large'>" +
+		    "Assets not found !!!</span><br/><br/>" +
+		    "Please contact technology supporter to solve this problem!";
+	    webview.loadData(data, "text/html", "");
+	}
+
+	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
+	switcher.setInAnimation(AnimationUtils.loadAnimation(this,
+		android.R.anim.fade_in));
+	switcher.setOutAnimation(AnimationUtils.loadAnimation(this,
+		android.R.anim.fade_out));
+	switcher.setCurrentText(home_info.slogans.get(0));
 
 	buildContentsLayout();
     }
@@ -147,23 +210,15 @@ public class HomeActivity extends Activity
 	TableLayout table = new TableLayout(getApplicationContext());
 	table.setId(atomic_int.incrementAndGet());
 
-	FrameLayout.LayoutParams contents_params = new FrameLayout.LayoutParams(
-		ViewGroup.LayoutParams.MATCH_PARENT,
-		ViewGroup.LayoutParams.MATCH_PARENT);
-	FrameLayout contents = (FrameLayout) findViewById(R.id.contents_layout);
-	contents.removeAllViews();
-	contents.addView(table, contents_params);
-
 	TableRow table_row = new TableRow(getApplicationContext());
 	table_row.setId(atomic_int.incrementAndGet());
 	table_row.setGravity(Gravity.CENTER_HORIZONTAL);
 	table_row.setLayoutParams(new TableLayout.LayoutParams(
-		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT));
 	table.addView(table_row);
 
 	int curr_column = 1;
-
 	for (HomeInfo.HomeItem item : home_info.items) {
 	    LinearLayout button = buildImageButton(item);
 	    TableRow.LayoutParams row_params = new TableRow.LayoutParams(
@@ -178,13 +233,28 @@ public class HomeActivity extends Activity
 		table_row = new TableRow(getApplicationContext());
 		table_row.setGravity(Gravity.CENTER_HORIZONTAL);
 		TableLayout.LayoutParams params = new TableLayout.LayoutParams(
-			ViewGroup.LayoutParams.MATCH_PARENT,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT);
 		params.topMargin = (int) HomeActivity.convertDpToPixel(40);
 		table.addView(table_row, params);
 		curr_column = 1;
 	    }
 	}
+	if (home_info.items.size() % home_info.item_columns != 0) {
+	    int paddings = home_info.item_columns - 
+		    (home_info.items.size() % home_info.item_columns);
+	    for (int i = 0; i < paddings; i++) {
+		View view = new View(this);
+		view.setVisibility(View.INVISIBLE);
+		table_row.addView(view);
+	    }
+	}
+
+	FrameLayout contents = (FrameLayout) findViewById(R.id.contents_layout);
+	contents.removeAllViews();
+	contents.addView(table, new FrameLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
 	

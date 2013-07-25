@@ -17,7 +17,7 @@
       android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen"
       android:allowBackup="true"
       android:allowClearUserData="false"
-      android:largeHeap="true">
+      android:largeHeap="true" android:hardwareAccelerated="true">
 
     <activity
         android:name="com.cansiny.eform.HomeActivity"

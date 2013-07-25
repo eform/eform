@@ -536,7 +536,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	    /* check for edit text */
 	    if ((Object) view instanceof EditText) {
 		if (((EditText) view).getText().length() == 0) {
-		    insertWarningImage(view, "此项为必填项");
+		    insertWarningImage(view, "姝ら」涓嶈兘涓虹┖");
 		    retval++;
 
 		    if (focus_view == null)

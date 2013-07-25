@@ -86,7 +86,7 @@ public class MagcardReader extends DialogFragment
 	layout.addView(layout2, params);
 
 	TextView view = new TextView(getActivity());
-	view.setText("²Ù×÷½«ÔÚ");
+	view.setText("æ“ä½œå°†åœ¨");
 	view.setGravity(Gravity.CENTER_VERTICAL);
 	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	layout2.addView(view, new LinearLayout.LayoutParams(
@@ -106,7 +106,7 @@ public class MagcardReader extends DialogFragment
 	layout2.addView(seconds_textview, params);
 
 	view = new TextView(getActivity());
-	view.setText("Ãëºó×Ô¶¯ÖÕÖ¹");
+	view.setText("ç§’åè‡ªåŠ¨ç»ˆæ­¢");
 	view.setGravity(Gravity.CENTER_VERTICAL);
 	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	layout2.addView(view, new LinearLayout.LayoutParams(
@@ -114,8 +114,8 @@ public class MagcardReader extends DialogFragment
     		ViewGroup.LayoutParams.MATCH_PARENT));
 
 	view = new TextView(getActivity());
-	view.setText("¶ÁÈ¡µÄ¿¨ºÅ½ö±»ÓÃÀ´ÌîĞ´±¾Ò³Ïà¹ØÒªËØ£¬²»×÷ËûÓÃ¡£");
-	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+	view.setText("è¯»å–çš„å¡å·ä»…ç”¨æ¥å¡«å†™æœ¬é¡µç›¸å…³è¦ç´ ï¼Œä¸ä½œä»–ç”¨ã€‚");
+	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
     	params = new LinearLayout.LayoutParams(
     		ViewGroup.LayoutParams.WRAP_CONTENT,
     		ViewGroup.LayoutParams.MATCH_PARENT);
@@ -177,7 +177,7 @@ public class MagcardReader extends DialogFragment
 	protected CharSequence doInBackground(TextView... args) {
 	    textview = args[0];
 	    if (!(textview instanceof TextView)) {
-		Log.e("MagcardReaderTask", "ÊäÈë²ÎÊı±ØĞëÊÇ TextView ÊµÀı");
+		Log.e("MagcardReaderTask", "å‚æ•°å¿…é¡»æ˜¯ TextView å®ä¾‹");
 		return null;
 	    }
 	    SerialPortFinder finder = new SerialPortFinder();
