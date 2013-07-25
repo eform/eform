@@ -1,69 +1,169 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/root_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0099cc"
-    android:orientation="vertical"
-    tools:context=".HomeActivity" >
+		xmlns:tools="http://schemas.android.com/tools"
+		android:id="@+id/root_layout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/purple"
+		android:gravity="center_horizontal"
+		android:orientation="vertical"
+		tools:context=".HomeActivity" >
 
-    <LinearLayout
-        android:id="@+id/logo_layout"
-        android:layout_width="match_parent"
+  <LinearLayout
+      android:id="@+id/logo_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentTop="true"
+      android:layout_gravity="top"
+      android:background="@color/white" >
+
+    <ImageView
+        android:id="@+id/logo_image"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_gravity="top"
-        android:background="@color/white" >
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/logo_image"
+        android:maxHeight="100dp"
+        android:scaleType="fitStart" />
 
-        <ImageView
-            android:id="@+id/logo_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/logo_image"
-            android:maxHeight="100dp"
-            android:scaleType="fitStart" />
+    <WebView
+        android:id="@+id/logo_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+  </LinearLayout>
 
-        <WebView
-            android:id="@+id/logo_webview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+  <LinearLayout
+      android:id="@+id/main_layout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_below="@id/logo_layout"
+      android:baselineAligned="false"
+      android:gravity="center_vertical"
+      android:orientation="horizontal" >
 
     <LinearLayout
-        android:id="@+id/main_layout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_below="@+id/logo_layout"
+        android:layout_marginTop="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
         android:orientation="vertical" >
 
-        <RelativeLayout
-            android:id="@+id/main_top_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
-            android:layout_marginTop="30dp" >
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="60dp"
+          android:layout_marginTop="60dp"
+          android:text="@string/choose_item"
+          android:textColor="@color/yellow"
+          android:textSize="40sp" />
 
-            <TextView
-                android:id="@+id/choose_business"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="@string/choose_item"
-                android:textColor="@color/yellow"
-                android:textSize="40sp" />
-
-        </RelativeLayout>
+      <ScrollView
+          android:id="@+id/contents_scroll"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:scrollbars="vertical" >
 
         <FrameLayout
             android:id="@+id/contents_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="0dp" >
-
+            android:layout_height="wrap_content" >
         </FrameLayout>
+      </ScrollView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/member_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/sidebar"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingBottom="40dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="5dp"
+        android:paddingTop="40dp" >
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="0dp"
+          android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/member_voucher_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/voucher"
+	    android:onClick="" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="0dp"
+            android:text="凭条管理"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+      </LinearLayout>
+
+      <View
+          android:layout_width="60dp"
+          android:layout_height="1dp"
+          android:layout_marginBottom="30dp"
+          android:layout_marginTop="30dp"
+          android:background="#888888" />
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/member_profile_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/member2"
+	    android:onClick="" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:text="会员信息"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+      </LinearLayout>
+
+      <LinearLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="30dp"
+          android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/member_logout_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/quit"
+	    android:onClick="" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
+            android:text="退出登陆"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+      </LinearLayout>
 
     </LinearLayout>
+  </LinearLayout>
 
 </RelativeLayout>

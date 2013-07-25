@@ -33,20 +33,50 @@ public final class HomeInfo
 
     public HomeInfo() {
 	this.items = new ArrayList<HomeItem>();
-	item_columns = 5;
-	item_image_size = 96;
+	item_columns = 6;
+	item_image_size = 88;
     }
 
     private void setCustomerCIB() {
 	logo = R.drawable.logo_cib;
 	background = R.drawable.background_cib;
+	background = R.color.drakblue;
+	background = R.drawable.dark;
 	flash = "cib.fls";
 
 	items.clear();
-	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 20));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
 	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
-	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 20));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
+	items.add(new HomeItem("FormCIB01", R.drawable.cib01, R.string.form_label_cib01, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib02));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib04, 21));
+	items.add(new HomeItem("FormCIB02", R.drawable.cib02, R.string.form_label_cib03));
     }
 
     private void setCustomerCCB() {
@@ -80,7 +110,7 @@ public final class HomeInfo
 	    this.klass = EFormApplication.getContext().getPackageName() + "." + klass;
 	    this.image = image;
 	    this.label = label;
-	    this.label_size = 22;
+	    this.label_size = 21;
 	}
 		
 	public HomeItem(String klass, int image, int label, int label_size) {

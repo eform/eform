@@ -71,7 +71,7 @@ class ReadIdcardDialogFragment extends DialogFragment
 	super.onCreateDialog(savedInstanceState);
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle(R.string.read_idcard);
+	//builder.setTitle(R.string.read_idcard);
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_idcard, null));
 	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

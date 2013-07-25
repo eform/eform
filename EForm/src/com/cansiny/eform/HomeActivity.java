@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.cansiny.eform.HomeInfo.HomeItem;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -46,8 +45,6 @@ public class HomeActivity extends Activity
     private AtomicInteger atomic_int;
     private HomeInfo home_info;
 
-    /* get application context object, since SDK has no static method
-     * to get this object, so we add one. */
     static private Context app_context = null;
     static public Context getAppContext() {
 	return app_context;
@@ -86,17 +83,6 @@ public class HomeActivity extends Activity
 
 	Log.d("HomeActivity", "onCreate");
 
-	Runtime rt = Runtime.getRuntime();
-	long maxMemory = rt.maxMemory();
-	Log.v("onCreate", "maxMemory:" + Long.toString(maxMemory));
-
-	ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-	int memoryClass = am.getMemoryClass();
-	Log.v("onCreate", "memoryClass:" + Integer.toString(memoryClass));
-		
-	//		dalvik.system.VMRuntime runtime = 	dalvik.system.VMRuntime.getRuntime();
-	//		runtime.setMinimumHeapSize(64 * 1024 * 1024);
-
 	app_context = getApplicationContext();
 	atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
 
@@ -106,14 +92,15 @@ public class HomeActivity extends Activity
 	LogActivity.clearLog();
 
 	setContentView(R.layout.activity_home);
-
-	/* configure home layout with HomeInfo */
 	buildLayout();
 
-	/* catch long click event */
-	View contents_layout = this.findViewById(R.id.contents_layout);
-	contents_layout.setLongClickable(true);
-	contents_layout.setOnLongClickListener(this);
+	/* catch long click event to popup menu */
+	View view = this.findViewById(R.id.main_layout);
+	view.setLongClickable(true);
+	view.setOnLongClickListener(this);
+	view = this.findViewById(R.id.contents_layout);
+	view.setLongClickable(true);
+	view.setOnLongClickListener(this);
     }
 
     @Override
@@ -145,6 +132,104 @@ public class HomeActivity extends Activity
 	super.onDestroy();
 	Log.d("HomeActivity", "on destory");
     }
+
+    private void buildLayout() {
+	ImageView logo_view = (ImageView) findViewById(R.id.logo_image);
+	logo_view.setImageResource(home_info.logo);
+	View main_layout = findViewById(R.id.root_layout);
+	main_layout.setBackgroundResource(home_info.background);
+
+	buildContentsLayout();
+    }
+
+	
+    private void buildContentsLayout() {
+	TableLayout table = new TableLayout(getApplicationContext());
+	table.setId(atomic_int.incrementAndGet());
+
+	FrameLayout.LayoutParams contents_params = new FrameLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.MATCH_PARENT);
+	FrameLayout contents = (FrameLayout) findViewById(R.id.contents_layout);
+	contents.removeAllViews();
+	contents.addView(table, contents_params);
+
+	TableRow table_row = new TableRow(getApplicationContext());
+	table_row.setId(atomic_int.incrementAndGet());
+	table_row.setGravity(Gravity.CENTER_HORIZONTAL);
+	table_row.setLayoutParams(new TableLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT));
+	table.addView(table_row);
+
+	int curr_column = 1;
+
+	for (HomeInfo.HomeItem item : home_info.items) {
+	    LinearLayout button = buildImageButton(item);
+	    TableRow.LayoutParams row_params = new TableRow.LayoutParams(
+		    ViewGroup.LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT);
+	    if (curr_column < home_info.item_columns) {
+		row_params.rightMargin = (int) convertDpToPixel(80);
+	    }
+	    table_row.addView(button, row_params);
+
+	    if (++curr_column > home_info.item_columns) {
+		table_row = new TableRow(getApplicationContext());
+		table_row.setGravity(Gravity.CENTER_HORIZONTAL);
+		TableLayout.LayoutParams params = new TableLayout.LayoutParams(
+			ViewGroup.LayoutParams.MATCH_PARENT,
+			ViewGroup.LayoutParams.WRAP_CONTENT);
+		params.topMargin = (int) HomeActivity.convertDpToPixel(40);
+		table.addView(table_row, params);
+		curr_column = 1;
+	    }
+	}
+    }
+
+	
+    private LinearLayout buildImageButton(HomeInfo.HomeItem item) {
+	LinearLayout button_layout = new LinearLayout(getApplicationContext());
+	button_layout.setId(atomic_int.incrementAndGet());
+	button_layout.setOrientation(LinearLayout.VERTICAL);
+
+	ImageButton button = new ImageButton(getApplicationContext());
+	button.setId(atomic_int.incrementAndGet());
+	button.setTag(item);
+	button.setImageResource(item.image);
+	button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+	button.setBackgroundResource(R.drawable.home_button);
+	button.setPadding(5, 5, 5, 5);
+	button.setClickable(true);
+	button.setOnClickListener(this);
+
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		(int) convertDpToPixel(home_info.item_image_size),
+		(int) convertDpToPixel(home_info.item_image_size));
+	params.gravity = Gravity.CENTER_HORIZONTAL;
+	params.bottomMargin = 4;
+	button_layout.addView(button, params);
+
+	TextView text_view = new TextView(getApplicationContext());
+	text_view.setId(atomic_int.incrementAndGet());
+	text_view.setText(item.label);
+	text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, item.label_size);
+	text_view.setTextColor(getResources().getColor(R.color.white));
+	text_view.setGravity(Gravity.CENTER);
+
+	button_layout.addView(text_view, new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+	return button_layout;
+    }
+
+	
+    public void refreshLayout() {
+	ViewGroup group = (ViewGroup) findViewById(R.id.contents_layout);
+	group.removeAllViews();
+	buildLayout();
+    }
+
 
     @Override
     public void onClick(View view) {
@@ -181,115 +266,18 @@ public class HomeActivity extends Activity
 
     @Override
     public boolean onLongClick(View view) {
-	if (view.getId() == R.id.contents_layout) {
-	    Log.d("", "Long clicked");
+	switch (view.getId()) {
+	case R.id.main_layout:
+	case R.id.contents_layout:
+	    HomeMenu menu = new HomeMenu();
+	    menu.show(getFragmentManager(), "HomeMenu");
 	    return true;
-	}
-	return false;
-    }
-
-    /**
-     * Build home user interface layout. some information is fixed like label.
-     * some information read from IDL.
-     */
-    private void buildLayout() {
-	/* setup home user interface. */
-	ImageView logo_view = (ImageView) findViewById(R.id.logo_image);
-	logo_view.setImageResource(home_info.logo);
-	View main_layout = findViewById(R.id.main_layout);
-	main_layout.setBackgroundResource(home_info.background);
-	/* add items to home contents area. */
-	buildContentsLayout();
-    }
-
-	
-    private LinearLayout buildImageButton(HomeInfo.HomeItem item) {
-	LinearLayout button_layout = new LinearLayout(getApplicationContext());
-	button_layout.setId(atomic_int.incrementAndGet());
-	button_layout.setOrientation(LinearLayout.VERTICAL);
-
-	ImageButton button = new ImageButton(getApplicationContext());
-	button.setId(atomic_int.incrementAndGet());
-	button.setTag(item);
-	button.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-	button.setBackgroundResource(item.image);
-	button.setClickable(true);
-	button.setOnClickListener(this);
-
-	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-		(int) convertDpToPixel(home_info.item_image_size),
-		(int) convertDpToPixel(home_info.item_image_size));
-	params.bottomMargin = 0;
-	params.gravity = Gravity.CENTER_HORIZONTAL;
-	button_layout.addView(button, params);
-
-	TextView text_view = new TextView(getApplicationContext());
-	text_view.setId(atomic_int.incrementAndGet());
-	text_view.setText(item.label);
-	text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, item.label_size);
-	text_view.setTextColor(getResources().getColor(R.color.white));
-	text_view.setGravity(Gravity.CENTER);
-
-	params = new LinearLayout.LayoutParams(
-		ViewGroup.LayoutParams.MATCH_PARENT,
-		ViewGroup.LayoutParams.MATCH_PARENT);
-	button_layout.addView(text_view, params);
-
-	return button_layout;
-    }
-
-	
-    private void buildContentsLayout() {
-	TableLayout table = new TableLayout(getApplicationContext());
-	table.setId(atomic_int.incrementAndGet());
-
-	FrameLayout.LayoutParams contents_params = new FrameLayout.LayoutParams(
-		ViewGroup.LayoutParams.MATCH_PARENT,
-		ViewGroup.LayoutParams.MATCH_PARENT);
-	FrameLayout contents = (FrameLayout) findViewById(R.id.contents_layout);
-	contents.removeAllViews();
-	contents.addView(table, contents_params);
-
-	TableRow table_row = new TableRow(getApplicationContext());
-	table_row.setId(atomic_int.incrementAndGet());
-	table_row.setGravity(Gravity.CENTER_HORIZONTAL);
-	table_row.setLayoutParams(new TableLayout.LayoutParams(
-		ViewGroup.LayoutParams.MATCH_PARENT,
-		ViewGroup.LayoutParams.WRAP_CONTENT));
-	table.addView(table_row);
-
-	int curr_column = 1;
-
-	for (HomeInfo.HomeItem item : home_info.items) {
-	    LinearLayout button = buildImageButton(item);
-	    TableRow.LayoutParams row_params = new TableRow.LayoutParams(
-		    ViewGroup.LayoutParams.MATCH_PARENT,
-		    ViewGroup.LayoutParams.WRAP_CONTENT);
-	    if (curr_column < home_info.item_columns) {
-		row_params.rightMargin = (int) convertDpToPixel(50);
-	    }
-	    table_row.addView(button, row_params);
-
-	    if (++curr_column > home_info.item_columns) {
-		table_row = new TableRow(getApplicationContext());
-		table_row.setGravity(Gravity.CENTER_HORIZONTAL);
-		table_row.setLayoutParams(new TableLayout.LayoutParams(
-			ViewGroup.LayoutParams.MATCH_PARENT,
-			ViewGroup.LayoutParams.WRAP_CONTENT));
-		table.addView(table_row);
-		curr_column = 1;
-	    }
+	default:
+	    return false;
 	}
     }
 
-	
-    public void refreshLayout() {
-	ViewGroup group = (ViewGroup) findViewById(R.id.contents_layout);
-	group.removeAllViews();
-	buildLayout();
-    }
 
-	
     private void show_error_flagment(int reason) {
 	FragmentManager fragmentManager = getFragmentManager();
 	FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

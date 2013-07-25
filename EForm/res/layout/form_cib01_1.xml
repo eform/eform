@@ -463,7 +463,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="text"
+            android:inputType="phone"
             android:textColor="@color/blue" />
 
         <Button

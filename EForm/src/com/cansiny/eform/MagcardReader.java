@@ -52,7 +52,6 @@ public class MagcardReader extends DialogFragment
 	public void run() {
 	    long currtime = System.currentTimeMillis();
 	    long millis = currtime - starttime;
-	    starttime = currtime;
 	    int seconds = (int) (millis / 1000);
 
 	    total_seconds -= seconds;
@@ -60,20 +59,13 @@ public class MagcardReader extends DialogFragment
 		dismiss();
 		return;
 	    }
-				
+	    starttime = currtime;
 	    seconds_textview.setText("" + total_seconds);
-
 	    handler.postDelayed(this, 1000);
 	}
     };
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-	super.onCreateDialog(savedInstanceState);
-
-	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle(R.string.swipe_card);
-	
+    private LinearLayout buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
 	layout.setOrientation(LinearLayout.VERTICAL);
 	layout.setBackgroundResource(R.color.white);
@@ -132,7 +124,18 @@ public class MagcardReader extends DialogFragment
     	params.bottomMargin = 2;
 	layout.addView(view, params);
 
-	builder.setView(layout);
+	return layout;
+    }
+
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	builder.setTitle(R.string.swipe_card);
+
+	builder.setView(buildLayout());
 	
 	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 	    @Override
@@ -148,8 +151,8 @@ public class MagcardReader extends DialogFragment
 
 	setCancelable(false);
 
-	starttime = System.currentTimeMillis();
 	seconds_textview.setText("" + total_seconds);
+	starttime = System.currentTimeMillis();
 	handler.postDelayed(runable, 0);
     }
 		
