@@ -37,7 +37,8 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
     static public final String INTENT_RESULT_ERRREASON = "com.cansiny.eform.ERRREASON";
 
     /* constants uses for identified the difference of event source */
-    static private final String VIEW_TAG_PAGE_TITLE_BUTTON = "com.cansiny.eform.PAGE_TITLE_BUTTON";
+    static private final int VIEW_TAG_PAGE_TITLE_BUTTON = 1;
+    static private final int VIEW_TAG_SIDEBAR_MEMBER_BUTTON = 2;
 
     static private final int TOAST_IMAGE_NONE  = 0;
     static private final int TOAST_IMAGE_SMILE = -1;
@@ -85,6 +86,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 		page_title.addView(buildPageButton(n, page.title), params);
 		n++;
 	    }
+	    sidebar_add_member_buttons();
 	    setResult(RESULT_OK, getIntent());
 	} catch (InstantiationException e) {
 	    LogActivity.writeLog(e);
@@ -118,7 +120,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	    finish();
 	}		
     }
-	
+
 
     protected void onStart() {
 	super.onStart();
@@ -127,7 +129,48 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	setActivePage(0);
     }
 
-	
+
+    private void sidebar_add_member_buttons() {
+	if (!Member.getMember().is_login())
+	    return;
+
+	LinearLayout linear = new LinearLayout(this);
+	linear.setOrientation(LinearLayout.VERTICAL);
+
+	Button button = new Button(this);
+	button.setId(atomic_int.incrementAndGet());
+	button.setTag(VIEW_TAG_SIDEBAR_MEMBER_BUTTON);
+	button.setBackgroundResource(R.drawable.save);
+	button.setGravity(Gravity.CENTER_HORIZONTAL);
+	button.setOnClickListener(this);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		(int) HomeActivity.convertDpToPixel(60),
+		(int) HomeActivity.convertDpToPixel(60));
+	linear.addView(button, params);
+
+	TextView textview = new TextView(this);
+	textview.setText("保 存");
+	textview.setTextColor(getResources().getColor(R.color.white));
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+	textview.setGravity(Gravity.CENTER_HORIZONTAL);
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.WRAP_CONTENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = (int) HomeActivity.convertDpToPixel(2);
+	params.gravity = Gravity.CENTER_HORIZONTAL;
+	linear.addView(textview, params);
+
+	View print_linear = (View) findViewById(R.id.print_button).getParent();
+	ViewGroup parent = (ViewGroup) print_linear.getParent();
+	int index = parent.indexOfChild(print_linear);
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.WRAP_CONTENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = (int) HomeActivity.convertDpToPixel(20);
+	parent.addView(linear, index + 1, params);
+    }
+
+
     private View buildPageButton(int index, String title) {
 	LinearLayout button_layout = new LinearLayout(getApplicationContext());
 	button_layout.setId(atomic_int.incrementAndGet());
@@ -179,19 +222,18 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
     @Override
     public void onClick(View view) {
 	Object object = view.getTag();
-	if (object == null) {
-	    Log.e("ItemActivity", "Object " + view.toString() + " missing tag");
-	    return;
-	}
-
-	if (object.getClass() == String.class) {
-	    String string = (String) object;
-			
-	    /* page title button clicked */
-	    if (string.equals(VIEW_TAG_PAGE_TITLE_BUTTON)) {
-		if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
-		    LinearLayout step_layout = (LinearLayout) findViewById(R.id.page_title_layout);
-		    setActivePage(step_layout.indexOfChild((View) view.getParent()));
+	if (object != null) {
+	    if (object.getClass() == Integer.class) {
+		switch (((Integer) object).intValue()) {
+		case VIEW_TAG_PAGE_TITLE_BUTTON: /* page title button clicked */
+		    if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
+			LinearLayout step_layout = (LinearLayout) findViewById(R.id.page_title_layout);
+			setActivePage(step_layout.indexOfChild((View) view.getParent()));
+		    }
+		    break;
+		case VIEW_TAG_SIDEBAR_MEMBER_BUTTON:
+		    onSaveButtonClick(view);
+		    break;
 		}
 	    }
 	}
@@ -213,7 +255,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	}
     }
 
-    
+
     private class FormPageSwitcher extends AsyncTask<Integer, Void, View>
     {
 	private int index;
@@ -349,7 +391,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
     public Toast showToast(CharSequence sequence) {
 	return showToast(sequence, TOAST_IMAGE_NONE);
     }
-   
+
 
     public void onVerifyButtonClick(View view) {
 	/* prevent click too fast */
@@ -368,12 +410,17 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	}
     }
 
-	
+
     public void onPrintButtonClick(View view) {
 	form.print();
     }
 
-	
+
+    public void onSaveButtonClick(View view) {
+	Log.d("", "save");
+    }
+
+
     public void onExitButtonClick(View view) {
 	setResult(RESULT_OK);
 	finish();

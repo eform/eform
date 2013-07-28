@@ -392,6 +392,11 @@ public class HomeActivity extends Activity
     }
 
 
+    public void on_member_voucher_button_click(View view) {
+	
+    }
+
+
     public void on_member_profile_button_click(View view) {
 	Member member = Member.getMember();
 	member.modify_profile(getFragmentManager());
