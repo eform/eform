@@ -1,16 +1,16 @@
 <resources>
-
+    <color name="transparent">#00000000</color>
+    <color name="translucence">#88000000</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="red">#FF0000</color>
     <color name="blue">#0000FF</color>
     <color name="yellow">#FFFF00</color>
     <color name="purple">#990099</color>
-    <color name="transparent">#00000000</color>
-    <color name="translucence">#88000000</color>
-    <color name="drakgray">#444444</color>
-    <color name="drakblue">#00008B</color>
     <color name="fuchsia">#FF00FF</color>
-    <color name="drakred">#8B0000</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="darkgray">#444444</color>
+    <color name="darkblue">#00008B</color>
+    <color name="darkred">#8B0000</color>
     
 </resources>

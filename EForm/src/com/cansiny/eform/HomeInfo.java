@@ -52,8 +52,14 @@ public final class HomeInfo
     }
 
     private void getSlogans(String root) {
-	slogans.add("服务热线: 95559");
-	slogans.add("网站: http://www.cib.com.cn");
+	if (root == "cib") {
+	    slogans.add("客服热线：95561");
+	    slogans.add("贵宾专线：400 889 5561");
+	    slogans.add("境外客服热线：86-21-3876 9999");
+	    slogans.add("境外信用卡白金专线：86-21-3842 9696");
+	    slogans.add("网上银行：http://www.cib.com.cn");
+	    slogans.add("手机银行：http://wap.cib.com.cn");
+	}
     }
 
     private void loadCIBRes() {

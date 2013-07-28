@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:text="储蓄转账凭条"
-            android:textColor="@color/drakblue"
+            android:textColor="@color/darkblue"
             android:textSize="26sp" />
     </LinearLayout>
 
@@ -51,7 +51,7 @@
                 android:paddingLeft="12dp"
                 android:paddingRight="10dp"
                 android:text="银\n行\n打\n印"
-                android:textColor="@color/drakblue"
+                android:textColor="@color/darkblue"
                 android:textSize="22sp" />
 
             <TableLayout
@@ -73,7 +73,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="240dp"
                         android:text="转  出 帐 号"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
@@ -81,14 +81,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="240dp"
                         android:text="转  入 帐 号"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="交易 金额"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </TableRow>
 
@@ -101,21 +101,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="转  出 户 名"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="转  入 户 名"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="货币 种类"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </TableRow>
 
@@ -128,21 +128,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="转出户余额"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="转入户余额"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="交易 日期"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </TableRow>
 
@@ -155,21 +155,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="存  款 序 号"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="业  务 种 类"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="现钞/现汇"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </TableRow>
 
@@ -182,14 +182,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="存            期"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="居  民 标 志"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </TableRow>
             </TableLayout>
@@ -208,7 +208,7 @@
                 android:paddingLeft="12dp"
                 android:paddingRight="10dp"
                 android:text="客\n户\n填\n写"
-                android:textColor="@color/drakblue"
+                android:textColor="@color/darkblue"
                 android:textSize="22sp" />
 
             <TableLayout
@@ -241,7 +241,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="20dp"
                         android:text="活期间转账"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <CheckBox
@@ -250,7 +250,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="20dp"
                         android:text="定期转活期"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <CheckBox
@@ -259,7 +259,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="20dp"
                         android:text="活期转定期"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <CheckBox
@@ -268,7 +268,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="20dp"
                         android:text="定期移户"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <CheckBox
@@ -276,7 +276,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="银证转账"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </LinearLayout>
 
@@ -292,7 +292,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="10dp"
                         android:text="转出帐号(卡号)"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -310,7 +310,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="10dp"
                         android:text="户  名"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -327,7 +327,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="10dp"
                         android:text="存款序号"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -348,7 +348,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="转 账 金 额"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -365,7 +365,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="10dp"
                         android:text="货币种类"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -382,7 +382,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:text="现钞户"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <CheckBox
@@ -391,7 +391,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:text="现汇户"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
                 </TableRow>
 
@@ -404,7 +404,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="转入帐号(卡号)"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -421,7 +421,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="10dp"
                         android:text="户  名"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -438,7 +438,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="10dp"
                         android:text="存期"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -459,7 +459,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="券 商 名 称"
-                        android:textColor="@color/drakblue"
+                        android:textColor="@color/darkblue"
                         android:textSize="22sp" />
 
                     <EditText
@@ -486,16 +486,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="请注意阅读凭条背面的“客户须知”"
-            android:textColor="@color/drakblue"
+            android:textColor="@color/darkblue"
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/aftermarket_local_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="300dp"
             android:text="复核"
-            android:textColor="@color/drakblue"
+            android:textColor="@color/darkblue"
             android:textSize="20sp" />
 
         <TextView
@@ -504,7 +504,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="300dp"
             android:text="经办"
-            android:textColor="@color/drakblue"
+            android:textColor="@color/darkblue"
             android:textSize="20sp" />
 
     </LinearLayout>

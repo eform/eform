@@ -136,7 +136,7 @@ public class MagcardReader extends DialogFragment
 	builder.setTitle(R.string.swipe_card);
 
 	builder.setView(buildLayout());
-	
+
 	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {

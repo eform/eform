@@ -558,10 +558,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	return true;
     }
 
-	
-    /**
-     * a class to hold a form page
-     */
+
     public class FormPage
     {
 	public String title;
@@ -685,12 +682,8 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
     }
 	
 
-    /**
-     * Form listener interface
-     */
     public interface FormListener
     {
-	/* fire when scroll view scrolled. */
 	public void onScrollViewScrolled(Form form, ScrollView scroll_view);
     }
 }

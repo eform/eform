@@ -8,6 +8,7 @@ package com.cansiny.eform;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cansiny.eform.HomeInfo.HomeItem;
+import com.cansiny.eform.Member.MemberListener;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -21,11 +22,16 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
@@ -41,7 +47,7 @@ import android.widget.TextView;
  * Home Activity, efrom will start form this activity.
  */
 public class HomeActivity extends Activity
-    implements OnClickListener, OnLongClickListener
+    implements OnClickListener, OnLongClickListener, MemberListener
 {
     static public final int HOME_VIEW_ID_BASE = 0x3F000001;
     static public final int ITEM_VIEW_ID_BASE = 0x3F100001;
@@ -119,7 +125,7 @@ public class HomeActivity extends Activity
 	View view = findViewById(R.id.main_layout);
 	view.setLongClickable(true);
 	view.setOnLongClickListener(this);
-	view = findViewById(R.id.contents_layout);
+	view = findViewById(R.id.contents_frame);
 	view.setLongClickable(true);
 	view.setOnLongClickListener(this);
     }
@@ -128,11 +134,12 @@ public class HomeActivity extends Activity
     protected void onPause() {
 	super.onPause();
 
+	Log.d("HomeActivity", "on Paused");
+
 	WebView webview = (WebView) findViewById(R.id.logo_webview);
 	webview.onPause();
 
 	handler.removeCallbacks(runable);
-	Log.d("HomeActivity", "on Paused");
     }
 	
     @Override
@@ -145,9 +152,9 @@ public class HomeActivity extends Activity
 	webview.onResume();
 
 	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
-	switcher.setCurrentText(home_info.slogans.get(curr_slogan++));
+	switcher.setCurrentText(home_info.slogans.get(curr_slogan));
 
-	handler.postDelayed(runable, 5000);
+	handler.postDelayed(runable, 0);
     }
 
     @Override
@@ -155,12 +162,20 @@ public class HomeActivity extends Activity
 	super.onStart();
 
 	Log.d("HomeActivity", "on Start");
+
+	Member member = Member.getMember();
+	member.setListener(this);
+	set_member_layout_visible(member.is_login());
     }
 
     @Override
     protected void onStop() {
 	super.onStop();
+
 	Log.d("HomeActivity", "on Stoped");
+
+	Member member = Member.getMember();
+	member.setListener(null);
     }
 	
     @Override
@@ -173,8 +188,11 @@ public class HomeActivity extends Activity
     public void onDestroy() {
 	super.onDestroy();
 
-	handler.removeCallbacks(runable);
 	Log.d("HomeActivity", "on destory");
+
+	handler.removeCallbacks(runable);
+	Member member = Member.getMember();
+	member.logout();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -194,6 +212,13 @@ public class HomeActivity extends Activity
 		    "Please contact technology supporter to solve this problem!";
 	    webview.loadData(data, "text/html", "");
 	}
+	webview.setOnTouchListener(new View.OnTouchListener() {
+	    @Override
+	    public boolean onTouch(View v, MotionEvent event) {
+		((WebView) findViewById(R.id.logo_webview)).reload();
+	        return true;
+	    }
+	});
 
 	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
 	switcher.setInAnimation(AnimationUtils.loadAnimation(this,
@@ -250,7 +275,7 @@ public class HomeActivity extends Activity
 	    }
 	}
 
-	FrameLayout contents = (FrameLayout) findViewById(R.id.contents_layout);
+	FrameLayout contents = (FrameLayout) findViewById(R.id.contents_frame);
 	contents.removeAllViews();
 	contents.addView(table, new FrameLayout.LayoutParams(
 		ViewGroup.LayoutParams.MATCH_PARENT,
@@ -295,7 +320,7 @@ public class HomeActivity extends Activity
 
 	
     public void refreshLayout() {
-	ViewGroup group = (ViewGroup) findViewById(R.id.contents_layout);
+	ViewGroup group = (ViewGroup) findViewById(R.id.contents_frame);
 	group.removeAllViews();
 	buildLayout();
     }
@@ -338,7 +363,7 @@ public class HomeActivity extends Activity
     public boolean onLongClick(View view) {
 	switch (view.getId()) {
 	case R.id.main_layout:
-	case R.id.contents_layout:
+	case R.id.contents_frame:
 	    HomeMenu menu = new HomeMenu();
 	    menu.show(getFragmentManager(), "HomeMenu");
 	    return true;
@@ -348,15 +373,68 @@ public class HomeActivity extends Activity
     }
 
 
+    public void on_slogan_switcher_click(View view) {
+	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
+	if (++curr_slogan >= home_info.slogans.size())
+	    curr_slogan = 0;
+	switcher.setText(home_info.slogans.get(curr_slogan));
+    }
+
     private void show_error_flagment(int reason) {
 	FragmentManager fragmentManager = getFragmentManager();
 	FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 	ErrorFragment fragment = new ErrorFragment();
 	fragment.setErrorReason(reason);
-	ViewGroup layout = (ViewGroup)findViewById(R.id.contents_layout);
+	ViewGroup layout = (ViewGroup)findViewById(R.id.contents_frame);
 	layout.removeAllViews();
-	fragmentTransaction.add(R.id.contents_layout, fragment);
+	fragmentTransaction.add(R.id.contents_frame, fragment);
 	fragmentTransaction.commit();
+    }
+
+
+    public void on_member_logout_button_click(View view) {
+	Member member = Member.getMember();
+	member.logout();
+    }
+
+
+    private void set_member_layout_visible(boolean visible) {
+	final View view = findViewById(R.id.member_layout);
+	TranslateAnimation anim = null;
+
+	if (visible) {
+	    view.setVisibility(View.VISIBLE);
+	    int width = (view.getWidth() == 0) ? 100 : view.getWidth();
+	    anim = new TranslateAnimation(width, 0.0f, 0.0f, 0.0f);
+	} else {
+	    anim = new TranslateAnimation(0.0f, view.getWidth(), 0.0f, 0.0f);
+	    anim.setAnimationListener(new Animation.AnimationListener() {
+		public void onAnimationStart(Animation animation) {
+		}
+		public void onAnimationRepeat(Animation animation) {
+		}
+		public void onAnimationEnd(Animation animation) {
+		    view.setVisibility(View.GONE);
+		}
+	    });
+	}
+
+	AnimationSet anim_set = new AnimationSet(true);
+	anim_set.addAnimation(anim);
+	anim_set.setDuration(400);
+	anim_set.setInterpolator(new AccelerateInterpolator(1.0f));
+	view.startAnimation(anim_set);
+    }
+
+
+    @Override
+    public void on_member_login() {
+	set_member_layout_visible(true);
+    }
+
+    @Override
+    public void on_member_logout() {
+	set_member_layout_visible(false);
     }
 
 }

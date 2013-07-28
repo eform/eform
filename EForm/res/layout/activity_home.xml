@@ -15,12 +15,13 @@
         android:layout_alignParentTop="true"
         android:layout_gravity="top"
         android:background="@color/white"
-        android:orientation="vertical" >
+        android:orientation="horizontal" >
 
         <WebView
             android:id="@+id/logo_webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -56,7 +57,7 @@
                 android:scrollbars="vertical" >
 
                 <FrameLayout
-                    android:id="@+id/contents_layout"
+                    android:id="@+id/contents_frame"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
                 </FrameLayout>
@@ -65,6 +66,7 @@
 
         <LinearLayout
             android:id="@+id/member_layout"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
@@ -142,7 +144,7 @@
                     android:layout_height="60dp"
                     android:layout_gravity="center_horizontal"
                     android:background="@drawable/quit"
-                    android:onClick="" />
+                    android:onClick="on_member_logout_button_click" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -163,7 +165,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="40dp"
-        android:animateFirstView="true" >
+        android:animateFirstView="true"
+        android:onClick="on_slogan_switcher_click" >
 
         <TextView
             android:layout_width="wrap_content"

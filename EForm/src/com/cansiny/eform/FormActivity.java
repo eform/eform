@@ -250,7 +250,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	    LinearLayout title_layout = (LinearLayout) findViewById(R.id.page_title_layout);
 	    LinearLayout button_layout = (LinearLayout) title_layout.getChildAt(index);
 	    Button button = (Button) button_layout.getChildAt(0);
-	    button.setBackgroundResource(R.color.drakgray);
+	    button.setBackgroundResource(R.color.darkgray);
 	    button.setTextColor(getResources().getColor(R.color.yellow));
 	    button_layout.getChildAt(1).setBackgroundResource(R.color.red);
 
