@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -58,10 +59,10 @@ class MemberDatabaseHelper extends SQLiteOpenHelper
 
 class MemberLoginDialog extends DialogFragment implements OnClickListener
 {
-    private static final int EDITTEXT_ID_USERNAME = 0x00010001;
+    private static final int EDITTEXT_ID_USERID = 0x00010001;
     private static final int EDITTEXT_ID_PASSWORD = 0x00010002;
 
-    private static final int BUTTON_TAG_USERNAME_CLEAR = 1;
+    private static final int BUTTON_TAG_USERID_CLEAR = 1;
     private static final int BUTTON_TAG_PASSWORD_CLEAR = 2;
 
     private View buildLayout() {
@@ -80,15 +81,16 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	row.addView(textview, params);
 
 	EditText edittext = new EditText(getActivity());
-	edittext.setId(EDITTEXT_ID_USERNAME);
+	edittext.setId(EDITTEXT_ID_USERID);
 	edittext.setInputType(InputType.TYPE_CLASS_PHONE);
 	edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(18)});
 	edittext.setMinEms(10);
+	edittext.setHintTextColor(getResources().getColor(R.color.silver));
 	params = new TableRow.LayoutParams();
 	row.addView(edittext, params);
 
 	Button button = new Button(getActivity());
-	button.setTag(BUTTON_TAG_USERNAME_CLEAR);
+	button.setTag(BUTTON_TAG_USERID_CLEAR);
 	button.setBackgroundResource(R.drawable.clear);
 	button.setOnClickListener(this);
 	params = new TableRow.LayoutParams(
@@ -124,6 +126,7 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	edittext.setInputType(InputType.TYPE_CLASS_NUMBER |
 		InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 	edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(6)});
+	edittext.setHintTextColor(getResources().getColor(R.color.silver));
 	params = new TableRow.LayoutParams();
 	row.addView(edittext, params);
 
@@ -175,7 +178,6 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	    @Override
 	    public void onClick(View view) {
 		hideIme(view);
-		dismiss();
 
 		MemberProfileDialog dialog = new MemberProfileDialog();
 		dialog.show(getFragmentManager(), "MemberInfoDialog");
@@ -189,12 +191,11 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	    public void onClick(View view) {
 		hideIme(view);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle("找回密码");
-		builder.setMessage("您可以通过下面步骤找回密码：\n\n" +
+		CommonDialog.showBox(getFragmentManager(),
+			"找回密码",
+			"您可以通过下面步骤找回密码：\n\n" +
 				"    1、带上注册会员时使用的身份证件；\n" +
 				"    2、联系大堂经理设置新密码；\n");
-		builder.create().show();
 	    }
 	});
 
@@ -203,13 +204,15 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-	        EditText username = (EditText) getDialog().findViewById(EDITTEXT_ID_USERNAME);
+	        EditText username = (EditText) getDialog().findViewById(EDITTEXT_ID_USERID);
 		EditText password = (EditText) getDialog().findViewById(EDITTEXT_ID_PASSWORD);
 		if (username.length() == 0) {
+		    username.setHint("证件号码不能为空");
 		    username.requestFocus();
 		    return;
 		}
 		if (password.length() == 0) {
+		    password.setHint("登陆密码不能为空");
 		    password.requestFocus();
 		    return;
 		}
@@ -220,10 +223,7 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 		if (member.login(username.getText().toString(), password.getText().toString())) {
 		    dismiss();
 		} else {
-		    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		    builder.setTitle("登陆失败");
-		    builder.setMessage("用户名或密码错误，请重新输入!\n");
-		    builder.create().show();
+		    CommonDialog.showBox(getFragmentManager(), "登陆失败", "用户名或密码错误，请重新输入!\n");
 		}
 	    }
 	});
@@ -242,8 +242,8 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
     @Override
     public void onClick(View view) {
 	switch(((Integer) view.getTag()).intValue()) {
-	case BUTTON_TAG_USERNAME_CLEAR:
-	    ((TextView) getDialog().findViewById(EDITTEXT_ID_USERNAME)).setText("");
+	case BUTTON_TAG_USERID_CLEAR:
+	    ((TextView) getDialog().findViewById(EDITTEXT_ID_USERID)).setText("");
 	    break;
 	case BUTTON_TAG_PASSWORD_CLEAR:
 	    ((TextView) getDialog().findViewById(EDITTEXT_ID_PASSWORD)).setText("");
@@ -255,18 +255,32 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 
 class MemberProfileDialog extends DialogFragment implements OnClickListener
 {
+    private Member.MemberProfile profile = null;
+
+    public void setProfile(Member.MemberProfile profile) {
+	this.profile = profile;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 	super.onCreateDialog(savedInstanceState);
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle("会员注册");
+
+	if (profile == null)
+	    builder.setTitle("注册会员");
+	else
+	    builder.setTitle("修改会员信息");
 
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_member, null));
 
 	builder.setNegativeButton("取 消", null);
-	builder.setPositiveButton("注 册", null);
+
+	if (profile == null)
+	    builder.setPositiveButton("注 册", null);
+	else
+	    builder.setPositiveButton("修 改", null);
 
 	return builder.create();
     }
@@ -281,7 +295,20 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
     public void onStart() {
 	super.onStart();
 
-	AlertDialog dialog = (AlertDialog) getDialog();
+	final AlertDialog dialog = (AlertDialog) getDialog();
+
+	if (profile != null) {
+	    TextView textview = (TextView) dialog.findViewById(R.id.userid_edittext);
+	    textview.setText(profile.userid);
+	    textview = (TextView) dialog.findViewById(R.id.username_edittext);
+	    textview.setText(profile.username);
+	    textview = (TextView) dialog.findViewById(R.id.company_edittext);
+	    textview.setText(profile.company);
+	    textview = (TextView) dialog.findViewById(R.id.phone_edittext);
+	    textview.setText(profile.phone);
+
+	    dialog.findViewById(R.id.idcard_read_button).setVisibility(View.GONE);
+	}
 
 	View view = dialog.findViewById(R.id.idcard_read_button);
 	view.setOnClickListener(this);
@@ -311,7 +338,70 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
+		EditText userid = (EditText) dialog.findViewById(R.id.userid_edittext);
+		EditText username = (EditText) dialog.findViewById(R.id.username_edittext);
+		EditText password = (EditText) dialog.findViewById(R.id.password_edittext);
+		EditText password2 = (EditText) dialog.findViewById(R.id.password2_edittext);
+		EditText company = (EditText) dialog.findViewById(R.id.company_edittext);
+		EditText phone = (EditText) dialog.findViewById(R.id.phone_edittext);
+
+		if (userid.length() == 0) {
+		    userid.setHint("证件号码不能为空");
+		    return;
+		}
+		if (username.length() == 0) {
+		    username.setHint("会员姓名不能为空");
+		    return;
+		}
+
+		if (profile == null) {
+		    if (password.length() == 0) {
+			password.setText("密码不能为空");
+			password.requestFocus();
+			return;
+		    }
+		}
+		if (password.length() > 0) {
+		    if (password.length() != 6) {
+			password.setText("");
+			password.setHint("密码长度必须是6位");
+			password.requestFocus();
+			return;
+		    }
+		    if (!password.getText().toString().equals(password2.getText().toString())) {
+			password2.setText("");
+			password2.setHint("确认密码不一致");
+			password2.requestFocus();
+			return;
+		    }
+		}
+
 		hideIme(view);
+
+		String userid_str = userid.getText().toString();
+		String username_str = username.getText().toString();
+		String password_str = password.getText().toString();
+		String company_str = company.getText().toString();
+		String phone_str = phone.getText().toString();
+
+		Member member = Member.getMember();
+		if (profile == null) {
+		    if (member.register(userid_str, username_str,
+			    password_str, company_str, phone_str)) {
+			CommonDialog.showBox(getFragmentManager(), "注册成功",
+				"注册成功！您现在可以通过证件号码和密码来登陆系统使用会员功能。");
+		    } else {
+			CommonDialog.showBox(getFragmentManager(), "注册失败",
+				"注册失败！");
+		    }
+		} else {
+		    if (member.modify(userid_str, username_str,
+			    password_str, company_str, phone_str)) {
+			CommonDialog.showBox(getFragmentManager(), "修改成功",
+				"您输入的信息已成功保存到系统中！");
+			dismiss();
+		    }
+		}
 	    }
 	});
 
@@ -320,7 +410,7 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
     }
 
     @Override
-    public void onDismiss (DialogInterface dialog) {
+    public void onDismiss(DialogInterface dialog) {
 	super.onDismiss(dialog);
     }
 
@@ -358,11 +448,13 @@ public class Member
     }
 
     private boolean is_login;
-    private MemberDatabaseHelper db_helper;
+    private MemberProfile profile;
+//    private MemberDatabaseHelper db_helper;
     private MemberListener listener;
 
     private Member() {
 	is_login = false;
+	profile = null;
 //	db_helper = new MemberDatabaseHelper();
     }
 
@@ -371,8 +463,15 @@ public class Member
 	return is_login;
     }
 
-    public boolean login(String uname, String passwd) {
+    public boolean login(String userid, String password) {
+	profile = new MemberProfile();
+	profile.userid = userid;
+	profile.username = "吴小虎";
+	profile.company = "Cansiny";
+	profile.phone = "18655953721";
+
 	is_login = true;
+
 	if (listener != null) {
 	    listener.on_member_login();
 	}
@@ -385,19 +484,33 @@ public class Member
     }
 
     public void logout() {
+	profile = null;
 	is_login = false;
+
 	if (listener != null) {
 	    listener.on_member_logout();
 	}
     }
-    
-    public boolean register(String uname, String passwd) {
+
+    public boolean register(String userid, String username, String password,
+	    String company, String phone) {
+	if (password == null || password.length() == 0)
+	    return false;
+
+	return true;
+    }
+
+    public boolean modify(String userid, String username, String password,
+	    String company, String phone) {
 	return true;
     }
 
     public void modify_profile(FragmentManager manager) {
-	MemberProfileDialog dialog = new MemberProfileDialog();
-	dialog.show(manager, "MemberInfoDialog");
+	if (is_login) {
+	    MemberProfileDialog dialog = new MemberProfileDialog();
+	    dialog.setProfile(profile);
+	    dialog.show(manager, "MemberInfoDialog");
+	}
     }
 
 
@@ -410,5 +523,14 @@ public class Member
     {
 	public void on_member_login();
 	public void on_member_logout();
+    }
+
+
+    public class MemberProfile
+    {
+	public String userid;
+	public String username;
+	public String company;
+	public String phone;
     }
 }

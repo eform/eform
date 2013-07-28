@@ -20,7 +20,7 @@
                 android:text="TextView" />
 
             <EditText
-                android:id="@+id/id_edittext"
+                android:id="@+id/userid_edittext"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"

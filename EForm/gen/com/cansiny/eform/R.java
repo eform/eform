@@ -121,7 +121,6 @@ public final class R {
         public static final int form_main_layout=0x7f060008;
         public static final int form_top_layout=0x7f060001;
         public static final int id=0x7f060132;
-        public static final int id_edittext=0x7f060027;
         public static final int idcard_read_button=0x7f060028;
         public static final int identifier_textview=0x7f06001f;
         public static final int logo_layout=0x7f060011;
@@ -406,6 +405,7 @@ public final class R {
         public static final int textView1=0x7f060133;
         public static final int textView2=0x7f060137;
         public static final int up_button=0x7f06000b;
+        public static final int userid_edittext=0x7f060027;
         public static final int username_edittext=0x7f060029;
         public static final int verify_button=0x7f06000d;
         public static final int version_textview=0x7f06001e;

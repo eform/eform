@@ -1,188 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="20dp"
-    android:stretchColumns="1" >
+	     android:layout_width="match_parent"
+	     android:layout_height="match_parent"
+	     android:padding="20dp"
+	     android:stretchColumns="1" >
 
-    <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+  <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:text="证件号码："
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/id_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:enabled="false"
-            android:hint="请读身份证"
-            android:inputType="phone"
-            android:textColorHint="@color/silver" >
-
-            <requestFocus />
-        </EditText>
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="1dp" />
-
-        <Button
-            android:id="@+id/idcard_read_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_span="1"
-            android:background="@drawable/button"
-            android:text="读身份证"
-            android:textColor="@color/purple" />
-
-    </TableRow>
-
-    <TableRow
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" >
+        android:layout_gravity="right|center_vertical"
+        android:text="证件号码："
+        android:textSize="18sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:text="会员姓名："
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/username_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:enabled="false"
-            android:hint="请读身份证"
-            android:inputType="text"
-            android:textColorHint="@color/silver" />
-
-        </TableRow>
-
-    <TableRow
+    <EditText
+        android:id="@+id/userid_edittext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" >
+        android:ems="10"
+        android:enabled="false"
+        android:hint="请读身份证"
+        android:inputType="phone"
+        android:textColorHint="@color/silver" >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:text="设置登陆密码："
-            android:textSize="18sp" />
+      <requestFocus />
+    </EditText>
 
-        <EditText
-            android:id="@+id/password_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="请牢记密码"
-            android:inputType="numberPassword"
-            android:textColorHint="@color/silver" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="1dp" />
 
-        <Button
-            android:id="@+id/password_clear"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/clear" />
-
-    </TableRow>
-
-    <TableRow
+    <Button
+        android:id="@+id/idcard_read_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" >
+        android:layout_marginLeft="10dp"
+        android:layout_span="1"
+        android:background="@drawable/button"
+        android:text="读身份证"
+        android:textColor="@color/purple" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:text="确认登陆密码："
-            android:textSize="18sp" />
+  </TableRow>
 
-        <EditText
-            android:id="@+id/password2_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="请牢记密码"
-            android:inputType="numberPassword"
-            android:textColorHint="@color/silver" />
+  <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dp" >
 
-        <Button
-            android:id="@+id/password2_clear"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/clear" />
-
-    </TableRow>
-
-    <TableRow
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" >
+        android:layout_gravity="right|center_vertical"
+        android:text="会员姓名："
+        android:textSize="18sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:text="单位名称："
-            android:textSize="18sp" />
-
-        <EditText
-            android:id="@+id/company_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="如有必填"
-            android:inputType="text"
-            android:textColorHint="@color/silver" />
-
-        <Button
-            android:id="@+id/company_clear"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/clear" />
-
-    </TableRow>
-
-    <TableRow
+    <EditText
+        android:id="@+id/username_edittext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp" >
+        android:ems="10"
+        android:enabled="false"
+        android:hint="请读身份证"
+        android:inputType="text"
+        android:textColorHint="@color/silver" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:text="联系电话："
-            android:textSize="18sp" />
+  </TableRow>
 
-        <EditText
-            android:id="@+id/phone_edittext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="务必填写"
-            android:inputType="phone"
-            android:textColorHint="@color/silver" />
+  <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dp" >
 
-        <Button
-            android:id="@+id/phone_clear"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/clear" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:text="设置登陆密码："
+        android:textSize="18sp" />
 
-    </TableRow>
+    <EditText
+        android:id="@+id/password_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="请牢记密码"
+        android:inputType="numberPassword"
+        android:maxLength="6"
+        android:textColorHint="@color/silver" />
+
+    <Button
+        android:id="@+id/password_clear"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:background="@drawable/clear" />
+
+  </TableRow>
+
+  <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dp" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:text="确认登陆密码："
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/password2_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="请牢记密码"
+        android:inputType="numberPassword"
+        android:maxLength="6"
+        android:textColorHint="@color/silver" />
+
+    <Button
+        android:id="@+id/password2_clear"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:background="@drawable/clear" />
+
+  </TableRow>
+
+  <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dp" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:text="单位名称："
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/company_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="如有必填"
+        android:inputType="text"
+        android:textColorHint="@color/silver" />
+
+    <Button
+        android:id="@+id/company_clear"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:background="@drawable/clear" />
+
+  </TableRow>
+
+  <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dp" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:text="联系电话："
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/phone_edittext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="务必填写"
+        android:inputType="phone"
+        android:maxLength="13"
+        android:textColorHint="@color/silver" />
+
+    <Button
+        android:id="@+id/phone_clear"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:background="@drawable/clear" />
+
+  </TableRow>
 
 </TableLayout>
