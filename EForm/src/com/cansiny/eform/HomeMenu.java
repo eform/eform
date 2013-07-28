@@ -21,63 +21,6 @@ import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
-
-class SupportDialogFragment extends DialogFragment
-{
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-	super.onCreateDialog(savedInstanceState);
-
-	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle("联系方式");
-
-	LinearLayout linear = new LinearLayout(getActivity());
-	linear.setOrientation(LinearLayout.VERTICAL);
-	linear.setBackgroundResource(R.color.white);
-	linear.setPadding(10, 10, 10, 10);
-
-	builder.setView(linear);
-
-	TextView textview = new TextView(getActivity());
-	textview.setText("公司名称： 合肥市长欣宜科贸发展有限公司\n" +
-			"联系电话： 0551-6342 0410(座机)   186 5595 3721(手机)\n" +
-			"联系邮箱： 18655953721@163.com\n" +
-			"公司地址： 合肥市包河区宣城路64号\n" +
-			"公司网址： http://www.ucu.com");
-	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-	textview.setLineSpacing(HomeActivity.convertDpToPixel(2), 1.2f);
-	linear.addView(textview);
-
-	textview = new TextView(getActivity());
-	textview.setText(
-		"系统版本： v1.3-build1003\n" +
-		"设备标识： 3121D2S32\n" +
-		"授权单位： 兴业银行合肥市分行\n");
-	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-	textview.setLineSpacing(HomeActivity.convertDpToPixel(2), 1.2f);
-	linear.addView(textview);
-
-	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-	    @Override
-	    public void onClick(DialogInterface dialog, int which) {
-	    }
-	});
-	return builder.create();
-    }
-		
-    @Override
-    public void onStart() {
-	super.onStart();
-    }
-		
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
-    }
-
-}
 
 
 public class HomeMenu extends DialogFragment implements OnClickListener
@@ -174,7 +117,7 @@ public class HomeMenu extends DialogFragment implements OnClickListener
 	switch (((Integer) view.getTag()).intValue()) {
 	case BUTTON_TAG_MEMBER:
 	    Member member = Member.getMember();
-	    member.login();
+	    member.login(getFragmentManager());
 	    break;
 	case BUTTON_TAG_UPGRADE:
 	    Log.d("", "settings");
