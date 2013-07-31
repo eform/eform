@@ -134,7 +134,7 @@ public class HomeActivity extends Activity
     protected void onPause() {
 	super.onPause();
 
-	Log.d("HomeActivity", "on Paused");
+	Log.d("HomeActivity", "onPause");
 
 	WebView webview = (WebView) findViewById(R.id.logo_webview);
 	webview.onPause();
@@ -146,7 +146,7 @@ public class HomeActivity extends Activity
     protected void onResume() {
 	super.onResume();
 
-	Log.d("HomeActivity", "on Resume");
+	Log.d("HomeActivity", "onResume");
 
 	WebView webview = (WebView) findViewById(R.id.logo_webview);
 	webview.onResume();
@@ -161,18 +161,18 @@ public class HomeActivity extends Activity
     protected void onStart() {
 	super.onStart();
 
-	Log.d("HomeActivity", "on Start");
+	Log.d("HomeActivity", "onStart");
 
 	Member member = Member.getMember();
 	member.setListener(this);
-	set_member_layout_visible(member.is_login());
+	setMemberLayoutVisible(member.isLogin());
     }
 
     @Override
     protected void onStop() {
 	super.onStop();
 
-	Log.d("HomeActivity", "on Stoped");
+	Log.d("HomeActivity", "onStop");
 
 	Member member = Member.getMember();
 	member.setListener(null);
@@ -181,14 +181,14 @@ public class HomeActivity extends Activity
     @Override
     protected void onRestart() {
 	super.onRestart();
-	Log.d("HomeActivity", "on Restart");
+	Log.d("HomeActivity", "onRestart");
     }
 	
     @Override
     public void onDestroy() {
 	super.onDestroy();
 
-	Log.d("HomeActivity", "on destory");
+	Log.d("HomeActivity", "onDestory");
 
 	handler.removeCallbacks(runable);
 	Member member = Member.getMember();
@@ -338,6 +338,7 @@ public class HomeActivity extends Activity
 	    Intent intent = new Intent(this, FormActivity.class);
 	    intent.putExtra(FormActivity.INTENT_MESSAGE_CLASS, item.klass);
 	    intent.putExtra(FormActivity.INTENT_MESSAGE_LABEL, item.label);
+	    intent.putExtra(FormActivity.INTENT_MESSAGE_MEMBER, Member.getMember().isLogin());
 	    startActivityForResult(intent, ITEM_ACTIVITY_REQUEST_CODE);
 	}
     }
@@ -350,7 +351,7 @@ public class HomeActivity extends Activity
 	    case RESULT_CANCELED:
 		int reason = intent.getIntExtra(FormActivity.INTENT_RESULT_ERRREASON, 0);
 		if (reason != 0)
-		    show_error_flagment(reason);
+		    showErrorFlagment(reason);
 		break;
 	    case RESULT_OK:
 		break;
@@ -373,14 +374,14 @@ public class HomeActivity extends Activity
     }
 
 
-    public void on_slogan_switcher_click(View view) {
+    public void onSloganSwitcherClick(View view) {
 	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
 	if (++curr_slogan >= home_info.slogans.size())
 	    curr_slogan = 0;
 	switcher.setText(home_info.slogans.get(curr_slogan));
     }
 
-    private void show_error_flagment(int reason) {
+    private void showErrorFlagment(int reason) {
 	FragmentManager fragmentManager = getFragmentManager();
 	FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 	ErrorFragment fragment = new ErrorFragment();
@@ -392,24 +393,24 @@ public class HomeActivity extends Activity
     }
 
 
-    public void on_member_voucher_button_click(View view) {
+    public void onMemberVoucherButtonClick(View view) {
 	
     }
 
 
-    public void on_member_profile_button_click(View view) {
+    public void onMemberProfileButtonClick(View view) {
 	Member member = Member.getMember();
-	member.modify_profile(getFragmentManager());
+	member.update(getFragmentManager());
     }
 
 
-    public void on_member_logout_button_click(View view) {
+    public void onMemberLogoutButtonClick(View view) {
 	Member member = Member.getMember();
 	member.logout();
     }
 
 
-    private void set_member_layout_visible(boolean visible) {
+    private void setMemberLayoutVisible(boolean visible) {
 	final View view = findViewById(R.id.member_layout);
 	TranslateAnimation anim = null;
 
@@ -439,13 +440,13 @@ public class HomeActivity extends Activity
 
 
     @Override
-    public void on_member_login() {
-	set_member_layout_visible(true);
+    public void onMemberLogin() {
+	setMemberLayoutVisible(true);
     }
 
     @Override
-    public void on_member_logout() {
-	set_member_layout_visible(false);
+    public void onMemberLogout() {
+	setMemberLayoutVisible(false);
     }
 
 }

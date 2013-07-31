@@ -23,7 +23,7 @@ public class EFormApplication extends Application
 
     @Override
     public void onCreate() {
-    	Log.d("", "Application created");
+	Log.d("EFormApplication", "onCreate");
     	application = this;
         super.onCreate();
     }

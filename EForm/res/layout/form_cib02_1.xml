@@ -1,512 +1,500 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white"
-    android:orientation="vertical"
-    android:paddingBottom="40dp"
-    android:paddingLeft="30dp"
-    android:paddingRight="30dp"
-    android:paddingTop="40dp" >
+	      android:layout_width="match_parent"
+	      android:layout_height="wrap_content"
+	      android:background="@color/white"
+	      android:orientation="vertical"
+	      android:paddingBottom="40dp"
+	      android:paddingLeft="30dp"
+	      android:paddingRight="30dp"
+	      android:paddingTop="40dp" >
 
-    <LinearLayout
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal" >
+
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" >
+        android:adjustViewBounds="true"
+        android:contentDescription="CIB Logo"
+        android:maxHeight="50dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/logo_cib" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:contentDescription="CIB Logo"
-            android:maxHeight="50dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/logo_cib" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:text="储蓄转账凭条"
+        android:textColor="@color/darkblue"
+        android:textSize="26sp" />
+  </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:text="储蓄转账凭条"
-            android:textColor="@color/darkblue"
-            android:textSize="26sp" />
-    </LinearLayout>
+  <TableLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="30dp"
+      android:stretchColumns="1" >
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:stretchColumns="1" >
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:layout_gravity="center_vertical"
+          android:background="@drawable/cell_cib02"
+          android:gravity="center_vertical"
+          android:paddingLeft="12dp"
+          android:paddingRight="10dp"
+          android:text="银\n行\n打\n印"
+          android:textColor="@color/darkgray"
+          android:textSize="22sp" />
+
+      <TableLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="@drawable/cell_cib02"
+          android:paddingBottom="20dp"
+          android:paddingLeft="30dp"
+          android:paddingRight="30dp"
+          android:paddingTop="20dp" >
 
         <TableRow
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/cell_cib02"
-                android:gravity="center_vertical"
-                android:paddingLeft="12dp"
-                android:paddingRight="10dp"
-                android:text="银\n行\n打\n印"
-                android:textColor="@color/darkblue"
-                android:textSize="22sp" />
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="240dp"
+              android:text="转 出  帐 号"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
 
-            <TableLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/cell_cib02"
-                android:paddingBottom="20dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
-                android:paddingTop="20dp" >
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="240dp"
+              android:text="转 入  帐 号"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
 
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="240dp"
-                        android:text="转  出 帐 号"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="240dp"
-                        android:text="转  入 帐 号"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="交易 金额"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="转  出 户 名"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="转  入 户 名"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="货币 种类"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="转出户余额"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="转入户余额"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="交易 日期"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="存  款 序 号"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="业  务 种 类"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="现钞/现汇"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="存            期"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="居  民 标 志"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </TableRow>
-            </TableLayout>
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="交 易  金 额"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
         </TableRow>
 
         <TableRow
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/cell_cib02"
-                android:gravity="center_vertical"
-                android:paddingLeft="12dp"
-                android:paddingRight="10dp"
-                android:text="客\n户\n填\n写"
-                android:textColor="@color/darkblue"
-                android:textSize="22sp" />
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="转 出  户 名"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
 
-            <TableLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/cell_cib02"
-                android:paddingBottom="20dp"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
-                android:paddingTop="20dp" >
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="转 入  户 名"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
 
-<!--           android:stretchColumns="2" > -->
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="货 币  种 类"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
+        </TableRow>
 
-
-                <!--
         <TableRow
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-                -->
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" >
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="转出户余额"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
 
-<!--               android:layout_span="6" > -->
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="转入户余额"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
 
-                    <CheckBox
-                        android:id="@+id/p1_transfer_demand_to_demand_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="20dp"
-                        android:text="活期间转账"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <CheckBox
-                        android:id="@+id/p1_transfer_time_to_demand_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="20dp"
-                        android:text="定期转活期"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <CheckBox
-                        android:id="@+id/p1_transfer_demand_to_time_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="20dp"
-                        android:text="活期转定期"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <CheckBox
-                        android:id="@+id/p1_transfer_time_to_time_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="20dp"
-                        android:text="定期移户"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <CheckBox
-                        android:id="@+id/p1_transfer_bank_to_securities_checkbox"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="银证转账"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </LinearLayout>
-
-<!--         </TableRow> -->
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:text="转出帐号(卡号)"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/userid_edittext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="1"
-                        android:inputType="number" >
-                    </EditText>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="10dp"
-                        android:text="户  名"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/password_edittext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:ems="6"
-                        android:inputType="text" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="10dp"
-                        android:text="存款序号"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/password2_edittext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:ems="6"
-                        android:inputType="number" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="转 账 金 额"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/company_edittext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="6"
-                        android:inputType="numberDecimal" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="10dp"
-                        android:text="货币种类"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/username_edittext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:ems="6"
-                        android:inputType="text" />
-
-                    <CheckBox
-                        android:id="@+id/checkBox2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:text="现钞户"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <CheckBox
-                        android:id="@+id/checkBox3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:text="现汇户"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="转入帐号(卡号)"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/phone_edittext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="6"
-                        android:inputType="number" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="10dp"
-                        android:text="户  名"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/editText7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:ems="6"
-                        android:inputType="text" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="10dp"
-                        android:text="存期"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/editText8"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:ems="6"
-                        android:inputType="number" />
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="券 商 名 称"
-                        android:textColor="@color/darkblue"
-                        android:textSize="22sp" />
-
-                    <EditText
-                        android:id="@+id/editText9"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_span="5"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="text" />
-
-                </TableRow>
-            </TableLayout>
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="交 易  日 期"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
         </TableRow>
-    </TableLayout>
 
-    <LinearLayout
-        android:id="@+id/id"
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="存 款  序 号"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="业 务  种 类"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="现钞 / 现汇"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="存            期"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="居 民  标 志"
+              android:textColor="@color/darkgray"
+              android:textSize="22sp" />
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:layout_gravity="center_vertical"
+          android:background="@drawable/cell_cib02"
+          android:gravity="center_vertical"
+          android:paddingLeft="12dp"
+          android:paddingRight="10dp"
+          android:text="客\n户\n填\n写"
+          android:textColor="@color/darkblue"
+          android:textSize="22sp" />
+
+      <TableLayout
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:background="@drawable/cell_cib02"
+          android:paddingBottom="20dp"
+          android:paddingLeft="30dp"
+          android:paddingRight="30dp"
+          android:paddingTop="20dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+          <CheckBox
+              android:id="@+id/p1_transfer_demand_to_demand_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="20dp"
+              android:text="活期间转账"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <CheckBox
+              android:id="@+id/p1_transfer_time_to_demand_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="20dp"
+              android:text="定期转活期"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <CheckBox
+              android:id="@+id/p1_transfer_demand_to_time_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="20dp"
+              android:text="活期转定期"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <CheckBox
+              android:id="@+id/p1_transfer_time_to_time_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="20dp"
+              android:text="定期移户"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <CheckBox
+              android:id="@+id/p1_transfer_bank_to_securities_checkbox"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="银证转账"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+        </LinearLayout>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="10dp"
+              android:text="转出帐号(卡号)"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:id="@+id/userid_edittext"
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:ems="10"
+              android:textSize="22sp"
+	      android:inputType="number" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginRight="10dp"
+              android:text="户  名"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:id="@+id/username_edittext"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="0"
+              android:ems="6"
+              android:textSize="22sp"
+	      android:inputType="text" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginRight="10dp"
+              android:text="存款序号"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="0"
+              android:ems="6"
+              android:textSize="22sp"
+              android:inputType="number" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="转 账 金 额"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:ems="6"
+              android:textSize="22sp"
+              android:inputType="numberDecimal" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginRight="10dp"
+              android:text="货币种类"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="0"
+              android:ems="6"
+              android:textSize="22sp"
+              android:inputType="text" />
+
+          <CheckBox
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:text="现钞户"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <CheckBox
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:text="现汇户"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="转入帐号(卡号)"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:ems="6"
+              android:textSize="22sp"
+              android:inputType="number" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginRight="10dp"
+              android:text="户  名"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="0"
+              android:ems="6"
+              android:textSize="22sp"
+              android:inputType="text" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginRight="10dp"
+              android:text="存  期"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="0"
+              android:ems="6"
+              android:textSize="22sp"
+              android:inputType="number" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="券 商 名 称"
+              android:textColor="@color/darkblue"
+              android:textSize="22sp" />
+
+          <EditText
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_span="5"
+              android:layout_weight="1"
+              android:ems="10"
+              android:textSize="22sp"
+              android:inputType="text" />
+
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+  </TableLayout>
+
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp" >
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" >
+        android:text="请注意阅读凭条背面的“客户须知”"
+        android:textColor="@color/darkblue"
+        android:textSize="20sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="请注意阅读凭条背面的“客户须知”"
-            android:textColor="@color/darkblue"
-            android:textSize="20sp" />
+    <TextView
+        android:id="@+id/aftermarket_local_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="240dp"
+        android:text="复核"
+        android:textColor="@color/darkblue"
+        android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/aftermarket_local_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="300dp"
-            android:text="复核"
-            android:textColor="@color/darkblue"
-            android:textSize="20sp" />
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="240dp"
+        android:text="经办"
+        android:textColor="@color/darkblue"
+        android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="300dp"
-            android:text="经办"
-            android:textColor="@color/darkblue"
-            android:textSize="20sp" />
-
-    </LinearLayout>
+  </LinearLayout>
 
 </LinearLayout>

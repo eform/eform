@@ -11,13 +11,9 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -33,37 +29,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 
-class MemberDatabaseHelper extends SQLiteOpenHelper
-{
-
-    public MemberDatabaseHelper(Context context, String name,
-	    CursorFactory factory, int version) {
-	super(context, name, factory, version);
-	// TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-	// TODO Auto-generated method stub
-	
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-	// TODO Auto-generated method stub
-	
-    }
-
-}
-
-
 class MemberLoginDialog extends DialogFragment implements OnClickListener
 {
-    private static final int EDITTEXT_ID_USERID = 0x00010001;
-    private static final int EDITTEXT_ID_PASSWORD = 0x00010002;
+    private static final int ID_USERID_EDITTEXT = 0x00010001;
+    private static final int ID_PASSWORD_EDITTEXT = 0x00010002;
 
-    private static final int BUTTON_TAG_USERID_CLEAR = 1;
-    private static final int BUTTON_TAG_PASSWORD_CLEAR = 2;
+    private static final int TAG_USERID_CLEAR_BUTTON = 1;
+    private static final int TAG_PASSWORD_CLEAR_BUTTON = 2;
 
     private View buildLayout() {
 	TableLayout table = new TableLayout(getActivity());
@@ -81,16 +53,17 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	row.addView(textview, params);
 
 	EditText edittext = new EditText(getActivity());
-	edittext.setId(EDITTEXT_ID_USERID);
+	edittext.setId(ID_USERID_EDITTEXT);
 	edittext.setInputType(InputType.TYPE_CLASS_PHONE);
 	edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(18)});
 	edittext.setMinEms(10);
 	edittext.setHintTextColor(getResources().getColor(R.color.silver));
+	edittext.setEnabled(false);
 	params = new TableRow.LayoutParams();
 	row.addView(edittext, params);
 
 	Button button = new Button(getActivity());
-	button.setTag(BUTTON_TAG_USERID_CLEAR);
+	button.setTag(TAG_USERID_CLEAR_BUTTON);
 	button.setBackgroundResource(R.drawable.clear);
 	button.setOnClickListener(this);
 	params = new TableRow.LayoutParams(
@@ -122,7 +95,7 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	row.addView(textview);
 
 	edittext = new EditText(getActivity());
-	edittext.setId(EDITTEXT_ID_PASSWORD);
+	edittext.setId(ID_PASSWORD_EDITTEXT);
 	edittext.setInputType(InputType.TYPE_CLASS_NUMBER |
 		InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 	edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(6)});
@@ -131,7 +104,7 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	row.addView(edittext, params);
 
 	button = new Button(getActivity());
-	button.setTag(BUTTON_TAG_PASSWORD_CLEAR);
+	button.setTag(TAG_PASSWORD_CLEAR_BUTTON);
 	button.setOnClickListener(this);
 	button.setBackgroundResource(R.drawable.clear);
 	params = new TableRow.LayoutParams(
@@ -140,6 +113,12 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	row.addView(button, params);
 
 	return table;
+    }
+
+    private void hideIme(View view) {
+	InputMethodManager imm =
+		(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+	imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
     }
 
 
@@ -160,12 +139,6 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
     }
 
 
-    private void hideIme(View view) {
-	InputMethodManager imm = 
-		(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-	imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-    }
-
     @Override
     public void onStart() {
 	super.onStart();
@@ -178,7 +151,6 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	    @Override
 	    public void onClick(View view) {
 		hideIme(view);
-
 		MemberProfileDialog dialog = new MemberProfileDialog();
 		dialog.show(getFragmentManager(), "MemberInfoDialog");
 	    }
@@ -190,7 +162,6 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	    @Override
 	    public void onClick(View view) {
 		hideIme(view);
-
 		CommonDialog.showBox(getFragmentManager(),
 			"找回密码",
 			"您可以通过下面步骤找回密码：\n\n" +
@@ -204,8 +175,8 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-	        EditText username = (EditText) getDialog().findViewById(EDITTEXT_ID_USERID);
-		EditText password = (EditText) getDialog().findViewById(EDITTEXT_ID_PASSWORD);
+	        EditText username = (EditText) getDialog().findViewById(ID_USERID_EDITTEXT);
+		EditText password = (EditText) getDialog().findViewById(ID_PASSWORD_EDITTEXT);
 		if (username.length() == 0) {
 		    username.setHint("证件号码不能为空");
 		    username.requestFocus();
@@ -216,14 +187,15 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 		    password.requestFocus();
 		    return;
 		}
-
 		hideIme(view);
 
 		Member member = Member.getMember();
-		if (member.login(username.getText().toString(), password.getText().toString())) {
+		if (member.login(username.getText().toString(),
+			password.getText().toString())) {
 		    dismiss();
 		} else {
-		    CommonDialog.showBox(getFragmentManager(), "登陆失败", "用户名或密码错误，请重新输入!\n");
+		    CommonDialog.showBox(getFragmentManager(),
+			    "登陆失败", "用户名或密码错误，请重新输入!\n");
 		}
 	    }
 	});
@@ -242,11 +214,12 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
     @Override
     public void onClick(View view) {
 	switch(((Integer) view.getTag()).intValue()) {
-	case BUTTON_TAG_USERID_CLEAR:
-	    ((TextView) getDialog().findViewById(EDITTEXT_ID_USERID)).setText("");
+	case TAG_USERID_CLEAR_BUTTON:
+	    ((TextView) getDialog().findViewById(ID_USERID_EDITTEXT)).setText("");
+	    getDialog().findViewById(ID_USERID_EDITTEXT).setEnabled(true);
 	    break;
-	case BUTTON_TAG_PASSWORD_CLEAR:
-	    ((TextView) getDialog().findViewById(EDITTEXT_ID_PASSWORD)).setText("");
+	case TAG_PASSWORD_CLEAR_BUTTON:
+	    ((TextView) getDialog().findViewById(ID_PASSWORD_EDITTEXT)).setText("");
 	    break;
 	}
     }
@@ -294,6 +267,8 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
     @Override
     public void onStart() {
 	super.onStart();
+
+	setCancelable(false);
 
 	final AlertDialog dialog = (AlertDialog) getDialog();
 
@@ -395,7 +370,7 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 				"注册失败！");
 		    }
 		} else {
-		    if (member.modify(userid_str, username_str,
+		    if (member.update(userid_str, username_str,
 			    password_str, company_str, phone_str)) {
 			CommonDialog.showBox(getFragmentManager(), "修改成功",
 				"您输入的信息已成功保存到系统中！");
@@ -449,17 +424,15 @@ public class Member
 
     private boolean is_login;
     private MemberProfile profile;
-//    private MemberDatabaseHelper db_helper;
     private MemberListener listener;
 
     private Member() {
 	is_login = false;
 	profile = null;
-//	db_helper = new MemberDatabaseHelper();
     }
 
 
-    public boolean is_login() {
+    public boolean isLogin() {
 	return is_login;
     }
 
@@ -473,7 +446,7 @@ public class Member
 	is_login = true;
 
 	if (listener != null) {
-	    listener.on_member_login();
+	    listener.onMemberLogin();
 	}
 	return is_login;
     }
@@ -488,7 +461,7 @@ public class Member
 	is_login = false;
 
 	if (listener != null) {
-	    listener.on_member_logout();
+	    listener.onMemberLogout();
 	}
     }
 
@@ -500,12 +473,12 @@ public class Member
 	return true;
     }
 
-    public boolean modify(String userid, String username, String password,
+    public boolean update(String userid, String username, String password,
 	    String company, String phone) {
 	return true;
     }
 
-    public void modify_profile(FragmentManager manager) {
+    public void update(FragmentManager manager) {
 	if (is_login) {
 	    MemberProfileDialog dialog = new MemberProfileDialog();
 	    dialog.setProfile(profile);
@@ -521,8 +494,8 @@ public class Member
 
     public interface MemberListener
     {
-	public void on_member_login();
-	public void on_member_logout();
+	public void onMemberLogin();
+	public void onMemberLogout();
     }
 
 

@@ -94,10 +94,47 @@
   </LinearLayout>
 
   <LinearLayout
+      android:id="@+id/form_tip_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/form_top_layout"
+      android:background="@color/yellow"
+      android:gravity="center"
+      android:paddingBottom="10dp"
+      android:paddingTop="10dp"
+      android:visibility="gone" >
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="如在"
+          android:textColor="@color/darkblue"
+          android:textSize="24sp" />
+
+      <TextView
+          android:id="@+id/tip_timeout_textview"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginLeft="10dp"
+          android:layout_marginRight="10dp"
+          android:text="30"
+          android:textColor="@color/red"
+          android:textSize="24sp" />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="内无任何操作，本交易将自动关闭"
+          android:textColor="@color/darkblue"
+          android:textSize="24sp" />
+
+  </LinearLayout>
+
+  <LinearLayout
       android:id="@+id/form_main_layout"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout_below="@id/form_top_layout"
+      android:layout_below="@id/form_tip_layout"
       android:baselineAligned="false"
       android:gravity="center_vertical"
       android:orientation="horizontal" >

@@ -14,14 +14,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,11 +36,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class FormActivity extends Activity implements OnClickListener, Form.FormListener
+
+public class FormActivity extends Activity implements
+	OnClickListener, OnTouchListener, Form.FormListener
 {
     /* constants uses for communication with previous activity. */
     static public final String INTENT_MESSAGE_CLASS    = "com.cansiny.eform.CLASS";
     static public final String INTENT_MESSAGE_LABEL    = "com.cansiny.eform.LABEL";
+    static public final String INTENT_MESSAGE_MEMBER   = "com.cansiny.eform.MEMBER";
     static public final String INTENT_RESULT_ERRREASON = "com.cansiny.eform.ERRREASON";
 
     /* constants uses for identified the difference of event source */
@@ -43,12 +53,20 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
     static private final int TOAST_IMAGE_NONE  = 0;
     static private final int TOAST_IMAGE_SMILE = -1;
     static private final int TOAST_IMAGE_CRY   = -2;
-    
+
+    static private final int TIMEOUT_VALUE = 90;
+
     private AtomicInteger atomic_int;
     private Form form;
     private long last_verify_time = 0;
     private FormPageSwitcher page_switcher;
+    private boolean is_member;
+    private int timeout_remains = TIMEOUT_VALUE;
+    private Handler timeout_handler;
+    private Runnable timeout_runnable;
 
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 
@@ -86,7 +104,14 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 		page_title.addView(buildPageButton(n, page.title), params);
 		n++;
 	    }
-	    sidebar_add_member_buttons();
+
+	    is_member = getIntent().getBooleanExtra(INTENT_MESSAGE_MEMBER, false);
+	    if (is_member) {
+		addMemberButtons();
+	    }
+	    View view = findViewById(R.id.form_main_layout);
+	    view.setOnTouchListener(this);
+
 	    setResult(RESULT_OK, getIntent());
 	} catch (InstantiationException e) {
 	    LogActivity.writeLog(e);
@@ -121,7 +146,7 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	}		
     }
 
-
+    @Override
     protected void onStart() {
 	super.onStart();
 
@@ -129,11 +154,81 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	setActivePage(0);
     }
 
+    @Override
+    protected void onStop() {
+	super.onStop();
+    }
 
-    private void sidebar_add_member_buttons() {
-	if (!Member.getMember().is_login())
-	    return;
+    @Override
+    protected void onResume() {
+	super.onResume();
 
+	timeout_handler = new Handler();
+	timeout_runnable = new Runnable() {
+	    @Override
+	    public void run() {
+		if (timeout_remains <= 30) {
+		    setTimeoutTipVisible(true);
+		    if (timeout_remains <= 0) {
+			finish();
+		    }
+		}
+		timeout_remains--;
+		timeout_handler.postDelayed(this, 1000);
+	    }
+	};
+	timeout_handler.postDelayed(timeout_runnable, 1000);
+    }
+
+    @Override
+    protected void onPause() {
+	super.onPause();
+
+	timeout_handler.removeCallbacks(timeout_runnable);
+    }
+
+
+    private void setTimeoutTipVisible(boolean visible) {
+	final View view = findViewById(R.id.form_tip_layout);
+	int state = view.getVisibility();
+
+	AlphaAnimation anim = null;
+
+	if (visible) {
+	    TextView textview = ((TextView) findViewById(R.id.tip_timeout_textview));
+	    textview.setText("" + timeout_remains);
+
+	    if (state == View.VISIBLE)
+		return;
+
+	    view.setVisibility(View.VISIBLE);
+	    view.setOnTouchListener(this);
+	    anim = new AlphaAnimation(0.0f, 1.0f);
+	} else {
+	    timeout_remains = TIMEOUT_VALUE;
+
+	    if (state == View.GONE)
+		return;
+
+	    anim = new AlphaAnimation(1.0f, 0.0f);
+	    anim.setAnimationListener(new Animation.AnimationListener() {
+		public void onAnimationStart(Animation animation) {
+		}
+		public void onAnimationRepeat(Animation animation) {
+		}
+		public void onAnimationEnd(Animation animation) {
+		    view.setVisibility(View.GONE);
+		}
+	    });
+	}
+
+	AnimationSet anim_set = new AnimationSet(true);
+	anim_set.addAnimation(anim);
+	anim_set.setDuration(400);
+	view.startAnimation(anim_set);
+    }
+
+    private void addMemberButtons() {
 	LinearLayout linear = new LinearLayout(this);
 	linear.setOrientation(LinearLayout.VERTICAL);
 
@@ -425,4 +520,23 @@ public class FormActivity extends Activity implements OnClickListener, Form.Form
 	setResult(RESULT_OK);
 	finish();
     }
+
+    @Override
+    public boolean onTouch(View arg0, MotionEvent event) {
+	if (event.getAction() == MotionEvent.ACTION_DOWN) {
+	    setTimeoutTipVisible(false);
+	}
+	return false;
+    }
+
+    @Override
+    public void onViewTouched(Form form, View view) {
+	setTimeoutTipVisible(false);
+    }
+
+    @Override
+    public void onTextChanged(Form form, EditText textview) {
+	setTimeoutTipVisible(false);
+    }
+
 }

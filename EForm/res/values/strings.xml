@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">电子填单</string>
-    <string name="logo_image">Logo 图片</string>
+    <string name="logo_image">Logo图片</string>
+    <string name="app_contents_name">数据提供者</string>
     <string name="choose_item">请选择要办理的业务</string>
-    <string name="exit">退 出</string>
-    <string name="next">下一步</string>
-    <string name="previous">上一步</string>
-    <string name="cancel">取 消</string>
-    <string name="swipe_card">请刷“磁条卡/存折”</string>
-    <string name="read_idcard">请将“身份证”放在感应区域</string>
     <string name="error_instantiation_exception">构造 Form 实例异常，可能是因为配置的类型错误</string>
     <string name="error_class_not_found">指定的类型没有找到，可能是因为程序配置错误</string>
     

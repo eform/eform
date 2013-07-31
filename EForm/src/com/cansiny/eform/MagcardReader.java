@@ -17,6 +17,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -45,25 +46,33 @@ public class MagcardReader extends DialogFragment
     private long starttime;
     private TextView seconds_textview;
     private Activity activity;
+    private Handler handler;
+    private Runnable runnable;
 
-    private Handler  handler = new Handler();
-    private Runnable runable = new Runnable() {
-	@Override
-	public void run() {
-	    long currtime = System.currentTimeMillis();
-	    long millis = currtime - starttime;
-	    int seconds = (int) (millis / 1000);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
 
-	    total_seconds -= seconds;
-	    if (total_seconds <= 0) {
-		dismiss();
-		return;
+	handler = new Handler();
+	runnable = new Runnable() {
+	    @Override
+	    public void run() {
+		long currtime = System.currentTimeMillis();
+		long millis = currtime - starttime;
+		int seconds = (int) (millis / 1000);
+
+		total_seconds -= seconds;
+		if (total_seconds <= 0) {
+		    dismiss();
+		    return;
+		}
+		starttime = currtime;
+		seconds_textview.setText("" + total_seconds);
+
+		handler.postDelayed(this, 1000);
 	    }
-	    starttime = currtime;
-	    seconds_textview.setText("" + total_seconds);
-	    handler.postDelayed(this, 1000);
-	}
-    };
+	};
+    }
 
     private LinearLayout buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
@@ -133,15 +142,11 @@ public class MagcardReader extends DialogFragment
 	super.onCreateDialog(savedInstanceState);
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle(R.string.swipe_card);
+	builder.setTitle("请刷磁条卡或存折");
 
 	builder.setView(buildLayout());
 
-	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-	    @Override
-	    public void onClick(DialogInterface dialog, int which) {
-	    }
-	});
+	builder.setNegativeButton("取 消", null);
 	return builder.create();
     }
 		
@@ -151,15 +156,18 @@ public class MagcardReader extends DialogFragment
 
 	setCancelable(false);
 
+	Button button = ((AlertDialog) getDialog()).getButton(Dialog.BUTTON_NEGATIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+
 	seconds_textview.setText("" + total_seconds);
 	starttime = System.currentTimeMillis();
-	handler.postDelayed(runable, 0);
+	handler.postDelayed(runnable, 0);
     }
 		
     @Override
     public void onDismiss(DialogInterface dialog) {
 	super.onDismiss(dialog);
-	handler.removeCallbacks(runable);
+	handler.removeCallbacks(runnable);
     }
 
 

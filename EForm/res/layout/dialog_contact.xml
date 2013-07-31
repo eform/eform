@@ -256,7 +256,7 @@
               android:layout_height="wrap_content"
               android:layout_marginLeft="20dp"
               android:layout_marginTop="10dp"
-              android:text="客服电话：0551-6342 0410\n客服邮箱：cansinysupport@163.com"
+              android:text="电话：0551-6342 0410\n传真：0551-6342 0410\n邮箱：cansinysupport@163.com"
               android:textSize="18sp" />
         </LinearLayout>
       </FrameLayout>

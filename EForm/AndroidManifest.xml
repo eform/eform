@@ -22,7 +22,9 @@
     <activity
         android:name="com.cansiny.eform.HomeActivity"
         android:configChanges="orientation|keyboardHidden|screenSize"
-        android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:singleUser="true"
+	android:hardwareAccelerated="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />	
         <category android:name="android.intent.category.LAUNCHER" />
@@ -34,6 +36,16 @@
 
     <activity android:name="com.cansiny.eform.FormActivity">
     </activity>
+
+    <provider android:name="com.cansiny.eform.EFormContentProvider"
+        android:authorities="com.cansiny.eform.EFormContents"
+        android:label="@string/app_contents_name"
+        android:multiprocess="false"
+	android:enabled="true"
+	android:syncable="true"
+	android:exported="true"
+	android:singleUser="true">
+    </provider>
 
   </application>
 

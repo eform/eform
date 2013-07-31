@@ -7,8 +7,6 @@ package com.cansiny.eform;
 
 import java.util.ArrayList;
 
-import com.cansiny.eform.FormScrollView.ScrollViewListener;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,12 +17,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -71,10 +73,10 @@ class ReadIdcardDialogFragment extends DialogFragment
 	super.onCreateDialog(savedInstanceState);
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	//builder.setTitle(R.string.read_idcard);
+	builder.setTitle("请将“身份证”放在感应区域");
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_idcard, null));
-	builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
 		@Override
 		public void onClick(DialogInterface dialog, int which) {
 		}
@@ -100,38 +102,7 @@ class ReadIdcardDialogFragment extends DialogFragment
 }
 
 
-/**
- * Form scroll view
- */
-class FormScrollView extends ScrollView
-{
-    private ScrollViewListener listener;
-	
-    public FormScrollView(Context context) {
-	super(context);
-	listener = null;
-	setSmoothScrollingEnabled(true);
-    }
-
-    /* event listener */
-    public void setListener(ScrollViewListener listener) {
-	this.listener = listener;
-    }
-    @Override
-    protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-	super.onScrollChanged(l, t, oldl, oldt);
-
-	if (listener != null)
-	    listener.onScollChanged(this);
-    }
-    public interface ScrollViewListener
-    {
-	public void onScollChanged(ScrollView scroll_view);
-    }
-}
-
-
-public abstract class Form implements OnClickListener, OnFocusChangeListener, ScrollViewListener
+public abstract class Form implements OnClickListener, OnFocusChangeListener, OnTouchListener
 {
     protected Activity activity;
     protected ArrayList<FormPage> pages;
@@ -140,7 +111,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
     protected ArrayList<Integer> cardno_views; 
     protected ArrayList<Integer> verify_views;
     private FormListener listener;
-	
+
     public Form(Activity activity) {
 	this.activity = activity;
 	listener = null;
@@ -245,8 +216,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	
     /* call by page when its state be restored */
     public void onPageRestored(FormPage page) {
-	((FormScrollView) page.scroll_view).setListener(this);
-
 	/* listen all views event */
 	addViewsListener(page.scroll_view);
 		
@@ -283,6 +252,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	View view = (View) object;
 	view.setClickable(true);
 	view.setOnClickListener(this);
+	view.setOnTouchListener(this);
 
 	if (object instanceof ViewGroup) {
 	    ViewGroup group = (ViewGroup) object;
@@ -318,13 +288,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	    return false;
 	page.scrollDown();
 	return true;
-    }
-
-    @Override
-    public void onScollChanged(ScrollView scroll_view) {
-	/* notify activity the from has scrolled. */
-	if (listener != null)
-	    listener.onScrollViewScrolled(this, scroll_view);
     }
 
 
@@ -368,7 +331,17 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
     }
 
-	
+
+    @Override
+    public boolean onTouch(View view, MotionEvent event) {
+	if (event.getAction() == MotionEvent.ACTION_DOWN) {
+	    if (listener != null) {
+		listener.onViewTouched(this, view);
+	    }
+	}
+	return false;
+    }
+
     @Override
     public void onFocusChange(View view, boolean hasfocus) {
 	/* switch card no display format */
@@ -390,6 +363,9 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
     /* callback for edit text listener */
     protected void beforeTextChanged(TextView textview, CharSequence sequence,
 				     int start, int count, int after) {
+	if (listener != null) {
+	    listener.onTextChanged(this, (EditText) textview);
+	}
     }
 	
     /* callback for edit text listener */
@@ -559,11 +535,46 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
     }
 
 
-    public class FormPage
+    public interface FormListener
+    {
+	public void onScrollViewScrolled(Form form, ScrollView scroll_view);
+	public void onViewTouched(Form form, View view);
+	public void onTextChanged(Form form, EditText textview);
+    }
+
+
+    interface FormScrollViewListener
+    {
+	public void onScollChanged(ScrollView scroll_view);
+    }
+
+    class FormScrollView extends ScrollView
+    {
+        private FormScrollViewListener listener;
+
+        public FormScrollView(Context context) {
+            super(context);
+            listener = null;
+            setSmoothScrollingEnabled(true);
+        }
+        public void setScrollListener(FormScrollViewListener listener) {
+            this.listener = listener;
+        }
+        @Override
+        protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+            super.onScrollChanged(l, t, oldl, oldt);
+            if (listener != null) {
+        	listener.onScollChanged(this);
+            }
+        }
+    }
+
+
+    public class FormPage implements FormScrollViewListener
     {
 	public String title;
 	public int layout;
-	public ScrollView scroll_view;
+	public FormScrollView scroll_view;
 	public Bundle bundle;
 
 	private void initialize(String title, int layout) {
@@ -582,9 +593,10 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 	public ScrollView restoreState() {
-	    FormScrollView scroll = new FormScrollView(activity.getApplicationContext());
+	    FormScrollView scroll = new FormScrollView(activity);
 	    LayoutInflater inflater = activity.getLayoutInflater();
-	    scroll_view = (ScrollView) inflater.inflate(layout, scroll);
+	    scroll_view = (FormScrollView) inflater.inflate(layout, scroll);
+	    scroll_view.setScrollListener(this);
 	    restoreViewState(scroll_view);
 	    onPageRestored(this);
 	    return scroll_view;
@@ -599,6 +611,12 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 		return;
 	    }
 
+	    /* set edittext ime options */
+	    if (object instanceof EditText) {
+		((EditText) object).setImeOptions(EditorInfo.IME_ACTION_NEXT);
+	    }
+
+	    /* restore widgets value */
 	    String key = Integer.valueOf(((View) object).getId()).toString();
 	    if (bundle.containsKey(key)) {
 		if (object instanceof EditText) {
@@ -650,13 +668,11 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 	}
 
 
-	/* handler scroll view */
 	public boolean canScrollUp() {
 	    if (scroll_view == null)
 		return false;
 	    return scroll_view.getScrollY() == 0 ? false : true;
 	}
-
 	public boolean canScrollDown() {
 	    if (scroll_view == null || scroll_view.getChildCount() == 0)
 		return false;
@@ -673,17 +689,17 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, Sc
 		return;
 	    scroll_view.smoothScrollBy(0, -100);
 	}
-
 	public void scrollDown() {
 	    if (scroll_view == null || !((Object) scroll_view instanceof ScrollView))
 		return;
 	    scroll_view.smoothScrollBy(0, 100);
 	}
-    }
-	
 
-    public interface FormListener
-    {
-	public void onScrollViewScrolled(Form form, ScrollView scroll_view);
+	@Override
+	public void onScollChanged(ScrollView scroll_view) {
+	    if (listener != null)
+		listener.onScrollViewScrolled(Form.this, scroll_view);
+	}
     }
+
 }

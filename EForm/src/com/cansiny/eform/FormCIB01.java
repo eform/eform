@@ -8,6 +8,7 @@ package com.cansiny.eform;
 import java.util.Calendar;
 import android.app.Activity;
 import android.text.Editable;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -676,4 +677,5 @@ public class FormCIB01 extends Form
     public boolean print() {
 	return true;
     }
+
 }
