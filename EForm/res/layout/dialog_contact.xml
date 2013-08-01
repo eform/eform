@@ -39,13 +39,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="产品型号："
+                android:text="产品名称："
                 android:textSize="17sp" />
 
             <TextView
-                android:id="@+id/product_type_textview"
+                android:id="@+id/product_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="17sp"
                 android:text="" />
 
           </TableRow>
@@ -58,13 +59,34 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="系统版本："
+                android:text="产品型号："
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/model_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:text="" />
+
+          </TableRow>
+
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="5dp" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="产品版本："
                 android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/version_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="17sp"
                 android:text="" />
 
           </TableRow>
@@ -84,6 +106,7 @@
                 android:id="@+id/identifier_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="17sp"
                 android:text="" />
 
           </TableRow>
@@ -96,37 +119,79 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="出厂日期："
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/manufacture_date_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="" />
-
-          </TableRow>
-
-          <TableRow
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginTop="5dp" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="运行环境："
+                android:text="系统环境："
                 android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/environment_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="17sp"
                 android:text="" />
 
           </TableRow>
 
-        </TableLayout>
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="5dp" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="构建日期："
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/manufacture_date_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:text="" />
+
+          </TableRow>
+
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="5dp" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="屏幕精度："
+                  android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/screendp_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:text="" />
+
+	  </TableRow>
+
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="5dp" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="键盘类型："
+                  android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/keyboard_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:text="" />
+
+	  </TableRow>
+
+	</TableLayout>
 
         <LinearLayout
             android:id="@+id/copyright_tab"

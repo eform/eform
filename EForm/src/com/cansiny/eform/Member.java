@@ -190,7 +190,7 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 		hideIme(view);
 
 		Member member = Member.getMember();
-		if (member.login(username.getText().toString(),
+		if (member.login(getActivity(), username.getText().toString(),
 			password.getText().toString())) {
 		    dismiss();
 		} else {
@@ -429,6 +429,7 @@ public class Member
     private Member() {
 	is_login = false;
 	profile = null;
+	listener = null;
     }
 
 
@@ -436,14 +437,14 @@ public class Member
 	return is_login;
     }
 
-    public boolean login(String userid, String password) {
+    public boolean login(Context context, String userid, String password) {
 	profile = new MemberProfile();
 	profile.userid = userid;
 	profile.username = "吴小虎";
 	profile.company = "Cansiny";
 	profile.phone = "18655953721";
 
-	is_login = true;
+	is_login = EFormContent.Member.login(context, userid, password);
 
 	if (listener != null) {
 	    listener.onMemberLogin();

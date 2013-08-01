@@ -9,6 +9,8 @@
       android:minSdkVersion="13"
       android:targetSdkVersion="17" />
 
+  <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
   <application
       android:name="EFormApplication"
       android:logo="@drawable/launcher"
@@ -38,12 +40,12 @@
     </activity>
 
     <provider android:name="com.cansiny.eform.EFormContentProvider"
-        android:authorities="com.cansiny.eform.EFormContents"
+        android:authorities="com.cansiny.eform.EFormContentProvider"
         android:label="@string/app_contents_name"
         android:multiprocess="false"
 	android:enabled="true"
 	android:syncable="true"
-	android:exported="true"
+	android:exported="false"
 	android:singleUser="true">
     </provider>
 
