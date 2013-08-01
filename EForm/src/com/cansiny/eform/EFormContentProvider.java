@@ -27,9 +27,14 @@ public class EFormContentProvider extends ContentProvider implements
     static final private int DATABASE_VERSION = 1;
 
     static final private int CODE_TABLE_ACCOUNT = 1;
-    static final private int CODE_TABLE_ACCOUNT_ID = 1;
-    static final private int CODE_TABLE_MEMBER = 1;
-    static final private int CODE_TABLE_MEMBER_ID = 1;
+    static final private int CODE_TABLE_ACCOUNT_ID = 2;
+    static final private int CODE_TABLE_MEMBER = 3;
+    static final private int CODE_TABLE_MEMBER_ID = 4;
+
+    static final public String TYPE_TABLE_ACCOUNT    = "vnd.cansiny.cursor.dir/account";
+    static final public String TYPE_TABLE_ACCOUNT_ID = "vnd.cansiny.cursor.item/account";
+    static final public String TYPE_TABLE_MEMBER     = "vnd.cansiny.cursor.dir/member";
+    static final public String TYPE_TABLE_MEMBER_ID  = "vnd.cansiny.cursor.item/member";
 
     static final private UriMatcher uriMatcher;
 
@@ -54,6 +59,16 @@ public class EFormContentProvider extends ContentProvider implements
     @Override
     public String getType(Uri uri) {
 	Log.d("EFormContentProvider", "getType");
+	switch(uriMatcher.match(uri)) {
+	case CODE_TABLE_ACCOUNT:
+	    return TYPE_TABLE_ACCOUNT;
+	case CODE_TABLE_ACCOUNT_ID:
+	    return TYPE_TABLE_ACCOUNT_ID;
+	case CODE_TABLE_MEMBER:
+	    return TYPE_TABLE_MEMBER;
+	case CODE_TABLE_MEMBER_ID:
+	    return TYPE_TABLE_MEMBER_ID;
+	}
 	return null;
     }
 
@@ -61,6 +76,12 @@ public class EFormContentProvider extends ContentProvider implements
     public Cursor query(Uri uri, String[] projection, String selection,
 	    String[] selectionArgs, String sortOrder) {
 	Log.d("EFormContentProvider", "query : " + uri.toString());
+	Log.d("EFormContentProvider", "query projection : " + projection.toString());
+	Log.d("EFormContentProvider", "query selection : " + selection);
+	if (selectionArgs != null)
+	    Log.d("EFormContentProvider", "query selectionArgs : " + selectionArgs.toString());
+	Log.d("EFormContentProvider", "query sortOrder : " + sortOrder);
+
 	return null;
     }
 

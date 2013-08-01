@@ -5,15 +5,21 @@
  */
 package com.cansiny.eform;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.method.ScrollingMovementMethod;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -150,9 +156,10 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
+		dismiss();
 		hideIme(view);
-		MemberProfileDialog dialog = new MemberProfileDialog();
-		dialog.show(getFragmentManager(), "MemberInfoDialog");
+		MemberRegisterDialog dialog = new MemberRegisterDialog();
+		dialog.show(getFragmentManager(), "MemberRegisterDialog");
 	    }
 	});
 
@@ -195,7 +202,9 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 		    dismiss();
 		} else {
 		    CommonDialog.showBox(getFragmentManager(),
-			    "登陆失败", "用户名或密码错误，请重新输入!\n");
+			    "登陆失败", "证件号码或密码错，请重试! \n\n" +
+			    		"如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
+			    		"如不是会员，请选择“注册会员”，根据提示注册会员。\n");
 		}
 	    }
 	});
@@ -226,6 +235,79 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 }
 
 
+class MemberRegisterDialog extends DialogFragment
+{
+    private View buildLayout() {
+	TextView textview = new TextView(getActivity());
+	textview.setMaxLines(20);
+	textview.setLineSpacing(1, 1.4f);
+	textview.setScrollContainer(true);
+	textview.setMovementMethod(new ScrollingMovementMethod());
+	textview.setPadding(20, 10, 20, 10);
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	try {
+	    AssetManager assets = getActivity().getAssets();
+	    InputStream stream = assets.open("member_protocol.txt");
+
+	    byte[] buffer = new byte[10240];
+	    int count = stream.read(buffer, 0, buffer.length);
+	    if (count >= buffer.length) {
+		LogActivity.writeLog("会员注册协议文件大于10K，超出的部分不显示。");
+	    }
+	    stream.close();
+	    textview.setText(new String(buffer, 0, count, "UTF-8"));
+	} catch (IOException e) {
+	    LogActivity.writeLog(e);
+	    textview.setText("协议文件未找到，请联系管理员。");
+	}
+	return textview;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	builder.setTitle("会员注册协议");
+
+	builder.setView(buildLayout());
+
+	builder.setNegativeButton("取 消", null);
+	builder.setPositiveButton("继续注册", new DialogInterface.OnClickListener() {
+	    @Override
+	    public void onClick(DialogInterface dialog, int which) {
+		dismiss();
+		MemberProfileDialog dialog2 = new MemberProfileDialog();
+		dialog2.show(getFragmentManager(), "MemberProfileDialog");
+	    }
+	});
+
+	return builder.create();
+    }
+
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+
+	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+    }
+
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+	super.onDismiss(dialog);
+    }
+
+}
+
+
 class MemberProfileDialog extends DialogFragment implements OnClickListener
 {
     private Member.MemberProfile profile = null;
@@ -243,7 +325,7 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 	if (profile == null)
 	    builder.setTitle("注册会员");
 	else
-	    builder.setTitle("修改会员信息");
+	    builder.setTitle("更新会员信息");
 
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_member, null));
@@ -253,7 +335,7 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 	if (profile == null)
 	    builder.setPositiveButton("注 册", null);
 	else
-	    builder.setPositiveButton("修 改", null);
+	    builder.setPositiveButton("更 新", null);
 
 	return builder.create();
     }
@@ -372,8 +454,8 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 		} else {
 		    if (member.update(userid_str, username_str,
 			    password_str, company_str, phone_str)) {
-			CommonDialog.showBox(getFragmentManager(), "修改成功",
-				"您输入的信息已成功保存到系统中！");
+			CommonDialog.showBox(getFragmentManager(), "更新成功",
+				"更新信息已成功保存到系统中！");
 			dismiss();
 		    }
 		}
@@ -438,15 +520,20 @@ public class Member
     }
 
     public boolean login(Context context, String userid, String password) {
+	ContentValues values = EFormSQLiteHelper.Member.login(context, userid, password);
+	if (values == null)
+	    return false;
+
+	is_login = true;
+
 	profile = new MemberProfile();
-	profile.userid = userid;
-	profile.username = "吴小虎";
-	profile.company = "Cansiny";
-	profile.phone = "18655953721";
+	profile.rowid = values.getAsLong(EFormSQLiteHelper.Member.COLUMN_ID);
+	profile.userid = values.getAsString(EFormSQLiteHelper.Member.COLUMN_USERID);
+	profile.username = values.getAsString(EFormSQLiteHelper.Member.COLUMN_USERNAME);
+	profile.company = values.getAsString(EFormSQLiteHelper.Member.COLUMN_COMPANY);
+	profile.phone = values.getAsString(EFormSQLiteHelper.Member.COLUMN_PHONE);
 
-	is_login = EFormContent.Member.login(context, userid, password);
-
-	if (listener != null) {
+	if (is_login && listener != null) {
 	    listener.onMemberLogin();
 	}
 	return is_login;
@@ -458,8 +545,11 @@ public class Member
     }
 
     public void logout() {
-	profile = null;
+	if (!is_login)
+	    return;
+
 	is_login = false;
+	profile = null;
 
 	if (listener != null) {
 	    listener.onMemberLogout();
@@ -483,7 +573,7 @@ public class Member
 	if (is_login) {
 	    MemberProfileDialog dialog = new MemberProfileDialog();
 	    dialog.setProfile(profile);
-	    dialog.show(manager, "MemberInfoDialog");
+	    dialog.show(manager, "MemberProfileDialog");
 	}
     }
 
@@ -502,6 +592,7 @@ public class Member
 
     public class MemberProfile
     {
+	public long rowid;
 	public String userid;
 	public String username;
 	public String company;
