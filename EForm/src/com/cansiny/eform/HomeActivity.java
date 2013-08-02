@@ -14,11 +14,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -43,9 +41,7 @@ import android.widget.TableRow;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 
-/**
- * Home Activity, efrom will start form this activity.
- */
+
 public class HomeActivity extends Activity
     implements OnClickListener, OnLongClickListener, MemberListener
 {
@@ -56,40 +52,6 @@ public class HomeActivity extends Activity
 	
     private AtomicInteger atomic_int;
     private HomeInfo home_info;
-
-    static private Context app_context = null;
-    static public Context getAppContext() {
-	return app_context;
-    }
-
-    /**
-     * This method converts dp unit to equivalent pixels, depending on
-     * device density. 
-     * 
-     * @param dp A value in dp (density independent pixels) unit. Which we
-     * 		need to convert into pixels
-     * @return A float value to represent px equivalent to dp depending on
-     *		device density
-     */
-    static public float convertDpToPixel(float dp) {
-	Context context = HomeActivity.getAppContext();
-	DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-	return dp * (metrics.densityDpi / 160f);
-    }
-
-    /**
-     * This method converts device specific pixels to density independent pixels
-     * 
-     * @param px A value in px (pixels) unit. Which we need to convert into dp
-     * @return A float value to represent dp equivalent to px value
-     */
-    static public float convertPixelsToDp(float px) {
-	Context context = HomeActivity.getAppContext();
-	DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-	return px / (metrics.densityDpi / 160f);
-    }
-
-
     private int curr_slogan = 0;
     private Handler  handler = new Handler();
     private Runnable runable = new Runnable() {
@@ -110,7 +72,6 @@ public class HomeActivity extends Activity
 
 	Log.d("HomeActivity", "onCreate");
 
-	app_context = getApplicationContext();
 	atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
 
 	home_info = HomeInfo.getHomeInfo();
@@ -250,7 +211,7 @@ public class HomeActivity extends Activity
 		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    ViewGroup.LayoutParams.WRAP_CONTENT);
 	    if (curr_column < home_info.item_columns) {
-		row_params.rightMargin = (int) convertDpToPixel(80);
+		row_params.rightMargin = (int) Utils.convertDpToPixel(80);
 	    }
 	    table_row.addView(button, row_params);
 
@@ -260,7 +221,7 @@ public class HomeActivity extends Activity
 		TableLayout.LayoutParams params = new TableLayout.LayoutParams(
 			ViewGroup.LayoutParams.WRAP_CONTENT,
 			ViewGroup.LayoutParams.WRAP_CONTENT);
-		params.topMargin = (int) HomeActivity.convertDpToPixel(40);
+		params.topMargin = (int) Utils.convertDpToPixel(40);
 		table.addView(table_row, params);
 		curr_column = 1;
 	    }
@@ -299,8 +260,8 @@ public class HomeActivity extends Activity
 	button.setOnClickListener(this);
 
 	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-		(int) convertDpToPixel(home_info.item_image_size),
-		(int) convertDpToPixel(home_info.item_image_size));
+		(int) Utils.convertDpToPixel(home_info.item_image_size),
+		(int) Utils.convertDpToPixel(home_info.item_image_size));
 	params.gravity = Gravity.CENTER_HORIZONTAL;
 	params.bottomMargin = 4;
 	button_layout.addView(button, params);

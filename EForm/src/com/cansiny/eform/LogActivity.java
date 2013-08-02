@@ -32,7 +32,7 @@ public class LogActivity extends Activity implements OnClickListener
     static final private int BUTTON_TAG_CLOSE = 1;
 
     static private String log_filepath = 
-	HomeActivity.getAppContext().getCacheDir().getAbsolutePath() + 
+	EFormApplication.getContext().getCacheDir().getAbsolutePath() + 
 	File.separator + "eform.log";
 
     static public void writeLog(Exception e) {

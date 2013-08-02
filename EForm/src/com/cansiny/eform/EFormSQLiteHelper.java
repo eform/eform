@@ -106,7 +106,7 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 	values.put("_id", 0);
 	values.put("userid", 0);
 	values.put("password", SHAPassword("123456"));
-	values.put("role", 0);
+	values.put("role", Account.ROLE_ADMINISTRATOR);
 
 	long rowid = db.insert("account", null, values);
 	if (rowid != 0) {
@@ -115,7 +115,7 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
     }
 
 
-    public class Account
+    static public class Account
     {
 	static final public String TABLE_NAME = "account";
 
@@ -123,6 +123,13 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 	static final public String COLUMN_USERID = "userid";
 	static final public String COLUMN_PASSWORD = "password";
 	static final public String COLUMN_ROLE = "role";
+
+	static final public int ROLE_ADMINISTRATOR = 0;
+	static final public int ROLE_MEMBER = 1;
+
+	static public long addMember(ContentValues values, String admin_password) {
+	    return -1;
+	}
     }
 
 
@@ -143,11 +150,9 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 
 	    String[] columns = { COLUMN_ID, COLUMN_USERNAME, COLUMN_PASSWORD,
 		    COLUMN_COMPANY, COLUMN_PHONE };
-	    String selection = "userid=?";
-	    String[] args = { userid };
 
 	    Cursor cursor = database.query(TABLE_NAME, columns,
-		    selection, args, null, null, null);
+		    "userid=?", new String[]{ userid }, null, null, null);
 
 	    if (cursor == null || cursor.getCount() != 1) {
 		helper.close();
@@ -173,8 +178,40 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 	    return values;
 	}
 
-	public void register(Context context, ContentValues values) {
-	    
+	static public long register(Context context, ContentValues values, String admin_passwd) {
+	    EFormSQLiteHelper helper = EFormSQLiteHelper.getSQLiteHelper(context);
+	    SQLiteDatabase database = helper.getWritableDatabase();
+
+	    String userid = values.getAsString(COLUMN_USERID);
+	    String username = values.getAsString(COLUMN_USERNAME);
+	    String password = values.getAsString(COLUMN_PASSWORD);
+
+	    if (userid == null || username == null || password == null) {
+		helper.close();
+		return -1;
+	    }
+
+	    String[] columns = { COLUMN_ID };
+	    Cursor cursor = database.query(TABLE_NAME, columns,
+		    "userid=?", new String[]{ userid }, null, null, null);
+	    if (cursor != null && cursor.getCount() > 0) {
+		helper.close();
+		return -2;
+	    }
+
+	    long rowid = -1;
+	    database.beginTransaction();
+	    try {
+		values.put(COLUMN_PASSWORD, SHAPassword(password));
+		rowid = database.insert(TABLE_NAME, null, values);
+		if (rowid >= 0)
+		    Account.addMember(values, admin_passwd);
+		database.setTransactionSuccessful();
+	    } finally {
+		database.endTransaction();
+	    }
+	    helper.close();
+	    return rowid;
 	}
 
 	public void update(Context context, ContentValues values) {

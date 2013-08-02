@@ -73,8 +73,8 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	button.setBackgroundResource(R.drawable.clear);
 	button.setOnClickListener(this);
 	params = new TableRow.LayoutParams(
-		(int) HomeActivity.convertDpToPixel(26),
-		(int) HomeActivity.convertDpToPixel(26));
+		(int) Utils.convertDpToPixel(26),
+		(int) Utils.convertDpToPixel(26));
 	row.addView(button, params);
 
 	button = new Button(getActivity());
@@ -85,14 +85,14 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	params = new TableRow.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	row.addView(button, params);
 
 
 	row = new TableRow(getActivity());
 	row.setGravity(Gravity.CENTER_VERTICAL);
 	TableLayout.LayoutParams table_params = new TableLayout.LayoutParams();
-	table_params.topMargin = (int) HomeActivity.convertDpToPixel(20);
+	table_params.topMargin = (int) Utils.convertDpToPixel(20);
 	table.addView(row, table_params);
 
 	textview = new TextView(getActivity());
@@ -114,8 +114,8 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(this);
 	button.setBackgroundResource(R.drawable.clear);
 	params = new TableRow.LayoutParams(
-		(int) HomeActivity.convertDpToPixel(26),
-		(int) HomeActivity.convertDpToPixel(26));
+		(int) Utils.convertDpToPixel(26),
+		(int) Utils.convertDpToPixel(26));
 	row.addView(button, params);
 
 	return table;
@@ -169,11 +169,9 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	    @Override
 	    public void onClick(View view) {
 		hideIme(view);
-		CommonDialog.showBox(getFragmentManager(),
-			"找回密码",
-			"您可以通过下面步骤找回密码：\n\n" +
-				"    1、带上注册会员时使用的身份证件；\n" +
-				"    2、联系大堂经理设置新密码；\n");
+		Utils.showToastLong("您可以通过下面步骤找回密码：\n\n" +
+			"    1、带上注册会员时使用的身份证件；\n" +
+			"    2、联系大堂经理设置新密码；", R.drawable.tips);
 	    }
 	});
 
@@ -201,10 +199,9 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 			password.getText().toString())) {
 		    dismiss();
 		} else {
-		    CommonDialog.showBox(getFragmentManager(),
-			    "登陆失败", "证件号码或密码错，请重试! \n\n" +
-			    		"如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
-			    		"如不是会员，请选择“注册会员”，根据提示注册会员。\n");
+		    Utils.showToastLong("证件号码或密码错，请重试! \n\n" +
+		    		"如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
+		    		"如不是会员，请选择“注册会员”，根据提示注册会员。\n", R.drawable.cry);
 		}
 	    }
 	});
@@ -289,6 +286,8 @@ class MemberRegisterDialog extends DialogFragment
     @Override
     public void onStart() {
 	super.onStart();
+
+	setCancelable(false);
 
 	AlertDialog dialog = (AlertDialog) getDialog();
 
@@ -443,20 +442,20 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 
 		Member member = Member.getMember();
 		if (profile == null) {
-		    if (member.register(userid_str, username_str,
-			    password_str, company_str, phone_str)) {
-			CommonDialog.showBox(getFragmentManager(), "注册成功",
-				"注册成功！您现在可以通过证件号码和密码来登陆系统使用会员功能。");
+		    if (member.register(userid_str, username_str, password_str,
+			    company_str, phone_str)) {
+			Utils.showToast("注册成功！您现在可以通过证件号码和密码来登陆系统使用会员功能。", R.drawable.smile);
+			dismiss();
 		    } else {
-			CommonDialog.showBox(getFragmentManager(), "注册失败",
-				"注册失败！");
+			Utils.showToast("注册失败！", R.drawable.cry);
 		    }
 		} else {
 		    if (member.update(userid_str, username_str,
 			    password_str, company_str, phone_str)) {
-			CommonDialog.showBox(getFragmentManager(), "更新成功",
-				"更新信息已成功保存到系统中！");
+			Utils.showToast("会员信息已成功更新！", R.drawable.smile);
 			dismiss();
+		    } else {
+			Utils.showToast("不能更新会员信息！", R.drawable.cry);
 		    }
 		}
 	    }

@@ -30,7 +30,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -49,10 +48,6 @@ public class FormActivity extends Activity implements
     /* constants uses for identified the difference of event source */
     static private final int VIEW_TAG_PAGE_TITLE_BUTTON = 1;
     static private final int VIEW_TAG_SIDEBAR_MEMBER_BUTTON = 2;
-
-    static private final int TOAST_IMAGE_NONE  = 0;
-    static private final int TOAST_IMAGE_SMILE = -1;
-    static private final int TOAST_IMAGE_CRY   = -2;
 
     static private final int TIMEOUT_VALUE = 90;
 
@@ -239,8 +234,8 @@ public class FormActivity extends Activity implements
 	button.setGravity(Gravity.CENTER_HORIZONTAL);
 	button.setOnClickListener(this);
 	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-		(int) HomeActivity.convertDpToPixel(60),
-		(int) HomeActivity.convertDpToPixel(60));
+		(int) Utils.convertDpToPixel(60),
+		(int) Utils.convertDpToPixel(60));
 	linear.addView(button, params);
 
 	TextView textview = new TextView(this);
@@ -251,7 +246,7 @@ public class FormActivity extends Activity implements
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(2);
+	params.topMargin = (int) Utils.convertDpToPixel(2);
 	params.gravity = Gravity.CENTER_HORIZONTAL;
 	linear.addView(textview, params);
 
@@ -261,7 +256,7 @@ public class FormActivity extends Activity implements
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.topMargin = (int) Utils.convertDpToPixel(20);
 	parent.addView(linear, index + 1, params);
     }
 
@@ -291,7 +286,7 @@ public class FormActivity extends Activity implements
 
 	LinearLayout.LayoutParams line_params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.MATCH_PARENT,
-		(int) HomeActivity.convertDpToPixel(6));
+		(int) Utils.convertDpToPixel(6));
 	button_layout.addView(line, line_params);
 
 	return button_layout;
@@ -375,7 +370,7 @@ public class FormActivity extends Activity implements
 	
 	@Override
 	protected void onPreExecute() {
-	    this.toast = showToast("正在加载页面...");
+	    this.toast = showToast("正在加载页面...", 0);
 	}
 
 	@Override
@@ -439,52 +434,14 @@ public class FormActivity extends Activity implements
     }
 
 
-    public Toast showToast(CharSequence sequence, int icon) {
-	LinearLayout layout = new LinearLayout(getApplicationContext());
-	layout.setBackgroundResource(R.color.translucence);
-	layout.setPadding(20, 10, 20, 10);
-
-	if (icon < 0) {
-	    ImageView image = new ImageView(getApplicationContext());
-	    switch (icon) {
-	    case TOAST_IMAGE_SMILE:
-		image.setBackgroundResource(R.drawable.smile);
-		break;
-	    case TOAST_IMAGE_CRY:
-		image.setBackgroundResource(R.drawable.cry);
-		break;
-	    }
-	    image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-
-	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(60, 60);
-	    params.gravity = Gravity.CENTER_VERTICAL;
-	    params.rightMargin = 10;
-	    layout.addView(image, params);
-	}
-
-	TextView text_view = new TextView(getApplicationContext());
-	text_view.setText(sequence);
-	text_view.setTextColor(getResources().getColor(R.color.yellow));
-	text_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
-	text_view.setGravity(Gravity.CENTER_VERTICAL);
-
-	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-		ViewGroup.LayoutParams.MATCH_PARENT,
-		ViewGroup.LayoutParams.MATCH_PARENT);
-	params.gravity = Gravity.CENTER_VERTICAL;
-	layout.addView(text_view, params);
-
-	Toast toast = new Toast(getApplicationContext());
-	toast.setView(layout);
-	toast.setDuration(Toast.LENGTH_SHORT);
+    public Toast showToast(CharSequence sequence, int image) {
+	Toast toast = Utils.makeToast(sequence, image,
+		Utils.IMAGE_SIZE_LARGE, Toast.LENGTH_SHORT);
 	View sidebar = findViewById(R.id.sidebar_layout);
 	toast.setGravity(Gravity.CENTER, 0 - sidebar.getWidth() / 2, 0);
 	toast.show();
-	return toast;
-    }
 
-    public Toast showToast(CharSequence sequence) {
-	return showToast(sequence, TOAST_IMAGE_NONE);
+	return toast;
     }
 
 
@@ -499,9 +456,9 @@ public class FormActivity extends Activity implements
 	int retval = form.verify();
 	if (retval > 0) {
 	    showToast(String.format("本页共 %d 个必填项未填写，点击警告标志可查看详细说明...", retval),
-		    TOAST_IMAGE_CRY);
+		    R.drawable.cry);
 	} else {
-	    showToast("检查完成，没有发现问题！", TOAST_IMAGE_SMILE);
+	    showToast("检查完成，没有发现问题！", R.drawable.smile);
 	}
     }
 

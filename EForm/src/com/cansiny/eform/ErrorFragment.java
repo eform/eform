@@ -62,15 +62,15 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 	image.setImageResource(R.drawable.cry);
 	linear.addView(image, new LinearLayout.LayoutParams(
-		(int) HomeActivity.convertDpToPixel(200),
-		(int) HomeActivity.convertDpToPixel(200)));
+		(int) Utils.convertDpToPixel(200),
+		(int) Utils.convertDpToPixel(200)));
 	
 	LinearLayout linear2 = new LinearLayout(getActivity());
 	linear2.setOrientation(LinearLayout.VERTICAL);
 	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(60);
+	params.leftMargin = (int) Utils.convertDpToPixel(60);
 	linear.addView(linear2, params);
 
 	TextView textview = new TextView(getActivity());
@@ -87,8 +87,8 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(10);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.topMargin = (int) Utils.convertDpToPixel(10);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	linear2.addView(textview, params);
 
 	textview = new TextView(getActivity());
@@ -98,7 +98,7 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(30);
+	params.topMargin = (int) Utils.convertDpToPixel(30);
 	linear2.addView(textview, params);
 
 	textview = new TextView(getActivity());
@@ -112,8 +112,8 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(10);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.topMargin = (int) Utils.convertDpToPixel(10);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	linear2.addView(textview, params);
 
 	Button button = new Button(getActivity());
@@ -125,8 +125,8 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(10);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.topMargin = (int) Utils.convertDpToPixel(10);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	linear2.addView(button, params);
 
 	textview = new TextView(getActivity());
@@ -136,8 +136,8 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = (int) HomeActivity.convertDpToPixel(50);
-	params.bottomMargin = (int) HomeActivity.convertDpToPixel(10);
+	params.topMargin = (int) Utils.convertDpToPixel(50);
+	params.bottomMargin = (int) Utils.convertDpToPixel(10);
 	linear2.addView(textview, params);
 
 	button = new Button(getActivity());
@@ -150,7 +150,7 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	linear2.addView(button, params);
 
 	button = new Button(getActivity());
@@ -163,7 +163,7 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	linear2.addView(button, params);
 
 	button = new Button(getActivity());
@@ -176,7 +176,7 @@ public class ErrorFragment extends Fragment implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.leftMargin = (int) HomeActivity.convertDpToPixel(20);
+	params.leftMargin = (int) Utils.convertDpToPixel(20);
 	linear2.addView(button, params);
 
 	return linear;

@@ -426,13 +426,13 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	image.setBackgroundResource(R.color.transparent);
 	image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 	image.setAdjustViewBounds(true);
-	image.setMaxHeight((int) HomeActivity.convertDpToPixel(28));
+	image.setMaxHeight((int) Utils.convertDpToPixel(28));
 	image.setOnClickListener(new OnClickListener() {
 		@Override
 		public void onClick(View image) {
 		    CharSequence desc = image.getContentDescription();
 		    if (desc.length() > 0)
-			((FormActivity) activity).showToast(desc);
+			Utils.showToast(desc, R.drawable.warning, Utils.IMAGE_SIZE_SMALL);
 		}
 	    });
 	return image;

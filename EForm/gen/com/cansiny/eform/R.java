@@ -83,20 +83,21 @@ public final class R {
         public static final int sidebar=0x7f020036;
         public static final int smile=0x7f020037;
         public static final int swipe_card=0x7f020038;
-        public static final int transparent_button=0x7f020039;
-        public static final int up=0x7f02003a;
-        public static final int up_disabled=0x7f02003b;
-        public static final int up_normal=0x7f02003c;
-        public static final int up_press=0x7f02003d;
-        public static final int upgrade=0x7f02003e;
-        public static final int verify=0x7f02003f;
-        public static final int verify_disabled=0x7f020040;
-        public static final int verify_normal=0x7f020041;
-        public static final int verify_press=0x7f020042;
-        public static final int voucher=0x7f020043;
-        public static final int voucher_normal=0x7f020044;
-        public static final int voucher_press=0x7f020045;
-        public static final int warning=0x7f020046;
+        public static final int tips=0x7f020039;
+        public static final int transparent_button=0x7f02003a;
+        public static final int up=0x7f02003b;
+        public static final int up_disabled=0x7f02003c;
+        public static final int up_normal=0x7f02003d;
+        public static final int up_press=0x7f02003e;
+        public static final int upgrade=0x7f02003f;
+        public static final int verify=0x7f020040;
+        public static final int verify_disabled=0x7f020041;
+        public static final int verify_normal=0x7f020042;
+        public static final int verify_press=0x7f020043;
+        public static final int voucher=0x7f020044;
+        public static final int voucher_normal=0x7f020045;
+        public static final int voucher_press=0x7f020046;
+        public static final int warning=0x7f020047;
     }
     public static final class id {
         public static final int aftermarket_local_textview=0x7f06002a;
