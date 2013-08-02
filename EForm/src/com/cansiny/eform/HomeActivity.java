@@ -152,6 +152,10 @@ public class HomeActivity extends Activity
 	Log.d("HomeActivity", "onDestory");
 
 	handler.removeCallbacks(runable);
+
+	Administrator admin = Administrator.getAdministrator();
+	admin.logout();
+
 	Member member = Member.getMember();
 	member.logout();
     }
@@ -391,7 +395,6 @@ public class HomeActivity extends Activity
 		}
 	    });
 	}
-
 	AnimationSet anim_set = new AnimationSet(true);
 	anim_set.addAnimation(anim);
 	anim_set.setDuration(400);

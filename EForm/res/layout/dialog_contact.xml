@@ -214,9 +214,18 @@
           <TextView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginTop="220dp"
+              android:layout_marginTop="180dp"
+              android:lineSpacingMultiplier="1.2"
               android:text="本系统所含资源包括：软件、硬件、艺术、文档，其所有权归版权持有者所有，任何组织和个人未经许可，不可再次发布本系统资源的任何部分，否则将追究其法律责任。"
               android:textSize="16sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="4dp"
+	      android:text="本产品包含第三方软硬件产品，其版权归相应厂商和/或组织所有。"
+              android:textSize="16sp" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -240,7 +249,7 @@
           <TableLayout
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:layout_marginTop="200dp" >
+              android:layout_marginTop="230dp" >
 
             <TableRow
                 android:layout_width="wrap_content"

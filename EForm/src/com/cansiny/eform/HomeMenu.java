@@ -11,7 +11,6 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -120,10 +119,18 @@ public class HomeMenu extends DialogFragment implements OnClickListener
 	    member.login(getFragmentManager());
 	    break;
 	case BUTTON_TAG_UPGRADE:
-	    Log.d("", "settings");
+	    Administrator admin = Administrator.getAdministrator();
+	    if (!admin.isLogin()) {
+		admin.login(getFragmentManager());
+		return;
+	    }
 	    break;
 	case BUTTON_TAG_SETTINGS:
-	    Log.d("", "settings");
+	    Administrator admin2 = Administrator.getAdministrator();
+	    if (!admin2.isLogin()) {
+		admin2.login(getFragmentManager());
+		return;
+	    }
 	    break;
 	case BUTTON_TAG_CONTACT:
 	    ContactDialog dialog = new ContactDialog();

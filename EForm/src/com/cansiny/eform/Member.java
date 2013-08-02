@@ -10,7 +10,6 @@ import java.io.InputStream;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,10 +23,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableLayout;
@@ -35,13 +31,10 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 
-class MemberLoginDialog extends DialogFragment implements OnClickListener
+class MemberLoginDialog extends Utils.DialogFragment
 {
-    private static final int ID_USERID_EDITTEXT = 0x00010001;
-    private static final int ID_PASSWORD_EDITTEXT = 0x00010002;
-
-    private static final int TAG_USERID_CLEAR_BUTTON = 1;
-    private static final int TAG_PASSWORD_CLEAR_BUTTON = 2;
+    private EditText userid_edittext;
+    private EditText password_edittext;
 
     private View buildLayout() {
 	TableLayout table = new TableLayout(getActivity());
@@ -55,29 +48,21 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	TextView textview = new TextView(getActivity());
 	textview.setText("证件号码：");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	textview.setOnClickListener(this);
 	TableRow.LayoutParams params = new TableRow.LayoutParams();
 	row.addView(textview, params);
 
-	EditText edittext = new EditText(getActivity());
-	edittext.setId(ID_USERID_EDITTEXT);
-	edittext.setInputType(InputType.TYPE_CLASS_PHONE);
-	edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(18)});
-	edittext.setMinEms(10);
-	edittext.setHintTextColor(getResources().getColor(R.color.silver));
-	edittext.setEnabled(false);
-	params = new TableRow.LayoutParams();
-	row.addView(edittext, params);
+	userid_edittext = new EditText(getActivity());
+	userid_edittext.setInputType(InputType.TYPE_CLASS_PHONE);
+	userid_edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(18)});
+	userid_edittext.setMinEms(10);
+	userid_edittext.setHintTextColor(getResources().getColor(R.color.silver));
+	userid_edittext.setEnabled(false);
+	row.addView(userid_edittext);
+
+	addClearButton(row);
 
 	Button button = new Button(getActivity());
-	button.setTag(TAG_USERID_CLEAR_BUTTON);
-	button.setBackgroundResource(R.drawable.clear);
-	button.setOnClickListener(this);
-	params = new TableRow.LayoutParams(
-		(int) Utils.convertDpToPixel(26),
-		(int) Utils.convertDpToPixel(26));
-	row.addView(button, params);
-
-	button = new Button(getActivity());
 	button.setText("读身份证");
 	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setTextColor(getResources().getColor(R.color.purple));
@@ -100,33 +85,17 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	row.addView(textview);
 
-	edittext = new EditText(getActivity());
-	edittext.setId(ID_PASSWORD_EDITTEXT);
-	edittext.setInputType(InputType.TYPE_CLASS_NUMBER |
+	password_edittext = new EditText(getActivity());
+	password_edittext.setInputType(InputType.TYPE_CLASS_NUMBER |
 		InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-	edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(6)});
-	edittext.setHintTextColor(getResources().getColor(R.color.silver));
-	params = new TableRow.LayoutParams();
-	row.addView(edittext, params);
+	password_edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(6)});
+	password_edittext.setHintTextColor(getResources().getColor(R.color.silver));
+	row.addView(password_edittext);
 
-	button = new Button(getActivity());
-	button.setTag(TAG_PASSWORD_CLEAR_BUTTON);
-	button.setOnClickListener(this);
-	button.setBackgroundResource(R.drawable.clear);
-	params = new TableRow.LayoutParams(
-		(int) Utils.convertDpToPixel(26),
-		(int) Utils.convertDpToPixel(26));
-	row.addView(button, params);
+	addClearButton(row);
 
 	return table;
     }
-
-    private void hideIme(View view) {
-	InputMethodManager imm =
-		(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-	imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-    }
-
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -169,7 +138,7 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	    @Override
 	    public void onClick(View view) {
 		hideIme(view);
-		Utils.showToastLong("您可以通过下面步骤找回密码：\n\n" +
+		showToastLong("您可以通过下面步骤找回密码：\n\n" +
 			"    1、带上注册会员时使用的身份证件；\n" +
 			"    2、联系大堂经理设置新密码；", R.drawable.tips);
 	    }
@@ -180,59 +149,44 @@ class MemberLoginDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-	        EditText username = (EditText) getDialog().findViewById(ID_USERID_EDITTEXT);
-		EditText password = (EditText) getDialog().findViewById(ID_PASSWORD_EDITTEXT);
-		if (username.length() == 0) {
-		    username.setHint("证件号码不能为空");
-		    username.requestFocus();
+		if (userid_edittext.length() == 0) {
+		    userid_edittext.setHint("证件号码不能为空");
+		    userid_edittext.requestFocus();
 		    return;
 		}
-		if (password.length() == 0) {
-		    password.setHint("登陆密码不能为空");
-		    password.requestFocus();
+		if (password_edittext.length() == 0) {
+		    password_edittext.setHint("登陆密码不能为空");
+		    password_edittext.requestFocus();
 		    return;
 		}
 		hideIme(view);
 
 		Member member = Member.getMember();
-		if (member.login(getActivity(), username.getText().toString(),
-			password.getText().toString())) {
+		if (member.login(getActivity(), userid_edittext.getText().toString(),
+			password_edittext.getText().toString())) {
 		    dismiss();
+		    Utils.showToast("登陆成功!", R.drawable.smile);
 		} else {
-		    Utils.showToastLong("证件号码或密码错，请重试! \n\n" +
-		    		"如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
-		    		"如不是会员，请选择“注册会员”，根据提示注册会员。\n", R.drawable.cry);
+		    showToastLong("证件号码或密码错，请重试! \n\n" +
+			    "如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
+			    "如不是会员，请选择“注册会员”，根据提示注册会员。\n", R.drawable.cry);
 		}
 	    }
 	});
-
-	getDialog().getWindow().setSoftInputMode(
-		WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
-
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
-    }
-
 
     @Override
     public void onClick(View view) {
-	switch(((Integer) view.getTag()).intValue()) {
-	case TAG_USERID_CLEAR_BUTTON:
-	    ((TextView) getDialog().findViewById(ID_USERID_EDITTEXT)).setText("");
-	    getDialog().findViewById(ID_USERID_EDITTEXT).setEnabled(true);
-	    break;
-	case TAG_PASSWORD_CLEAR_BUTTON:
-	    ((TextView) getDialog().findViewById(ID_PASSWORD_EDITTEXT)).setText("");
-	    break;
+	super.onClick(view);
+	if (view.getClass().equals(TextView.class)) {
+	    userid_edittext.setEnabled(true);
 	}
     }
+
 }
 
 
-class MemberRegisterDialog extends DialogFragment
+class MemberRegisterDialog extends Utils.DialogFragment
 {
     private View buildLayout() {
 	TextView textview = new TextView(getActivity());
@@ -298,17 +252,17 @@ class MemberRegisterDialog extends DialogFragment
 	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     }
 
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
-    }
-
 }
 
 
-class MemberProfileDialog extends DialogFragment implements OnClickListener
+class MemberProfileDialog extends Utils.DialogFragment
 {
+    private EditText userid_edittext;
+    private EditText username_edittext;
+    private EditText password_edittext;
+    private EditText password2_edittext;
+    private EditText company_edittext;
+    private EditText phone_edittext;
     private Member.MemberProfile profile = null;
 
     public void setProfile(Member.MemberProfile profile) {
@@ -339,12 +293,6 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 	return builder.create();
     }
 
-    private void hideIme(View view) {
-	InputMethodManager imm = 
-		(InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-	imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-    }
-
     @Override
     public void onStart() {
 	super.onStart();
@@ -353,31 +301,39 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 
 	final AlertDialog dialog = (AlertDialog) getDialog();
 
+	userid_edittext = (EditText) dialog.findViewById(R.id.userid_edittext);
+	username_edittext = (EditText) dialog.findViewById(R.id.username_edittext);
+	password_edittext = (EditText) dialog.findViewById(R.id.password_edittext);
+	password2_edittext = (EditText) dialog.findViewById(R.id.password2_edittext);
+	company_edittext = (EditText) dialog.findViewById(R.id.company_edittext);
+	phone_edittext = (EditText) dialog.findViewById(R.id.phone_edittext);
+
 	if (profile != null) {
-	    TextView textview = (TextView) dialog.findViewById(R.id.userid_edittext);
-	    textview.setText(profile.userid);
-	    textview = (TextView) dialog.findViewById(R.id.username_edittext);
-	    textview.setText(profile.username);
-	    textview = (TextView) dialog.findViewById(R.id.company_edittext);
-	    textview.setText(profile.company);
-	    textview = (TextView) dialog.findViewById(R.id.phone_edittext);
-	    textview.setText(profile.phone);
+	    userid_edittext.setText(profile.userid);
+	    username_edittext.setText(profile.username);
+	    company_edittext.setText(profile.company);
+	    phone_edittext.setText(profile.phone);
 
 	    dialog.findViewById(R.id.idcard_read_button).setVisibility(View.GONE);
 	}
 
 	View view = dialog.findViewById(R.id.idcard_read_button);
 	view.setOnClickListener(this);
+
 	view = dialog.findViewById(R.id.password_clear);
+	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
 	view.setOnClickListener(this);
 	view = dialog.findViewById(R.id.password2_clear);
+	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
 	view.setOnClickListener(this);
 	view = dialog.findViewById(R.id.company_clear);
+	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
 	view.setOnClickListener(this);
 	view = dialog.findViewById(R.id.phone_clear);
+	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
 	view.setOnClickListener(this);
 
-	dialog.findViewById(R.id.password_edittext).requestFocus();
+	password_edittext.requestFocus();
 
 	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
 	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
@@ -394,98 +350,73 @@ class MemberProfileDialog extends DialogFragment implements OnClickListener
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		EditText userid = (EditText) dialog.findViewById(R.id.userid_edittext);
-		EditText username = (EditText) dialog.findViewById(R.id.username_edittext);
-		EditText password = (EditText) dialog.findViewById(R.id.password_edittext);
-		EditText password2 = (EditText) dialog.findViewById(R.id.password2_edittext);
-		EditText company = (EditText) dialog.findViewById(R.id.company_edittext);
-		EditText phone = (EditText) dialog.findViewById(R.id.phone_edittext);
-
-		if (userid.length() == 0) {
-		    userid.setHint("证件号码不能为空");
+		if (userid_edittext.length() == 0) {
+		    userid_edittext.setHint("证件号码不能为空");
 		    return;
 		}
-		if (username.length() == 0) {
-		    username.setHint("会员姓名不能为空");
+		if (username_edittext.length() == 0) {
+		    username_edittext.setHint("会员姓名不能为空");
 		    return;
 		}
 
 		if (profile == null) {
-		    if (password.length() == 0) {
-			password.setText("密码不能为空");
-			password.requestFocus();
+		    if (password_edittext.length() == 0) {
+			password_edittext.setText("密码不能为空");
+			password_edittext.requestFocus();
 			return;
 		    }
 		}
-		if (password.length() > 0) {
-		    if (password.length() != 6) {
-			password.setText("");
-			password.setHint("密码长度必须是6位");
-			password.requestFocus();
+		String userid = userid_edittext.getText().toString();
+		String username = username_edittext.getText().toString();
+		String password = password_edittext.getText().toString();
+		String password2 = password2_edittext.getText().toString();
+		String company = company_edittext.getText().toString();
+		String phone = phone_edittext.getText().toString();
+
+		if (password_edittext.length() > 0) {
+		    if (password_edittext.length() != 6) {
+			password_edittext.setText("");
+			password_edittext.setHint("密码长度必须是6位");
+			password_edittext.requestFocus();
 			return;
 		    }
-		    if (!password.getText().toString().equals(password2.getText().toString())) {
-			password2.setText("");
-			password2.setHint("确认密码不一致");
-			password2.requestFocus();
+		    if (!password.equals(password2)) {
+			password2_edittext.setText("");
+			password2_edittext.setHint("确认密码不一致");
+			password2_edittext.requestFocus();
 			return;
 		    }
 		}
 
 		hideIme(view);
 
-		String userid_str = userid.getText().toString();
-		String username_str = username.getText().toString();
-		String password_str = password.getText().toString();
-		String company_str = company.getText().toString();
-		String phone_str = phone.getText().toString();
-
 		Member member = Member.getMember();
 		if (profile == null) {
-		    if (member.register(userid_str, username_str, password_str,
-			    company_str, phone_str)) {
-			Utils.showToast("注册成功！您现在可以通过证件号码和密码来登陆系统使用会员功能。", R.drawable.smile);
+		    if (member.register(userid, username, password, company, phone)) {
+			showToast("注册成功！您现在可以通过证件号码和密码来登陆系统使用会员功能。",
+				R.drawable.smile);
 			dismiss();
 		    } else {
-			Utils.showToast("注册失败！", R.drawable.cry);
+			showToast("注册失败！", R.drawable.cry);
 		    }
 		} else {
-		    if (member.update(userid_str, username_str,
-			    password_str, company_str, phone_str)) {
-			Utils.showToast("会员信息已成功更新！", R.drawable.smile);
+		    if (member.update(userid, username, password, company, phone)) {
+			showToast("会员信息已成功更新！", R.drawable.smile);
 			dismiss();
 		    } else {
-			Utils.showToast("不能更新会员信息！", R.drawable.cry);
+			showToast("不能更新会员信息！", R.drawable.cry);
 		    }
 		}
 	    }
 	});
-
-	getDialog().getWindow().setSoftInputMode(
-		WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
     }
 
 
     @Override
     public void onClick(View view) {
+	super.onClick(view);
+
 	switch (view.getId()) {
-	case R.id.password_clear:
-	    ((TextView) getDialog().findViewById(R.id.password_edittext)).setText("");
-	    break;
-	case R.id.password2_clear:
-	    ((TextView) getDialog().findViewById(R.id.password2_edittext)).setText("");
-	    break;
-	case R.id.company_clear:
-	    ((TextView) getDialog().findViewById(R.id.company_edittext)).setText("");
-	    break;
-	case R.id.phone_clear:
-	    ((TextView) getDialog().findViewById(R.id.phone_edittext)).setText("");
-	    break;
 	case R.id.idcard_read_button:
 	    break;
 	}

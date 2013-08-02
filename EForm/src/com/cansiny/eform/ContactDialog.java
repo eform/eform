@@ -100,7 +100,7 @@ public class ContactDialog extends DialogFragment
 
 	    tabspec = tabhost.newTabSpec(TAB_TAG_DEVICEINFO);
 	    tabspec.setContent(R.id.deviceinfo_tab);
-	    tabspec.setIndicator("设备信息",null);
+	    tabspec.setIndicator("产品信息",null);
 	    tabhost.addTab(tabspec);
 
 	    tabspec = tabhost.newTabSpec(TAB_TAG_COPYRIGHT);

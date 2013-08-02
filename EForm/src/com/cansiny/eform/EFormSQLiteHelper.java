@@ -101,17 +101,6 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
     }
 
     private void initData(SQLiteDatabase db, int oldVersion, int newVersion) {
-	ContentValues values = new ContentValues();
-
-	values.put("_id", 0);
-	values.put("userid", 0);
-	values.put("password", SHAPassword("123456"));
-	values.put("role", Account.ROLE_ADMINISTRATOR);
-
-	long rowid = db.insert("account", null, values);
-	if (rowid != 0) {
-	    LogActivity.writeLog("Administrator must has rowid 0, current is %d", rowid);
-	}
     }
 
 
@@ -127,8 +116,85 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 	static final public int ROLE_ADMINISTRATOR = 0;
 	static final public int ROLE_MEMBER = 1;
 
-	static public long addMember(ContentValues values, String admin_password) {
-	    return -1;
+	static public boolean hasPassword(Context context) {
+	    EFormSQLiteHelper helper = EFormSQLiteHelper.getSQLiteHelper(context);
+	    SQLiteDatabase database = helper.getReadableDatabase();
+
+	    Cursor cursor = database.query(TABLE_NAME, null,
+		    "userid=0 and role=0", null , null, null, null);
+
+	    if (cursor == null) {
+		helper.close();
+		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
+		return false;
+	    }
+
+	    int count = cursor.getCount();
+	    cursor.close();
+	    helper.close();
+
+	    return (count > 0) ? true : false;
+	}
+
+	static public boolean setPassword(Context context, String password) {
+	    if (password.length() != 6) {
+		throw new IllegalArgumentException("管理员密码长度必须为6位");
+	    }
+
+	    EFormSQLiteHelper helper = EFormSQLiteHelper.getSQLiteHelper(context);
+	    SQLiteDatabase database = helper.getReadableDatabase();
+
+	    Cursor cursor = database.query(TABLE_NAME, new String[] { COLUMN_ID },
+		    "userid=0 and role=0", null , null, null, null);
+
+	    if (cursor == null) {
+		helper.close();
+		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
+		return false;
+	    }
+
+	    ContentValues values = new ContentValues();
+	    values.put(COLUMN_PASSWORD, SHAPassword(password));
+
+	    if (cursor.getCount() == 0) {
+		values.put(COLUMN_USERID, 0);
+		values.put(COLUMN_ROLE, Account.ROLE_ADMINISTRATOR);
+		long rowid = database.insert(TABLE_NAME, null, values);
+		return (rowid >= 0) ? true : false;
+	    } else {
+		cursor.moveToFirst();
+		int rows = database.update(TABLE_NAME, values,
+			"_id=?", new String[] { String.valueOf(cursor.getLong(0)) });
+		return (rows == 1) ? true : false;
+	    }
+	}
+
+	static public int login(Context context, String password) {
+	    EFormSQLiteHelper helper = EFormSQLiteHelper.getSQLiteHelper(context);
+	    SQLiteDatabase database = helper.getReadableDatabase();
+
+	    Cursor cursor = database.query(TABLE_NAME, new String[] { COLUMN_PASSWORD },
+		    "userid=0 and role=0", null , null, null, null);
+
+	    if (cursor == null) {
+		helper.close();
+		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
+		return -1;
+	    }
+
+	    if (cursor.getCount() == 0) {
+		cursor.close();
+		helper.close();
+		return password.equals("123456") ? 1 : -1;
+	    }
+
+	    cursor.moveToFirst();
+	    String encoded_password = cursor.getString(0);
+
+	    cursor.close();
+	    helper.close();
+
+	    return encoded_password.equals(SHAPassword(password)) ? 0 : -1;
 	}
     }
 
@@ -204,8 +270,8 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 	    try {
 		values.put(COLUMN_PASSWORD, SHAPassword(password));
 		rowid = database.insert(TABLE_NAME, null, values);
-		if (rowid >= 0)
-		    Account.addMember(values, admin_passwd);
+//		if (rowid >= 0)
+//		    Account.addMember(values, admin_passwd);
 		database.setTransactionSuccessful();
 	    } finally {
 		database.endTransaction();

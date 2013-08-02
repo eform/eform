@@ -370,7 +370,7 @@ public class FormActivity extends Activity implements
 	
 	@Override
 	protected void onPreExecute() {
-	    this.toast = showToast("正在加载页面...", 0);
+	    toast = showToast("正在加载页面...", 0);
 	}
 
 	@Override
