@@ -1,148 +1,283 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+	      android:layout_width="match_parent"
+	      android:layout_height="match_parent"
+	      android:orientation="vertical" >
 
-    <TabHost
-        android:id="@android:id/tabhost"
+  <TabHost
+      android:id="@android:id/tabhost"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent" >
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+      <TabWidget
+          android:id="@android:id/tabs"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content" >
+      </TabWidget>
+
+      <FrameLayout
+          android:id="@android:id/tabcontent"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:minHeight="400dp"
+          android:padding="20dp" >
 
         <LinearLayout
+            android:id="@+id/member_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:orientation="vertical" >
+
+          <Button
+              android:id="@+id/member_password_button"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="修改会员密码" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="10dp"
+              android:layout_marginLeft="4dp"
+              android:text="会员如不慎忘记密码，可以带上身份证在这里设置新密码"
+              android:textSize="16sp" />
+
+          <TableLayout
+              android:id="@+id/member_password_table"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/yellow"
+              android:focusableInTouchMode="true"
+              android:paddingBottom="10dp"
+              android:paddingLeft="20dp"
+              android:paddingRight="20dp"
+              android:paddingTop="10dp"
+              android:stretchColumns="1" >
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="right|center_vertical"
+                  android:text="新密码："
+                  android:textSize="18sp" />
+
+              <EditText
+                  android:id="@+id/member_password_edittext"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:ems="10"
+                  android:inputType="numberPassword" >
+
+                <requestFocus />
+              </EditText>
+
+              <Button
+                  android:id="@+id/member_password_clear_button"
+                  android:layout_width="26dp"
+                  android:layout_height="26dp"
+                  android:background="@drawable/clear" />
+
+              <Button
+                  android:id="@+id/member_password_set_button"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="10dp"
+                  android:background="@drawable/button"
+                  android:text="修 改"
+                  android:textColor="@color/purple" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="确认新密码："
+                  android:textSize="18sp" />
+
+              <EditText
+                  android:id="@+id/member_password2_edittext"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:ems="10"
+                  android:inputType="numberPassword" />
+
+              <Button
+                  android:id="@+id/member_password2_clear_button"
+                  android:layout_width="26dp"
+                  android:layout_height="26dp"
+                  android:background="@drawable/clear" />
+
+              <Button
+                  android:id="@+id/member_password_cancel_button"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="10dp"
+                  android:background="@drawable/button"
+                  android:text="取 消"
+                  android:textColor="@color/purple" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_span="4"
+                  android:layout_marginTop="5dp"
+                  android:text="会员密码用于加密设备中存储的信息，请勿告诉他人。"
+                  android:textColor="@color/red"
+                  android:textSize="16sp" />
+
+            </TableRow>
+
+          </TableLayout>
+
+          <Button
+              android:id="@+id/member_list_button"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="10dp"
+              android:text="查看会员列表" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="4dp"
+              android:text="查看所有已注册的会员信息"
+              android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <TableLayout
+            android:id="@+id/device_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:stretchColumns="1" >
+
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="刷卡器设备："
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/magcard_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:spinnerStyle="@android:style/Widget.Spinner.DropDown"
+                android:gravity="bottom" />
+          </TableRow>
+        </TableLayout>
+
+        <LinearLayout
+            android:id="@+id/advance_tab"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical" >
 
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-            </TabWidget>
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center_vertical" >
 
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minHeight="400dp"
-                android:padding="20dp" >
+            <CheckBox
+                android:id="@+id/auto_logout_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="自动退出管理员登录，登录后停留时间："
+                android:textSize="18sp" />
 
-                <LinearLayout
-                    android:id="@+id/advance_tab"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical" >
+            <EditText
+                android:id="@+id/auto_logout_time_edittext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="3"
+                android:inputType="number"
+                android:textSize="18sp" >
 
-                    <LinearLayout
-                        android:id="@+id/jj"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" >
+            </EditText>
 
-                        <CheckBox
-                            android:id="@+id/auto_logout_checkbox"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="自动退出管理员登录，停留时间："
-                            android:textSize="18sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="分钟"
+                android:textSize="18sp" />
 
-                        <EditText
-                            android:id="@+id/auto_logout_time_edittext"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ems="3"
-                            android:inputType="number" >
-                        </EditText>
+          </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="分钟"
-                            android:textSize="18sp" />
+          <Button
+              android:id="@+id/admin_logout_button"
+              android:layout_width="180dp"
+              android:layout_height="wrap_content"
+              android:text="立即退出登录" />
 
-                    </LinearLayout>
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="4dp"
+              android:text="退出管理员登录，避免非管理人员使用管理功能"
+              android:textSize="16sp" />
 
-                    <Button
-                        android:id="@+id/logout_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="立即退出登录" />
+          <Button
+              android:id="@+id/admin_password_button"
+              android:layout_width="180dp"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="20dp"
+              android:text="设置管理员密码"
+              android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="退出管理员登录，避免非管理人员使用管理功能"
-                        android:textSize="16sp" />
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="4dp"
+              android:text="管理员密码用于加密在设备上存储的信息，请妥善保管"
+              android:textSize="16sp" />
 
-                    <Button
-                        android:id="@+id/set_password_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="设置管理员密码"
-                        android:textSize="18sp" />
+          <Button
+              android:id="@+id/system_settings_button"
+              android:layout_width="180dp"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="20dp"
+              android:text="进入系统设置"
+              android:textSize="18sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="管理员密码用于加密在设备上存储的信息，请妥善保管"
-                        android:textSize="16sp" />
-
-                    <Button
-                        android:id="@+id/system_settings_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="进入系统设置"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:text="对系统进行更多细致的设置"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
-                <TableLayout
-                    android:id="@+id/device_tab"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:stretchColumns="1" >
-
-                    <TableRow
-                        android:id="@+id/tableRow1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" >
-
-                        <TextView
-                            android:id="@+id/textView1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="刷卡器设备："
-                            android:textSize="18sp" />
-
-                        <Spinner
-                            android:id="@+id/magcard_spinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </TableRow>
-                </TableLayout>
-
-                <LinearLayout
-                    android:id="@+id/member_tab"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="会员" />
-                </LinearLayout>
-            </FrameLayout>
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="4dp"
+              android:text="系统各方面的设置，请谨慎使用"
+              android:textSize="16sp" />
         </LinearLayout>
-    </TabHost>
+
+      </FrameLayout>
+    </LinearLayout>
+  </TabHost>
 
 </LinearLayout>

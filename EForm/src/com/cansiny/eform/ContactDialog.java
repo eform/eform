@@ -25,13 +25,17 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 
-public class ContactDialog extends Utils.DialogFragment
+public class ContactDialog extends Utils.DialogFragment implements OnTabChangeListener
 {
     static final private String TAB_TAG_AFTERMARKET = "AfterMarket";
     static final private String TAB_TAG_COMPANYINFO = "CompanyInfo";
     static final private String TAB_TAG_DEVICEINFO  = "DeviceInfo";
     static final private String TAB_TAG_COPYRIGHT   = "Copyright";
 
+    private boolean aftermarket_tab_is_active = false;
+    private boolean companyinfo_tab_is_active = false;
+    private boolean deviceinfo_tab_is_active = false;
+    private boolean copyright_tab_is_active = false;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -81,26 +85,42 @@ public class ContactDialog extends Utils.DialogFragment
 		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 	    }
 
-	    tabhost.setOnTabChangedListener(new OnTabChangeListener() {
-		@Override
-		public void onTabChanged(String tag) {
-		}
-	    });
+	    tabhost.setOnTabChangedListener(this);
 
-	    fillAftermartket();
-	    fillDeviceInfo();
+	    onTabChanged(TAB_TAG_AFTERMARKET);
 	}
     }
 
+    @Override
+    public void onTabChanged(String tag) {
+	if (tag.equals(TAB_TAG_AFTERMARKET)) {
+	    if (!aftermarket_tab_is_active) {
+		onAftermarketTabActive();
+		aftermarket_tab_is_active = true;
+	    }
+	} else if (tag.equals(TAB_TAG_COMPANYINFO)) {
+	    if (!companyinfo_tab_is_active) {
+		companyinfo_tab_is_active = true;
+	    }
+	} else if (tag.equals(TAB_TAG_DEVICEINFO)) {
+	    if (!deviceinfo_tab_is_active) {
+		onDeviceinfoTabActive();
+		deviceinfo_tab_is_active = true;
+	    }
+	} else if (tag.equals("")) {
+	    if (!copyright_tab_is_active) {
+		copyright_tab_is_active = true;
+	    }
+	}
+    }
 
-    private void fillAftermartket() {
+    private void onAftermarketTabActive() {
 	TextView textview = (TextView) getDialog().findViewById(R.id.aftermarket_local_textview);
 	textview.setText("姓名：吴小虎\n电话：18655953721");
     }
 
-
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    private void fillDeviceInfo() {
+    private void onDeviceinfoTabActive() {
 	Configuration config = getResources().getConfiguration();
 	PackageInfo pInfo = null;
 
@@ -122,7 +142,7 @@ public class ContactDialog extends Utils.DialogFragment
 	}
 
 	textview = (TextView) getDialog().findViewById(R.id.identifier_textview);
-	textview.setText(Utils.getDeviceId(getActivity()).toString());
+	textview.setText(Utils.getDeviceId().toString().toUpperCase(Locale.US));
 
 	textview = (TextView) getDialog().findViewById(R.id.environment_textview);
 	textview.setText(Build.DISPLAY);

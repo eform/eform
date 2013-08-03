@@ -30,6 +30,7 @@ import android.widget.TextView;
 class AdministratorLoginDialog extends Utils.DialogFragment
 {
     private EditText password_edittext;
+    private boolean set_password = false;
 
     private View buildLayout() {
 	LinearLayout linear = new LinearLayout(getActivity());
@@ -139,7 +140,7 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 		case 1:
 		    dismiss();
 		    Utils.showToast("使用初始密码登录成功，请立即设置密码!", R.drawable.tips);
-		    admin.setPassword(getFragmentManager());
+		    set_password = true;
 		    break;
 		case -1:
 		    Utils.showToast("密码错误，请重试!", R.drawable.cry);
@@ -155,7 +156,11 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 
 	Administrator admin = Administrator.getAdministrator();
 	admin.fireLoginDialogDisapper();
+
+	if (set_password)
+	    admin.setPassword(getFragmentManager());
     }
+
 }
 
 

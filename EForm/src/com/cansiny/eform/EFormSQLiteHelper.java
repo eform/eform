@@ -7,6 +7,9 @@ package com.cansiny.eform;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+
+import com.cansiny.eform.Member.MemberProfile;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -16,7 +19,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Base64;
-import android.util.Log;
 
 
 public class EFormSQLiteHelper extends SQLiteOpenHelper
@@ -84,12 +86,12 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Member.TABLE_NAME + " ("
         	+ "_id      INTEGER PRIMARY KEY,"
-        	+ "userid   TEXT UNIQUE,"
-        	+ "usrename TEXT NOT NULL,"
-        	+ "password TEXT NOT NULL,"
-        	+ "company  TEXT,"
-        	+ "phone    TEXT"
-        	+ ");");
+		+ "userid   TEXT UNIQUE,"
+		+ "username TEXT NOT NULL,"
+		+ "password TEXT NOT NULL,"
+		+ "company  TEXT,"
+		+ "phone    TEXT"
+		+ ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Voucher.TABLE_NAME + " ("
         	+ "_id       INTEGER PRIMARY KEY,"
@@ -286,6 +288,39 @@ public class EFormSQLiteHelper extends SQLiteOpenHelper
 
 	public void delete(Context context) {
 	    
+	}
+
+	static public ArrayList<MemberProfile> listAll(Context context) {
+	    EFormSQLiteHelper helper = EFormSQLiteHelper.getSQLiteHelper(context);
+	    SQLiteDatabase database = helper.getWritableDatabase();
+
+	    String[] columns = { COLUMN_ID, COLUMN_USERID, COLUMN_USERNAME,
+		    COLUMN_COMPANY, COLUMN_PHONE };
+
+	    Cursor cursor = database.query(TABLE_NAME, columns,
+		    null, null, null, null, "username ASC");
+
+	    if (cursor == null || cursor.getCount() <= 0) {
+		helper.close();
+		return null;
+	    }
+
+	    ArrayList<MemberProfile> members = new ArrayList<MemberProfile>();
+	    while(cursor.moveToNext()) {
+		MemberProfile profile = new MemberProfile();
+
+		profile.rowid = cursor.getLong(0);
+		profile.userid = cursor.getString(1);
+		profile.username = cursor.getString(2);
+		profile.company = cursor.getString(3);
+		profile.phone = cursor.getString(4);
+
+		members.add(profile);
+	    }
+	    cursor.close();
+	    helper.close();
+
+	    return members;
 	}
     }
 

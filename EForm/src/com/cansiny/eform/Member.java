@@ -537,7 +537,7 @@ public class Member
     }
 
 
-    public class MemberProfile
+    static public class MemberProfile
     {
 	public long   rowid;
 	public String userid;

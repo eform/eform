@@ -70,10 +70,18 @@ public class HomeActivity extends Activity
 		    curr_slogan = 0;
 	    }
 
-	    Administrator admin = Administrator.getAdministrator();
-	    if (admin.isLogin()) {
-		if (currtime - admin_logintime >= 10 * 60 * 1000) {
-		    admin.logout();
+	    Preferences prefs = Preferences.getPreferences();
+	    if (prefs.getAdministratorAutoLogout()) {
+		Administrator admin = Administrator.getAdministrator();
+		if (admin.isLogin()) {
+		    if (admin_logintime == 0) {
+			admin_logintime = System.currentTimeMillis();
+		    } else {
+			int logouttime = prefs.getAdministratorAutoLogoutTime();
+			if (currtime - admin_logintime >= logouttime * 60 * 1000) {
+			    admin.logout();
+			}
+		    }
 		}
 	    }
 	    handler.postDelayed(this, 1000);
@@ -437,11 +445,14 @@ public class HomeActivity extends Activity
 
     @Override
     public void onAdministratorLogin(Administrator admin) {
-	admin_logintime = System.currentTimeMillis();
+	Preferences prefs = Preferences.getPreferences();
+	if (prefs.getAdministratorAutoLogout())
+	    admin_logintime = System.currentTimeMillis();
     }
 
     @Override
     public void onAdministratorLogout(Administrator admin) {
+	admin_logintime = 0;
     }
 
 }

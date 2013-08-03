@@ -1,4 +1,8 @@
-/*
+/* EForm - Electronic Form System
+ *
+ * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
+ * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
+ *
  * Copyright 2009 Cedric Priscal
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,31 +17,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-
 package com.cansiny.eform;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
 import java.io.OutputStream;
-
+import java.util.Iterator;
+import java.util.Vector;
 import android.util.Log;
+
 
 public class SerialPort
 {
     private static final String TAG = "SerialPort";
 
-    /*
-     * Do not remove or rename the field mFd: it is used by native method close();
-     */
+    /* Do not remove or rename the field mFd: it is used by native
+     * method close(); */
     private FileDescriptor mFd;
     private FileInputStream mFileInputStream;
     private FileOutputStream mFileOutputStream;
 
-    public SerialPort(File device, int baudrate, int flags) throws SecurityException, IOException {
+    public SerialPort(File device, int baudrate, int flags)
+	throws SecurityException, IOException {
 	/* Check access permission */
 	if (!device.canRead() || !device.canWrite()) {
 	    try {
@@ -64,7 +71,6 @@ public class SerialPort
 	mFileOutputStream = new FileOutputStream(mFd);
     }
 
-    // Getters and setters
     public InputStream getInputStream() {
 	return mFileInputStream;
     }
@@ -72,10 +78,107 @@ public class SerialPort
 	return mFileOutputStream;
     }
 
-    // JNI
     private native static FileDescriptor open(String path, int baudrate, int flags);
     public native void close();
     static {
 	System.loadLibrary("serial_port");
     }
+
+
+    static public class SerialPortFinder
+    {
+        public class Driver {
+	    public Driver(String name, String root) {
+		mDriverName = name;
+		mDeviceRoot = root;
+	    }
+	    private String mDriverName;
+	    private String mDeviceRoot;
+	    Vector<File> mDevices = null;
+	    public Vector<File> getDevices() {
+		if (mDevices == null) {
+		    mDevices = new Vector<File>();
+		    File dev = new File("/dev");
+		    File[] files = dev.listFiles();
+		    for (int i = 0; i < files.length; i++) {
+			if (files[i].getAbsolutePath().startsWith(mDeviceRoot)) {
+			    Log.d(TAG, "Found new device: " + files[i]);
+			    mDevices.add(files[i]);
+			}
+		    }
+		}
+		return mDevices;
+	    }
+	    public String getName() {
+		return mDriverName;
+	    }
+        }
+
+        private static final String TAG = "SerialPort";
+
+        private Vector<Driver> mDrivers = null;
+
+        Vector<Driver> getDrivers() throws IOException {
+	    if (mDrivers == null) {
+		mDrivers = new Vector<Driver>();
+		LineNumberReader r = new LineNumberReader(new FileReader("/proc/tty/drivers"));
+		String l;
+		while((l = r.readLine()) != null) {
+		    // Issue 3:
+		    // Since driver name may contain spaces, we do not extract driver name with split()
+		    String drivername = l.substring(0, 0x15).trim();
+		    String[] w = l.split(" +");
+		    if ((w.length >= 5) && (w[w.length - 1].equals("serial"))) {
+			Log.d(TAG, "Found new driver " + drivername + " on " + w[w.length - 4]);
+			mDrivers.add(new Driver(drivername, w[w.length-4]));
+		    }
+		}
+		r.close();
+	    }
+	    return mDrivers;
+        }
+
+        public String[] getAllDevices() {
+	    Vector<String> devices = new Vector<String>();
+	    Iterator<Driver> itdriv;
+	    try {
+		itdriv = getDrivers().iterator();
+		while(itdriv.hasNext()) {
+		    Driver driver = itdriv.next();
+		    Iterator<File> itdev = driver.getDevices().iterator();
+		    while(itdev.hasNext()) {
+			File file = itdev.next();
+			String devicename = file.getName();
+			String devicepath = file.getAbsolutePath();
+			String value = String.format("%s %s %s", devicename,
+						     driver.getName(), devicepath);
+			devices.add(value);
+		    }
+		}
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+	    return devices.toArray(new String[devices.size()]);
+        }
+
+        public String[] getAllDevicesPath() {
+	    Vector<String> devices = new Vector<String>();
+	    Iterator<Driver> itdriv;
+	    try {
+		itdriv = getDrivers().iterator();
+		while(itdriv.hasNext()) {
+		    Driver driver = itdriv.next();
+		    Iterator<File> itdev = driver.getDevices().iterator();
+		    while(itdev.hasNext()) {
+			String device = itdev.next().getAbsolutePath();
+			devices.add(device);
+		    }
+		}
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+	    return devices.toArray(new String[devices.size()]);
+        }
+    }
+
 }

@@ -58,15 +58,13 @@ public class MagcardReader extends DialogFragment
 	    @Override
 	    public void run() {
 		long currtime = System.currentTimeMillis();
-		long millis = currtime - starttime;
-		int seconds = (int) (millis / 1000);
-
-		total_seconds -= seconds;
+		total_seconds -= (int) ((currtime - starttime) / 1000);
 		if (total_seconds <= 0) {
 		    dismiss();
 		    return;
 		}
 		starttime = currtime;
+
 		seconds_textview.setText("" + total_seconds);
 
 		handler.postDelayed(this, 1000);
@@ -188,11 +186,6 @@ public class MagcardReader extends DialogFragment
 		Log.e("MagcardReaderTask", "参数必须是 TextView 实例");
 		return null;
 	    }
-	    SerialPortFinder finder = new SerialPortFinder();
-	    String[] devices = finder.getAllDevicesPath();
-	    for (String device : devices) {
-		Log.d("", device);
-	    }
 	    try {
 		Thread.sleep(5000);
 	    } catch (InterruptedException e) {
@@ -214,4 +207,5 @@ public class MagcardReader extends DialogFragment
 	    }
 	}
     }
+
 }

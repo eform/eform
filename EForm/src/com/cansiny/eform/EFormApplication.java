@@ -7,6 +7,7 @@ package com.cansiny.eform;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 public class EFormApplication extends Application
@@ -21,10 +22,15 @@ public class EFormApplication extends Application
         return application;
     }
 
+    public static SharedPreferences getSharedPreferences() {
+	return application.getSharedPreferences("eform_settings", MODE_PRIVATE);
+    }
+
     @Override
     public void onCreate() {
 	Log.d("EFormApplication", "onCreate");
     	application = this;
         super.onCreate();
     }
+
 }

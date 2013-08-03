@@ -7,6 +7,7 @@ package com.cansiny.eform;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -137,10 +139,11 @@ public class Utils
     }
 
 
-    static public UUID getDeviceId(Context context) {
+    static public UUID getDeviceId() {
 	UUID uuid = null;
 
-	SharedPreferences prefs = context.getSharedPreferences("deviceid.xml", 0);
+	Context context = EFormApplication.getContext();
+	SharedPreferences prefs = context.getSharedPreferences("deviceid", 0);
 	String id = prefs.getString("deviceid", null);
 	if (id != null)
 	    return UUID.fromString(id);
@@ -259,4 +262,101 @@ public class Utils
 	}
     }
 
+
+    static public class SerialDeviceAdapter extends BaseAdapter
+    {
+	private ArrayList<SerialDevice> devices;
+
+	public SerialDeviceAdapter() {
+	    devices = new ArrayList<SerialDevice>();
+
+	    SerialPort.SerialPortFinder finder = new SerialPort.SerialPortFinder();
+	    String[] results = finder.getAllDevices();
+	    Arrays.sort(results);
+	    for (String device : results) {
+		String[] array = device.split(" ");
+		if (!array[1].equals("g_serial")) {
+		    devices.add(new SerialDevice(array[2], array[0], array[1]));
+		}
+	    }
+	}
+
+	@Override
+	public int getCount() {
+	    return devices.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+	    if (position < devices.size() && position >= 0) {
+		return devices.get(position);
+	    } else {
+		return null;
+	    }
+	}
+
+	@Override
+	public long getItemId(int position) {
+	    return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+	    SerialDevice device = null;
+	    if (position <= devices.size())
+		device = devices.get(position);
+
+	    LinearLayout linear = new LinearLayout(parent.getContext());
+	    linear.setOrientation(LinearLayout.HORIZONTAL);
+	    linear.setPadding(10, 10, 10, 0);
+	    linear.setGravity(Gravity.RIGHT);
+
+	    TextView textview = new TextView(parent.getContext());
+	    if (device != null) {
+		String driver = device.getDriver();
+		String name;
+		if (driver.equalsIgnoreCase("serial"))
+		    name = "标准串口 " + device.getName();
+		else if (driver.equalsIgnoreCase("usbserial"))
+		    name = "USB串口 " + device.getName();
+		else
+		    name = device.getName();
+		textview.setText(name);
+		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    }
+	    linear.addView(textview);
+
+	    return linear;
+	}
+
+	public String getItemDevpath(int position) {
+	    if (position < devices.size() && position >= 0) {
+		SerialDevice device = devices.get(position);
+		return device.devpath;
+	    }
+	    return null;
+	}
+
+	public class SerialDevice
+	{
+	    private String devpath;
+	    private String name;
+	    private String driver;
+	    public SerialDevice(String devpath, String name, String driver) {
+		this.devpath = devpath;
+		this.name = name;
+		this.driver = driver;
+	    }
+	    public String getDevpath() {
+		return devpath;
+	    }
+	    public String getName() {
+		return name;
+	    }
+	    public String getDriver() {
+		return driver;
+	    }
+	}
+
+    }
 }
