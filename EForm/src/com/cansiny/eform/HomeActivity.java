@@ -7,6 +7,7 @@ package com.cansiny.eform;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.cansiny.eform.Administrator.AdministratorListener;
 import com.cansiny.eform.HomeInfo.HomeItem;
 import com.cansiny.eform.Member.MemberListener;
 
@@ -43,7 +44,7 @@ import android.widget.TextView;
 
 
 public class HomeActivity extends Activity
-    implements OnClickListener, OnLongClickListener, MemberListener
+    implements OnClickListener, OnLongClickListener, MemberListener, AdministratorListener
 {
     static public final int HOME_VIEW_ID_BASE = 0x3F000001;
     static public final int ITEM_VIEW_ID_BASE = 0x3F100001;
@@ -53,15 +54,29 @@ public class HomeActivity extends Activity
     private AtomicInteger atomic_int;
     private HomeInfo home_info;
     private int curr_slogan = 0;
+    private long slogan_lasttime;
+    private long admin_logintime;
     private Handler  handler = new Handler();
     private Runnable runable = new Runnable() {
 	@Override
 	public void run() {
-	    TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
-	    switcher.setText(home_info.slogans.get(curr_slogan++));
-	    if (curr_slogan >= home_info.slogans.size())
-		curr_slogan = 0;
-	    handler.postDelayed(this, 5000);
+	    long currtime = System.currentTimeMillis();
+
+	    if (currtime - slogan_lasttime >= 5000) {
+		slogan_lasttime = currtime;
+		TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
+		switcher.setText(home_info.slogans.get(curr_slogan++));
+		if (curr_slogan >= home_info.slogans.size())
+		    curr_slogan = 0;
+	    }
+
+	    Administrator admin = Administrator.getAdministrator();
+	    if (admin.isLogin()) {
+		if (currtime - admin_logintime >= 10 * 60 * 1000) {
+		    admin.logout();
+		}
+	    }
+	    handler.postDelayed(this, 1000);
 	}
     };
 
@@ -115,6 +130,7 @@ public class HomeActivity extends Activity
 	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
 	switcher.setCurrentText(home_info.slogans.get(curr_slogan));
 
+	slogan_lasttime = System.currentTimeMillis();
 	handler.postDelayed(runable, 0);
     }
 
@@ -123,6 +139,9 @@ public class HomeActivity extends Activity
 	super.onStart();
 
 	Log.d("HomeActivity", "onStart");
+
+	Administrator admin = Administrator.getAdministrator();
+	admin.addListener(this);
 
 	Member member = Member.getMember();
 	member.setListener(this);
@@ -134,6 +153,9 @@ public class HomeActivity extends Activity
 	super.onStop();
 
 	Log.d("HomeActivity", "onStop");
+
+	Administrator admin = Administrator.getAdministrator();
+	admin.removeListener(this);
 
 	Member member = Member.getMember();
 	member.setListener(null);
@@ -411,6 +433,15 @@ public class HomeActivity extends Activity
     @Override
     public void onMemberLogout() {
 	setMemberLayoutVisible(false);
+    }
+
+    @Override
+    public void onAdministratorLogin(Administrator admin) {
+	admin_logintime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void onAdministratorLogout(Administrator admin) {
     }
 
 }

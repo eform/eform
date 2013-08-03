@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 
 class MemberLoginDialog extends Utils.DialogFragment
+	implements Administrator.AdministratorLoginDialogListener
 {
     private EditText userid_edittext;
     private EditText password_edittext;
@@ -81,7 +82,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 	table.addView(row, table_params);
 
 	textview = new TextView(getActivity());
-	textview.setText("登陆密码：");
+	textview.setText("登录密码：");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	row.addView(textview);
 
@@ -102,7 +103,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 	super.onCreateDialog(savedInstanceState);
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle("会员登陆");
+	builder.setTitle("会员登录");
 
 	builder.setView(buildLayout());
 
@@ -125,10 +126,17 @@ class MemberLoginDialog extends Utils.DialogFragment
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		dismiss();
 		hideIme(view);
-		MemberRegisterDialog dialog = new MemberRegisterDialog();
-		dialog.show(getFragmentManager(), "MemberRegisterDialog");
+		Administrator admin = Administrator.getAdministrator();
+		if (admin.isLogin()) {
+		    dismiss();
+		    MemberRegisterDialog dialog = new MemberRegisterDialog();
+		    dialog.show(getFragmentManager(), "MemberRegisterDialog");
+		} else {
+		    showToast("需要管理员登录...", R.drawable.tips);
+		    admin.setLoginDialogListener(MemberLoginDialog.this);
+		    admin.login(getFragmentManager());
+		}
 	    }
 	});
 
@@ -140,7 +148,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 		hideIme(view);
 		showToastLong("您可以通过下面步骤找回密码：\n\n" +
 			"    1、带上注册会员时使用的身份证件；\n" +
-			"    2、联系大堂经理设置新密码；", R.drawable.tips);
+			"    2、联系管理员设置新密码；", R.drawable.tips);
 	    }
 	});
 
@@ -155,7 +163,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 		    return;
 		}
 		if (password_edittext.length() == 0) {
-		    password_edittext.setHint("登陆密码不能为空");
+		    password_edittext.setHint("登录密码不能为空");
 		    password_edittext.requestFocus();
 		    return;
 		}
@@ -165,7 +173,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 		if (member.login(getActivity(), userid_edittext.getText().toString(),
 			password_edittext.getText().toString())) {
 		    dismiss();
-		    Utils.showToast("登陆成功!", R.drawable.smile);
+		    Utils.showToast("登录成功!", R.drawable.smile);
 		} else {
 		    showToastLong("证件号码或密码错，请重试! \n\n" +
 			    "如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
@@ -180,6 +188,17 @@ class MemberLoginDialog extends Utils.DialogFragment
 	super.onClick(view);
 	if (view.getClass().equals(TextView.class)) {
 	    userid_edittext.setEnabled(true);
+	}
+    }
+
+    @Override
+    public void onAdministratorLoginDialogDisapper(Administrator admin) {
+	admin.setLoginDialogListener(null);
+
+	if (admin.isLogin()) {
+	    dismiss();
+	    MemberRegisterDialog dialog = new MemberRegisterDialog();
+	    dialog.show(getFragmentManager(), "MemberRegisterDialog");
 	}
     }
 
@@ -393,7 +412,7 @@ class MemberProfileDialog extends Utils.DialogFragment
 		Member member = Member.getMember();
 		if (profile == null) {
 		    if (member.register(userid, username, password, company, phone)) {
-			showToast("注册成功！您现在可以通过证件号码和密码来登陆系统使用会员功能。",
+			showToast("注册成功！您现在可以通过证件号码和密码来登录系统使用会员功能。",
 				R.drawable.smile);
 			dismiss();
 		    } else {
@@ -475,14 +494,12 @@ public class Member
     }
 
     public void logout() {
-	if (!is_login)
-	    return;
-
-	is_login = false;
-	profile = null;
-
-	if (listener != null) {
-	    listener.onMemberLogout();
+	if (is_login) {
+	    if (listener != null) {
+		listener.onMemberLogout();
+	    }
+	    profile = null;
+	    is_login = false;
 	}
     }
 
@@ -522,7 +539,7 @@ public class Member
 
     public class MemberProfile
     {
-	public long rowid;
+	public long   rowid;
 	public String userid;
 	public String username;
 	public String company;

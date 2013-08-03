@@ -5,11 +5,16 @@
  */
 package com.cansiny.eform;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -25,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 public class Utils
 {
@@ -131,6 +137,31 @@ public class Utils
     }
 
 
+    static public UUID getDeviceId(Context context) {
+	UUID uuid = null;
+
+	SharedPreferences prefs = context.getSharedPreferences("deviceid.xml", 0);
+	String id = prefs.getString("deviceid", null);
+	if (id != null)
+	    return UUID.fromString(id);
+
+	try {
+	    String androidId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+	    if (!"9774d56d682e549c".equals(androidId)) {
+		uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf-8"));
+	    } else {
+		String deviceId = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+		uuid = (deviceId != null) ? UUID.nameUUIDFromBytes(deviceId.getBytes("utf8")) : UUID.randomUUID();
+	    }
+	    prefs.edit().putString("deviceid", uuid.toString()).commit();
+	    return uuid;
+	} catch (UnsupportedEncodingException e) {
+	    LogActivity.writeLog(e);
+	    return UUID.randomUUID();
+	}
+    }
+
+
     static public class DialogFragment extends android.app.DialogFragment
     	implements OnClickListener
     {
@@ -155,6 +186,11 @@ public class Utils
 	@Override
 	public void onDismiss(DialogInterface dialog) {
 	    super.onDismiss(dialog);
+
+	    if (getActivity() != null) {
+		getActivity().getWindow().setSoftInputMode(
+			WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+	    }
 	    for (Toast toast : toasts) {
 		toast.cancel();
 	    }
@@ -222,4 +258,5 @@ public class Utils
 	    }
 	}
     }
+
 }

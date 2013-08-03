@@ -76,7 +76,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="开通本功能后您在网上银行、手机银行、电话银行办理转账、缴费、支付等业务时，系统将自动发送一次性随机密码到您本人的手机，输入该密码后才可办理相关业务。您可登陆网上银行使用短信口令自助设置网上银行、手机银行、电话银行的转账、支付、缴费等功能及限额。"
+              android:text="开通本功能后您在网上银行、手机银行、电话银行办理转账、缴费、支付等业务时，系统将自动发送一次性随机密码到您本人的手机，输入该密码后才可办理相关业务。您可登录网上银行使用短信口令自助设置网上银行、手机银行、电话银行的转账、支付、缴费等功能及限额。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 
@@ -197,7 +197,7 @@
               android:paddingRight="12dp"
 	      android:paddingTop="8dp"
 	      android:paddingBottom="8dp"
-              android:text="开通本功能后您在网上银行办理转账、缴费、支付等业务时提供网盾保护。您可登陆网上银行使用网盾自助设置网上银行、手机银行、电话银行的转账、支付、缴费等功能及限额。"
+              android:text="开通本功能后您在网上银行办理转账、缴费、支付等业务时提供网盾保护。您可登录网上银行使用网盾自助设置网上银行、手机银行、电话银行的转账、支付、缴费等功能及限额。"
               android:textColor="@color/black"
               android:textSize="16sp" />
 

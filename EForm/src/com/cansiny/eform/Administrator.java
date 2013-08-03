@@ -5,6 +5,8 @@
  */
 package com.cansiny.eform;
 
+import java.util.ArrayList;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -71,7 +73,7 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 	Administrator admin = Administrator.getAdministrator();
 	if (!admin.hasPassword(getActivity())) {
 	    textview = new TextView(getActivity());
-	    textview.setText("首次登陆密码为 123456，登陆后请立即设置管理员密码");
+	    textview.setText("首次登录密码为 123456，登录后请立即设置管理员密码");
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	    textview.setTextColor(getResources().getColor(R.color.purple));
 	    params = new LinearLayout.LayoutParams(
@@ -89,7 +91,7 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-	builder.setTitle("管理员登陆");
+	builder.setTitle("管理员登录");
 	builder.setView(buildLayout());
 	builder.setNegativeButton("忘记密码", null);
 	builder.setPositiveButton("登 陆", null);
@@ -132,11 +134,11 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 		switch(retval) {
 		case 0:
 		    dismiss();
-		    Utils.showToast("登陆成功!", R.drawable.smile);
+		    Utils.showToast("登录成功!", R.drawable.smile);
 		    break;
 		case 1:
 		    dismiss();
-		    Utils.showToast("使用初始密码登陆成功，请立即设置密码!", R.drawable.tips);
+		    Utils.showToast("使用初始密码登录成功，请立即设置密码!", R.drawable.tips);
 		    admin.setPassword(getFragmentManager());
 		    break;
 		case -1:
@@ -147,6 +149,13 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 	});
     }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+	super.onDismiss(dialog);
+
+	Administrator admin = Administrator.getAdministrator();
+	admin.fireLoginDialogDisapper();
+    }
 }
 
 
@@ -241,8 +250,8 @@ class AdministratorPasswordDialog extends Utils.DialogFragment
 	builder.setNegativeButton("放 弃", new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
-		Utils.showToastLong("您可以在“设置”对话框的“安全“选项卡中设置管理员密码。",
-			R.drawable.tips);
+//		Utils.showToastLong("您可以在“设置”对话框的“安全“选项卡中设置管理员密码。",
+//			R.drawable.tips);
 	    }
 	});
 	builder.setPositiveButton("设 置", null);
@@ -320,10 +329,14 @@ public class Administrator
 
     private boolean is_login;
     private String password;
+    private ArrayList<AdministratorListener> listeners;
+    private AdministratorLoginDialogListener login_dialog_listener;
 
     private Administrator() {
 	password = null;
 	is_login = false;
+	listeners = new ArrayList<AdministratorListener>();
+	login_dialog_listener = null;
     }
 
     public boolean isLogin() {
@@ -339,34 +352,83 @@ public class Administrator
     }
 
     public int login(Context context, String password) {
-	int retval = EFormSQLiteHelper.Account.login(context, password);
-	if (retval >= 0) {
-	    is_login = true;
-	    this.password = password;
+	if (!is_login) {
+	    int retval = EFormSQLiteHelper.Account.login(context, password);
+	    if (retval >= 0) {
+		this.password = password;
+		is_login = true;
+		for (AdministratorListener listener : listeners) {
+		    listener.onAdministratorLogin(this);
+		}
+	    }
+	    return retval;
 	}
-	return retval;
+	return 0;
     }
 
     public void login(FragmentManager manager) {
-	AdministratorLoginDialog dialog = new AdministratorLoginDialog();
-	dialog.show(manager, "AdministratorLoginDialog");
+	if (!is_login) {
+	    AdministratorLoginDialog dialog = new AdministratorLoginDialog();
+	    dialog.show(manager, "AdministratorLoginDialog");
+	}
     }
 
     public boolean setPassword(Context context, String password) {
 	if (password == null)
 	    throw new IllegalArgumentException("管理员密码不能为NULL");
 
-	return EFormSQLiteHelper.Account.setPassword(context, password);
+	if (is_login) {
+	    if (EFormSQLiteHelper.Account.setPassword(context, password)) {
+		this.password = password;
+		return true;
+	    }
+	}
+	return false;
     }
 
     public void setPassword(FragmentManager manager) {
-	AdministratorPasswordDialog dialog = new AdministratorPasswordDialog();
-	dialog.show(manager, "AdministratorPasswordDialog");
+	if (is_login) {
+	    AdministratorPasswordDialog dialog = new AdministratorPasswordDialog();
+	    dialog.show(manager, "AdministratorPasswordDialog");
+	}
     }
 
     public void logout() {
-	password = null;
-	is_login = false;
+	if (is_login) {
+	    for (AdministratorListener listener : listeners) {
+		listener.onAdministratorLogout(this);
+	    }
+	    password = null;
+	    is_login = false;
+	}
+    }
+
+    public void addListener(AdministratorListener listener) {
+	listeners.add(listener);
+    }
+
+    public void removeListener(AdministratorListener listener) {
+	listeners.remove(listener);
+    }
+
+    public void setLoginDialogListener(AdministratorLoginDialogListener listener) {
+	login_dialog_listener = listener;
+    }
+
+    public void fireLoginDialogDisapper() {
+	if (login_dialog_listener != null)
+	    login_dialog_listener.onAdministratorLoginDialogDisapper(this);
+    }
+
+    public interface AdministratorListener
+    {
+	public void onAdministratorLogin(Administrator admin);
+	public void onAdministratorLogout(Administrator admin);
+    }
+
+    public interface AdministratorLoginDialogListener
+    {
+	public void onAdministratorLoginDialogDisapper(Administrator admin);
     }
 
 }

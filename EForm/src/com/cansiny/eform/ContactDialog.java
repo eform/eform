@@ -5,26 +5,17 @@
  */
 package com.cansiny.eform;
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.UUID;
-
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
-import android.telephony.TelephonyManager;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,37 +25,12 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 
-public class ContactDialog extends DialogFragment
+public class ContactDialog extends Utils.DialogFragment
 {
     static final private String TAB_TAG_AFTERMARKET = "AfterMarket";
     static final private String TAB_TAG_COMPANYINFO = "CompanyInfo";
     static final private String TAB_TAG_DEVICEINFO  = "DeviceInfo";
     static final private String TAB_TAG_COPYRIGHT   = "Copyright";
-
-
-    static public UUID getDeviceId(Context context) {
-	UUID uuid = null;
-
-	SharedPreferences prefs = context.getSharedPreferences("deviceid.xml", 0);
-	String id = prefs.getString("deviceid", null);
-	if (id != null)
-	    return UUID.fromString(id);
-
-	try {
-	    String androidId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-	    if (!"9774d56d682e549c".equals(androidId)) {
-		uuid = UUID.nameUUIDFromBytes(androidId.getBytes("utf-8"));
-	    } else {
-		String deviceId = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-		uuid = (deviceId != null) ? UUID.nameUUIDFromBytes(deviceId.getBytes("utf8")) : UUID.randomUUID();
-	    }
-	    prefs.edit().putString("deviceid", uuid.toString()).commit();
-	    return uuid;
-	} catch (UnsupportedEncodingException e) {
-	    LogActivity.writeLog(e);
-	    return UUID.randomUUID();
-	}
-    }
 
 
     @Override
@@ -82,7 +48,7 @@ public class ContactDialog extends DialogFragment
     public void onStart() {
 	super.onStart();
 
-	final TabHost tabhost = (TabHost)getDialog().findViewById(R.id.tabhost);
+	final TabHost tabhost = (TabHost)getDialog().findViewById(android.R.id.tabhost);
 	TabWidget tabwidget = tabhost.getTabWidget();
 
 	if (tabwidget == null || tabwidget.getTabCount() == 0) {
@@ -156,7 +122,7 @@ public class ContactDialog extends DialogFragment
 	}
 
 	textview = (TextView) getDialog().findViewById(R.id.identifier_textview);
-	textview.setText(getDeviceId(getActivity()).toString());
+	textview.setText(Utils.getDeviceId(getActivity()).toString());
 
 	textview = (TextView) getDialog().findViewById(R.id.environment_textview);
 	textview.setText(Build.DISPLAY);
@@ -204,12 +170,6 @@ public class ContactDialog extends DialogFragment
 	    textview.setText("12键键盘");
 	    break;
 	}
-    }
-
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
     }
 
 }

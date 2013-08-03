@@ -7,7 +7,6 @@ package com.cansiny.eform;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,14 +21,15 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 
-public class HomeMenu extends DialogFragment implements OnClickListener
+public class HomeMenu extends Utils.DialogFragment
+	implements OnClickListener, Administrator.AdministratorLoginDialogListener
 {
     static private final int BUTTON_TAG_MEMBER = 1;
     static private final int BUTTON_TAG_UPGRADE = 2;
     static private final int BUTTON_TAG_SETTINGS = 3;
     static private final int BUTTON_TAG_CONTACT = 4;
 
-    private int  total_seconds = 15;
+    private int  outtime = 15;
     private long starttime;
     private LinearLayout buttonBox;
 
@@ -38,16 +38,10 @@ public class HomeMenu extends DialogFragment implements OnClickListener
 	@Override
 	public void run() {
 	    long currtime = System.currentTimeMillis();
-	    long millis = currtime - starttime;
-	    int seconds = (int) (millis / 1000);
-
-	    total_seconds -= seconds;
-	    if (total_seconds <= 0) {
+	    if (currtime - starttime >= outtime * 1000) {
 		dismiss();
 		return;
 	    }
-	    starttime = currtime;
-
 	    handler.postDelayed(this, 1000);
 	}
     };
@@ -57,7 +51,7 @@ public class HomeMenu extends DialogFragment implements OnClickListener
 	super.onCreateDialog(savedInstanceState);
 
 	HomeMenuItem items[] = {
-		new HomeMenuItem(R.drawable.member, "会员登陆", BUTTON_TAG_MEMBER),
+		new HomeMenuItem(R.drawable.member, "会员登录", BUTTON_TAG_MEMBER),
 		new HomeMenuItem(R.drawable.upgrade, "系统升级", BUTTON_TAG_UPGRADE),
 		new HomeMenuItem(R.drawable.settings, "系统设置", BUTTON_TAG_SETTINGS),
 		new HomeMenuItem(R.drawable.contact, "联系方式", BUTTON_TAG_CONTACT),
@@ -111,31 +105,51 @@ public class HomeMenu extends DialogFragment implements OnClickListener
 
     @Override
     public void onClick(View view) {
-	dismiss();
+	Administrator admin = Administrator.getAdministrator();
 
 	switch (((Integer) view.getTag()).intValue()) {
 	case BUTTON_TAG_MEMBER:
+	    dismiss();
 	    Member member = Member.getMember();
 	    member.login(getFragmentManager());
 	    break;
 	case BUTTON_TAG_UPGRADE:
-	    Administrator admin = Administrator.getAdministrator();
 	    if (!admin.isLogin()) {
 		admin.login(getFragmentManager());
 		return;
 	    }
 	    break;
 	case BUTTON_TAG_SETTINGS:
-	    Administrator admin2 = Administrator.getAdministrator();
-	    if (!admin2.isLogin()) {
-		admin2.login(getFragmentManager());
-		return;
+	    if (!admin.isLogin()) {
+		Utils.showToast("请先登录...");
+		handler.removeCallbacks(runable);
+		admin.setLoginDialogListener(this);
+		admin.login(getFragmentManager());
+	    } else {
+		dismiss();
+		Preferences prefs = Preferences.getPreferences();
+		prefs.showDialog(getFragmentManager());
 	    }
 	    break;
 	case BUTTON_TAG_CONTACT:
+	    dismiss();
 	    ContactDialog dialog = new ContactDialog();
 	    dialog.show(getFragmentManager(), "ContactDialog");
 	    break;
+	}
+    }
+
+    @Override
+    public void onAdministratorLoginDialogDisapper(Administrator admin) {
+	admin.setLoginDialogListener(null);
+
+	if (admin.isLogin()) {
+	    dismiss();
+	    Preferences prefs = Preferences.getPreferences();
+	    prefs.showDialog(getFragmentManager());
+	} else {
+	    starttime = System.currentTimeMillis();
+	    handler.postDelayed(runable, 0);
 	}
     }
 
@@ -166,4 +180,5 @@ public class HomeMenu extends DialogFragment implements OnClickListener
 	    return button;
 	}
     }
+
 }

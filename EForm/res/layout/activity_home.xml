@@ -151,7 +151,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="2dp"
-            android:text="退出登陆"
+            android:text="退出登录"
             android:textColor="@color/white"
             android:textSize="20sp" />
       </LinearLayout>

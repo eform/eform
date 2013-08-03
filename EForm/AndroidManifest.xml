@@ -39,16 +39,6 @@
     <activity android:name="com.cansiny.eform.FormActivity">
     </activity>
 
-    <provider android:name="com.cansiny.eform.EFormContentProvider"
-        android:authorities="com.cansiny.eform.EFormContentProvider"
-        android:label="@string/app_contents_name"
-        android:multiprocess="false"
-	android:enabled="true"
-	android:syncable="true"
-	android:exported="false"
-	android:singleUser="true">
-    </provider>
-
   </application>
 
 </manifest>
