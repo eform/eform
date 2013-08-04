@@ -384,6 +384,7 @@ class MemberProfileDialog extends Utils.DialogFragment
 
 		if (profile == null) {
 		    if (password_edittext.length() != 6) {
+			password_edittext.setText("");
 			password_edittext.setHint("密码长度必须是6位");
 			password_edittext.setHintTextColor(getResources().getColor(R.color.red));
 			password_edittext.requestFocus();
@@ -492,7 +493,7 @@ public class Member
 
 	Administrator admin = Administrator.getAdministrator();
 	if (!admin.isLogin()) {
-	    LogActivity.writeLog("不能注册会员，因为管理员未登录。");
+	    Utils.showToast("不能注册会员，因为管理员未登录或已退出登录。");
 	    return -1;
 	}
 
@@ -571,5 +572,6 @@ public class Member
 	public String password;
 	public String company;
 	public String phone;
+	public long   datetime;
     }
 }

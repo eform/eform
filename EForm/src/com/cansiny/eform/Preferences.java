@@ -5,6 +5,7 @@
  */
 package com.cansiny.eform;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import com.cansiny.eform.Member.MemberProfile;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,11 +32,15 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabWidget;
+import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 
 
@@ -182,6 +188,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	    view2.setVisibility(View.VISIBLE);
 	    break;
 	case R.id.member_list_button:
+	    showToast("正在加载，请稍候 ...");
 	    MemberListDialog dialog2 = new MemberListDialog();
 	    dialog2.show(getFragmentManager(), "MemberListDialog");
 	    break;
@@ -371,12 +378,53 @@ class PreferencesDialog extends Utils.DialogFragment
 
 class MemberListDialog extends Utils.DialogFragment
 {
+    private static final int TAG_BUTTON_SCROLLUP = 1;
+    private static final int TAG_BUTTON_SCROLLDOWN = 2;
+
     private ListView listview;
+    private TextView total_textview;
 
-    private View buildLayout() {
-	listview = new ListView(getActivity());
+    private View customTitleView() {
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setPadding(10, 5, 10, 5);
+	linear.setGravity(Gravity.CENTER_VERTICAL);
 
-	return listview;
+	total_textview = new TextView(getActivity());
+	total_textview.setTextColor(getResources().getColor(R.color.darkgray));
+	total_textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		0, ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.weight = 1;
+	linear.addView(total_textview, params);
+
+	Button button = new Button(getActivity());
+	button.setBackgroundResource(R.drawable.up);
+	button.setTag(TAG_BUTTON_SCROLLUP);
+	button.setOnClickListener(this);
+	params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(48),
+		(int) Utils.convertDpToPixel(48));
+	params.leftMargin = 20;
+	params.rightMargin = 10;
+	linear.addView(button, params);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("上下滚动");
+	textview.setTextColor(getResources().getColor(R.color.black));
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	linear.addView(textview);
+
+	button = new Button(getActivity());
+	button.setBackgroundResource(R.drawable.down);
+	button.setTag(TAG_BUTTON_SCROLLDOWN);
+	button.setOnClickListener(this);
+	params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(48),
+		(int) Utils.convertDpToPixel(48));
+	params.leftMargin = 10;
+	linear.addView(button, params);
+
+	return linear;
     }
 
     @Override
@@ -385,8 +433,10 @@ class MemberListDialog extends Utils.DialogFragment
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-	builder.setTitle("会员列表");
-	builder.setView(buildLayout());
+	builder.setCustomTitle(customTitleView());
+
+	listview = new ListView(getActivity());
+	builder.setView(listview);
 
 	return builder.create();
     }
@@ -395,11 +445,40 @@ class MemberListDialog extends Utils.DialogFragment
     public void onStart() {
 	super.onStart();
 
-	AlertDialog dialog = (AlertDialog) getDialog();
-
 	MemberListAdapter adapter = new MemberListAdapter();
 	listview.setAdapter(adapter);
+
+	total_textview.setText("共 " + adapter.getCount() + " 位会员");
+
+	if(adapter.getCount() > 8) {
+	    View item = adapter.getView(0, null, listview);
+	    item.measure(0, 0);
+	    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+		    LayoutParams.MATCH_PARENT,
+		    (int) (8.5 * item.getMeasuredHeight()));
+	    listview.setLayoutParams(params);
+	}
     }
+
+    @Override
+    public void onClick(View view) {
+	super.onClick(view);
+
+	ListAdapter adapter = listview.getAdapter();
+	View item = adapter.getView(0, null, listview);
+	item.measure(0, 0);
+	int distance = (int) (2.2 * item.getMeasuredHeight());
+
+	switch(((Integer) view.getTag()).intValue()) {
+	case TAG_BUTTON_SCROLLUP:
+	    listview.smoothScrollBy(0 - distance, 200);
+	    break;
+	case TAG_BUTTON_SCROLLDOWN:
+	    listview.smoothScrollBy(distance, 200);
+	    break;
+	}
+    }
+
 
     private class MemberListAdapter extends BaseAdapter
     {
@@ -411,11 +490,10 @@ class MemberListDialog extends Utils.DialogFragment
 
 	@Override
 	public int getCount() {
-	    return 2;
-//	    if (members == null)
-//		return 0;
-//	    else
-//		return members.size();
+	    if (members == null)
+		return 0;
+	    else
+		return members.size();
 	}
 
 	@Override
@@ -437,9 +515,66 @@ class MemberListDialog extends Utils.DialogFragment
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+	    if (members == null || position >= members.size())
+		return null;
+
+	    MemberProfile profile = members.get(position);
+	    LinearLayout.LayoutParams params;
+
+	    LinearLayout linear = new LinearLayout(parent.getContext());
+	    linear.setOrientation(LinearLayout.HORIZONTAL);
+	    linear.setPadding(10, 10, 10, 0);
+	    linear.setGravity(Gravity.CENTER_VERTICAL);
+
 	    TextView textview = new TextView(parent.getContext());
-	    textview.setText("HELLO");
-	    return textview;
+	    textview.setText(profile.username);
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	    linear.addView(textview, new LinearLayout.LayoutParams(
+		    (int) Utils.convertDpToPixel(120),
+		    ViewGroup.LayoutParams.WRAP_CONTENT));
+
+	    LinearLayout linear2 = new LinearLayout(parent.getContext());
+	    linear2.setOrientation(LinearLayout.VERTICAL);
+	    params = new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT);
+	    linear.addView(linear2, params);
+
+	    textview = new TextView(parent.getContext());
+	    if (profile.company == null || profile.company.length() == 0)
+		textview.setText("-");
+	    else
+		textview.setText(profile.company);
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	    linear2.addView(textview);
+
+	    LinearLayout linear3 = new LinearLayout(parent.getContext());
+	    linear3.setOrientation(LinearLayout.HORIZONTAL);
+	    params = new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT);
+	    linear2.addView(linear3, params);
+
+	    textview = new TextView(parent.getContext());
+	    if (profile.phone == null || profile.phone.length() == 0)
+		textview.setText("-");
+	    else
+		textview.setText(profile.phone);
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	    linear3.addView(textview);
+
+	    textview = new TextView(parent.getContext());
+	    SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
+	    textview.setText(format.format(profile.datetime));
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	    textview.setGravity(Gravity.RIGHT);
+	    params = new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT);
+	    params.leftMargin = (int) Utils.convertDpToPixel(20);
+	    linear3.addView(textview, params);
+
+	    return linear;
 	}
     }
 

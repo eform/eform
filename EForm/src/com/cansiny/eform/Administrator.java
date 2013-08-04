@@ -124,6 +124,7 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 	    @Override
 	    public void onClick(View view) {
 		if (password_edittext.length() != 6) {
+		    password_edittext.setText("");
 		    password_edittext.setHint("密码必须是6位");
 		    password_edittext.requestFocus();
 		    return;

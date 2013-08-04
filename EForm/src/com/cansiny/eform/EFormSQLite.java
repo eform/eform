@@ -92,27 +92,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-	createTables(db);
-        initData(db, db.getVersion(), db.getVersion());
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-	createTables(db);
-	initData(db, oldVersion, newVersion);
-    }
-
-    @Override
-    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    
-    }
-
-    @Override
-    public void onOpen(SQLiteDatabase db) {
-    
-    }
-
-    private void createTables(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Account.TABLE_NAME + " ("
         	+ "_id      INTEGER PRIMARY KEY,"
         	+ "userid   INTEGER UNIQUE,"
@@ -127,6 +106,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		+ "password TEXT NOT NULL,"
 		+ "company  TEXT,"
 		+ "phone    TEXT"
+		+ "datetime INTEGER NOT NULL"
 		+ ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Voucher.TABLE_NAME + " ("
@@ -138,7 +118,18 @@ public class EFormSQLite extends SQLiteOpenHelper
         	+ ");");
     }
 
-    private void initData(SQLiteDatabase db, int oldVersion, int newVersion) {
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//	db.execSQL("ALTER TABLE member ADD COLUMN datetime INTEGER NOT NULL DEFAULT 0;");
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+	super.onOpen(db);
     }
 
 
@@ -257,6 +248,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	static final public String COLUMN_PASSWORD = "password";
 	static final public String COLUMN_COMPANY = "company";
 	static final public String COLUMN_PHONE = "phone";
+	static final public String COLUMN_DATETIME = "datetime";
 
 	static public long register(Context context, String userid, String username,
 		String password, String company, String phone, String admin_passwd) {
@@ -297,6 +289,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		values.put(COLUMN_PASSWORD, SHAPassword(password));
 		values.put(COLUMN_COMPANY, company);
 		values.put(COLUMN_PHONE, phone);
+		values.put(COLUMN_DATETIME, System.currentTimeMillis());
 
 		rowid = database.insert(TABLE_NAME, null, values);
 		if (rowid >= 0) {
@@ -366,10 +359,10 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    SQLiteDatabase database = sqlite.getWritableDatabase();
 
 	    String[] columns = { COLUMN_ID, COLUMN_USERID, COLUMN_USERNAME,
-		    COLUMN_COMPANY, COLUMN_PHONE };
+		    COLUMN_COMPANY, COLUMN_PHONE, COLUMN_DATETIME };
 
 	    Cursor cursor = database.query(TABLE_NAME, columns,
-		    null, null, null, null, "username ASC");
+		    null, null, null, null, "_id ASC");
 
 	    if (cursor == null || cursor.getCount() <= 0) {
 		sqlite.close();
@@ -385,6 +378,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		profile.username = cursor.getString(2);
 		profile.company = cursor.getString(3);
 		profile.phone = cursor.getString(4);
+		profile.datetime = cursor.getLong(5);
 
 		members.add(profile);
 	    }
