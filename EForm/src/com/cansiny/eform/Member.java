@@ -339,20 +339,22 @@ class MemberProfileDialog extends Utils.DialogFragment
 	View view = dialog.findViewById(R.id.idcard_read_button);
 	view.setOnClickListener(this);
 
-	view = dialog.findViewById(R.id.password_clear);
-	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
-	view.setOnClickListener(this);
-	view = dialog.findViewById(R.id.password2_clear);
-	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
-	view.setOnClickListener(this);
-	view = dialog.findViewById(R.id.company_clear);
-	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
-	view.setOnClickListener(this);
-	view = dialog.findViewById(R.id.phone_clear);
-	view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
-	view.setOnClickListener(this);
+	int[] ids = {
+		R.id.password_clear,
+		R.id.password2_clear,
+		R.id.company_clear,
+		R.id.phone_clear
+	};
+	for (int id : ids) {
+	    view = dialog.findViewById(id);
+	    view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
+	    view.setOnClickListener(this);
+	}
 
 	password_edittext.requestFocus();
+
+	userid_edittext.setEnabled(true);
+	username_edittext.setEnabled(true);
 
 	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
 	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
@@ -371,16 +373,19 @@ class MemberProfileDialog extends Utils.DialogFragment
 	    public void onClick(View view) {
 		if (userid_edittext.length() == 0) {
 		    userid_edittext.setHint("证件号码不能为空");
+		    userid_edittext.setHintTextColor(getResources().getColor(R.color.red));
 		    return;
 		}
 		if (username_edittext.length() == 0) {
 		    username_edittext.setHint("会员姓名不能为空");
+		    username_edittext.setHintTextColor(getResources().getColor(R.color.red));
 		    return;
 		}
 
 		if (profile == null) {
-		    if (password_edittext.length() == 0) {
-			password_edittext.setText("密码不能为空");
+		    if (password_edittext.length() != 6) {
+			password_edittext.setHint("密码长度必须是6位");
+			password_edittext.setHintTextColor(getResources().getColor(R.color.red));
 			password_edittext.requestFocus();
 			return;
 		    }
@@ -396,12 +401,14 @@ class MemberProfileDialog extends Utils.DialogFragment
 		    if (password_edittext.length() != 6) {
 			password_edittext.setText("");
 			password_edittext.setHint("密码长度必须是6位");
+			password_edittext.setHintTextColor(getResources().getColor(R.color.red));
 			password_edittext.requestFocus();
 			return;
 		    }
 		    if (!password.equals(password2)) {
 			password2_edittext.setText("");
 			password2_edittext.setHint("确认密码不一致");
+			password2_edittext.setHintTextColor(getResources().getColor(R.color.red));
 			password2_edittext.requestFocus();
 			return;
 		    }
@@ -411,12 +418,18 @@ class MemberProfileDialog extends Utils.DialogFragment
 
 		Member member = Member.getMember();
 		if (profile == null) {
-		    if (member.register(userid, username, password, company, phone)) {
-			showToast("注册成功！您现在可以通过证件号码和密码来登录系统使用会员功能。",
+		    long rowid = member.register(getActivity(), userid, username,
+			    password, company, phone);
+		    if (rowid >= 0) {
+			Utils.showToast("注册成功！您现在可以通过证件号码和密码来登录系统使用会员功能。",
 				R.drawable.smile);
 			dismiss();
-		    } else {
+		    } else if (rowid == -1) {
 			showToast("注册失败！", R.drawable.cry);
+		    } else if (rowid == -2) {
+			showToast("证件号码 " + userid + " 已经注册过。", R.drawable.tips);
+		    } else {
+			showToast("未知错误！", R.drawable.cry);
 		    }
 		} else {
 		    if (member.update(userid, username, password, company, phone)) {
@@ -468,19 +481,40 @@ public class Member
 	return is_login;
     }
 
+    public long register(Context context, String userid, String username,
+	    String password, String company, String phone) {
+	if (userid == null || userid.length() == 0 ||
+		username == null || username.length() == 0 ||
+		password == null || password.length() == 0) {
+	    LogActivity.writeLog("会员注册的参数无效");
+	    return -1;
+	}
+
+	Administrator admin = Administrator.getAdministrator();
+	if (!admin.isLogin()) {
+	    LogActivity.writeLog("不能注册会员，因为管理员未登录。");
+	    return -1;
+	}
+
+	return EFormSQLite.Member.register(context, userid, username,
+		password, company, phone, admin.getPassword());
+    }
+
     public boolean login(Context context, String userid, String password) {
-	ContentValues values = EFormSQLiteHelper.Member.login(context, userid, password);
+	ContentValues values = EFormSQLite.Member.login(context, userid, password);
 	if (values == null)
 	    return false;
 
 	is_login = true;
 
 	profile = new MemberProfile();
-	profile.rowid = values.getAsLong(EFormSQLiteHelper.Member.COLUMN_ID);
-	profile.userid = values.getAsString(EFormSQLiteHelper.Member.COLUMN_USERID);
-	profile.username = values.getAsString(EFormSQLiteHelper.Member.COLUMN_USERNAME);
-	profile.company = values.getAsString(EFormSQLiteHelper.Member.COLUMN_COMPANY);
-	profile.phone = values.getAsString(EFormSQLiteHelper.Member.COLUMN_PHONE);
+
+	profile.rowid = values.getAsLong(EFormSQLite.Member.COLUMN_ID);
+	profile.userid = values.getAsString(EFormSQLite.Member.COLUMN_USERID);
+	profile.username = values.getAsString(EFormSQLite.Member.COLUMN_USERNAME);
+	profile.company = values.getAsString(EFormSQLite.Member.COLUMN_COMPANY);
+	profile.phone = values.getAsString(EFormSQLite.Member.COLUMN_PHONE);
+	profile.password = password;
 
 	if (is_login && listener != null) {
 	    listener.onMemberLogin();
@@ -501,14 +535,6 @@ public class Member
 	    profile = null;
 	    is_login = false;
 	}
-    }
-
-    public boolean register(String userid, String username, String password,
-	    String company, String phone) {
-	if (password == null || password.length() == 0)
-	    return false;
-
-	return true;
     }
 
     public boolean update(String userid, String username, String password,
@@ -542,6 +568,7 @@ public class Member
 	public long   rowid;
 	public String userid;
 	public String username;
+	public String password;
 	public String company;
 	public String phone;
     }

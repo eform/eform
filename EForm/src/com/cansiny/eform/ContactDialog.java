@@ -115,8 +115,22 @@ public class ContactDialog extends Utils.DialogFragment implements OnTabChangeLi
     }
 
     private void onAftermarketTabActive() {
-	TextView textview = (TextView) getDialog().findViewById(R.id.aftermarket_local_textview);
-	textview.setText("姓名：吴小虎\n电话：18655953721");
+	Preferences prefs = Preferences.getPreferences();
+	TextView textview;
+
+	String name = prefs.getAftermarketName();
+	String phone = prefs.getAftermarketPhone();
+	if (name == null || name.length() == 0 || phone == null || phone.length() == 0) {
+	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_name_textview);
+	    textview.setText("售后服务联系信息尚未录入！");
+	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_phone_textview);
+	    textview.setText("请在“系统设置”中录入售后服务联系信息。");
+	} else {
+	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_name_textview);
+	    textview.setText("姓 名：" + name);
+	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_phone_textview);
+	    textview.setText("电 话：" + phone);
+	}
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

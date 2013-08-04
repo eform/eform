@@ -17,8 +17,7 @@
       <TabWidget
           android:id="@android:id/tabs"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content" >
-      </TabWidget>
+          android:layout_height="wrap_content" />
 
       <FrameLayout
           android:id="@android:id/tabcontent"
@@ -26,6 +25,115 @@
           android:layout_height="match_parent"
           android:minHeight="400dp"
           android:padding="20dp" >
+
+        <LinearLayout
+            android:id="@+id/generic_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:orientation="vertical" >
+
+          <Button
+              android:id="@+id/aftermarket_contact_button"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="修改售后服务联系方式" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="10dp"
+              android:layout_marginLeft="4dp"
+              android:text="当售后服务人员发生变动时，可在这里修改售后联系方式"
+              android:textSize="16sp" />
+
+          <TableLayout
+              android:id="@+id/aftermarket_contact_table"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/yellow"
+              android:focusableInTouchMode="true"
+              android:paddingBottom="10dp"
+              android:paddingLeft="20dp"
+              android:paddingRight="20dp"
+              android:paddingTop="10dp"
+              android:stretchColumns="1" >
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="right|center_vertical"
+                  android:text="姓 名："
+                  android:textSize="18sp" />
+
+              <EditText
+                  android:id="@+id/aftermarket_name_edittext"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:ems="10"
+                  android:inputType="text" />
+
+              <Button
+                  android:id="@+id/aftermarket_name_clear_button"
+                  android:layout_width="26dp"
+                  android:layout_height="26dp"
+                  android:background="@drawable/clear" />
+
+              <Button
+                  android:id="@+id/aftermarket_contact_set_button"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="10dp"
+                  android:background="@drawable/button"
+                  android:text="修 改"
+                  android:textColor="@color/purple" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="电 话："
+                  android:textSize="18sp" />
+
+              <EditText
+                  android:id="@+id/aftermarket_phone_edittext"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:ems="10"
+                  android:inputType="phone" />
+
+              <Button
+                  android:id="@+id/aftermarket_phone_clear_button"
+                  android:layout_width="26dp"
+                  android:layout_height="26dp"
+                  android:background="@drawable/clear" />
+
+              <Button
+                  android:id="@+id/aftermarket_contact_cancel_button"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="10dp"
+                  android:background="@drawable/button"
+                  android:text="取 消"
+                  android:textColor="@color/purple" />
+
+            </TableRow>
+
+          </TableLayout>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/member_tab"
@@ -77,10 +185,8 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:ems="10"
-                  android:inputType="numberPassword" >
+                  android:inputType="numberPassword" />
 
-                <requestFocus />
-              </EditText>
 
               <Button
                   android:id="@+id/member_password_clear_button"
@@ -193,6 +299,7 @@
                 android:spinnerStyle="@android:style/Widget.Spinner.DropDown"
                 android:gravity="bottom" />
           </TableRow>
+
         </TableLayout>
 
         <LinearLayout
@@ -274,10 +381,13 @@
               android:layout_marginLeft="4dp"
               android:text="系统各方面的设置，请谨慎使用"
               android:textSize="16sp" />
+
         </LinearLayout>
 
       </FrameLayout>
+
     </LinearLayout>
+
   </TabHost>
 
 </LinearLayout>

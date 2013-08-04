@@ -66,7 +66,8 @@ public class Utils
 	return px / (metrics.densityDpi / 160f);
     }
 
-    static public Toast makeToast(CharSequence sequence, int image_res, int image_size, int duration) {
+    static public Toast makeToast(CharSequence sequence,
+	    int image_res, int image_size, int duration) {
 	Context context = EFormApplication.getContext();
 
 	LinearLayout layout = new LinearLayout(context);
@@ -143,7 +144,7 @@ public class Utils
 	UUID uuid = null;
 
 	Context context = EFormApplication.getContext();
-	SharedPreferences prefs = context.getSharedPreferences("deviceid", 0);
+	SharedPreferences prefs = context.getSharedPreferences("device", 0);
 	String id = prefs.getString("deviceid", null);
 	if (id != null)
 	    return UUID.fromString(id);
@@ -253,10 +254,10 @@ public class Utils
 		int index = parent.indexOfChild(view);
 		if (index <= 0)
 		    return;
-		View view2 = parent.getChildAt(index - 1);
-		if (view2 instanceof EditText) {
-		    ((EditText) view2).setText("");
-		    view2.requestFocus();
+		View edittext = parent.getChildAt(index - 1);
+		if (edittext instanceof EditText) {
+		    ((EditText) edittext).setText("");
+		    edittext.requestFocus();
 		}
 	    }
 	}

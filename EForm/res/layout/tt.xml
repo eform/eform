@@ -14,7 +14,7 @@
             android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/aftermarket_phone_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="TextView" />
@@ -30,7 +30,7 @@
             </EditText>
 
             <Button
-                android:id="@+id/member_password_button"
+                android:id="@+id/aftermarket_contact_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Button" />

@@ -17,8 +17,7 @@
       <TabWidget
           android:id="@android:id/tabs"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content" >
-      </TabWidget>
+          android:layout_height="wrap_content" />
 
       <FrameLayout
           android:id="@android:id/tabcontent"
@@ -26,6 +25,122 @@
           android:layout_height="match_parent"
           android:minHeight="400dp"
           android:padding="20dp" >
+
+        <LinearLayout
+            android:id="@+id/aftermarket_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="bottom"
+              android:text="本公司在所售产品区域驻有专职售后服务人员，您可以联系他们获得更快的响应速度。"
+              android:textSize="16sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="50dp"
+              android:singleLine="false"
+              android:text="产品当地售后服务"
+              android:textSize="22sp" />
+
+          <TextView
+              android:id="@+id/aftermarket_name_textview"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginTop="10dp"
+              android:text="姓名"
+              android:textSize="18sp" />
+
+          <TextView
+              android:id="@+id/aftermarket_phone_textview"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:text="电话"
+              android:textSize="18sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="50dp"
+              android:text="全国统一售后服务"
+              android:textSize="22sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:layout_marginTop="10dp"
+              android:text="电 话：0551-6342 0410\n传 真：0551-6342 0410\n邮 箱：cansinysupport@163.com"
+              android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/companyinfo_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="合肥市长欣宜科贸发展有限公司"
+              android:textSize="24sp" />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="Hefei Cansiny Technology Trade Co.,Ltd."
+              android:textSize="18sp" />
+
+          <TableLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="230dp" >
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginRight="40dp"
+                  android:text="地址：合肥市包河区宣城路64号"
+                  android:textSize="16sp" />
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="电话：0551-6342 0410"
+                  android:textSize="16sp" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="邮箱：93449042@qq.com"
+                  android:textSize="16sp" />
+
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="网址：http://www.cuc.com"
+                  android:textSize="16sp" />
+            </TableRow>
+
+          </TableLayout>
+
+        </LinearLayout>
 
         <TableLayout
             android:id="@+id/deviceinfo_tab"
@@ -156,11 +271,11 @@
               android:layout_height="wrap_content"
               android:layout_marginTop="5dp" >
 
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="屏幕精度："
-                  android:textSize="17sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="屏幕精度："
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/screendp_textview"
@@ -176,11 +291,11 @@
               android:layout_height="wrap_content"
               android:layout_marginTop="5dp" >
 
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="键盘类型："
-                  android:textSize="17sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="键盘类型："
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/keyboard_textview"
@@ -228,113 +343,10 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/companyinfo_tab"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="合肥市长欣宜科贸发展有限公司"
-              android:textSize="24sp" />
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Hefei Cansiny Technology Trade Co.,Ltd."
-              android:textSize="18sp" />
-
-          <TableLayout
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginTop="230dp" >
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginRight="40dp"
-                  android:text="地址：合肥市包河区宣城路64号"
-                  android:textSize="16sp" />
-
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="电话：0551-6342 0410"
-                  android:textSize="16sp" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="邮箱：93449042@qq.com"
-                  android:textSize="16sp" />
-
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="网址：http://www.cuc.com"
-                  android:textSize="16sp" />
-            </TableRow>
-          </TableLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/aftermarket_tab"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:gravity="bottom"
-              android:text="本公司在所售产品区域驻有专职售后服务人员，您可以联系他们获得更快的响应速度。"
-              android:textSize="16sp" />
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginTop="50dp"
-              android:singleLine="false"
-              android:text="产品当地售后服务"
-              android:textSize="22sp" />
-
-          <TextView
-              android:id="@+id/aftermarket_local_textview"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginLeft="20dp"
-              android:layout_marginTop="10dp"
-              android:text=""
-              android:textSize="18sp" />
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginTop="50dp"
-              android:text="全国统一售后服务"
-              android:textSize="22sp" />
-
-          <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginLeft="20dp"
-              android:layout_marginTop="10dp"
-              android:text="电话：0551-6342 0410\n传真：0551-6342 0410\n邮箱：cansinysupport@163.com"
-              android:textSize="18sp" />
-        </LinearLayout>
       </FrameLayout>
+
     </LinearLayout>
+
   </TabHost>
 
 </LinearLayout>

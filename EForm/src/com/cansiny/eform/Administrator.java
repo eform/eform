@@ -353,12 +353,12 @@ public class Administrator
     }
 
     public boolean hasPassword(Context context) {
-	return EFormSQLiteHelper.Account.hasPassword(context);
+	return EFormSQLite.Account.hasPassword(context);
     }
 
     public int login(Context context, String password) {
 	if (!is_login) {
-	    int retval = EFormSQLiteHelper.Account.login(context, password);
+	    int retval = EFormSQLite.Account.login(context, password);
 	    if (retval >= 0) {
 		this.password = password;
 		is_login = true;
@@ -383,7 +383,7 @@ public class Administrator
 	    throw new IllegalArgumentException("管理员密码不能为NULL");
 
 	if (is_login) {
-	    if (EFormSQLiteHelper.Account.setPassword(context, password)) {
+	    if (EFormSQLite.Account.setPassword(context, password)) {
 		this.password = password;
 		return true;
 	    }

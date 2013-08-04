@@ -41,10 +41,12 @@ import android.widget.TextView;
 class PreferencesDialog extends Utils.DialogFragment
     implements OnCheckedChangeListener, OnTabChangeListener
 {
+    static final private String TAB_TAG_GENERIC = "Generic";
     static final private String TAB_TAG_DEVICE  = "Device";
     static final private String TAB_TAG_MEMBER  = "Member";
     static final private String TAB_TAG_ADVANCE = "Advance";
 
+    private boolean generic_tab_is_active = false;
     private boolean device_tab_is_active = false;
     private boolean member_tab_is_active = false;
     private boolean advance_tab_is_active = false;
@@ -79,19 +81,24 @@ class PreferencesDialog extends Utils.DialogFragment
 	if (tabwidget == null || tabwidget.getTabCount() == 0) {
 	    tabhost.setup();
 
-	    TabHost.TabSpec tabspec = tabhost.newTabSpec(TAB_TAG_DEVICE);
+	    TabHost.TabSpec tabspec = tabhost.newTabSpec(TAB_TAG_GENERIC);
+	    tabspec.setContent(R.id.generic_tab);
+	    tabspec.setIndicator("常 规", null);
+	    tabhost.addTab(tabspec);
+
+	    tabspec = tabhost.newTabSpec(TAB_TAG_DEVICE);
 	    tabspec.setContent(R.id.device_tab);
-	    tabspec.setIndicator("设备", null);
+	    tabspec.setIndicator("设 备", null);
 	    tabhost.addTab(tabspec);
 
 	    tabspec = tabhost.newTabSpec(TAB_TAG_MEMBER);
 	    tabspec.setContent(R.id.member_tab);
-	    tabspec.setIndicator("会员", null);
+	    tabspec.setIndicator("会 员", null);
 	    tabhost.addTab(tabspec);
 
 	    tabspec = tabhost.newTabSpec(TAB_TAG_ADVANCE);
 	    tabspec.setContent(R.id.advance_tab);
-	    tabspec.setIndicator("高级", null);
+	    tabspec.setIndicator("高 级", null);
 	    tabhost.addTab(tabspec);
 
 	    tabwidget = tabhost.getTabWidget();
@@ -104,7 +111,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	    tabhost.setOnTabChangedListener(this);
 	}
 
-	onTabChanged(TAB_TAG_DEVICE);
+	onTabChanged(TAB_TAG_GENERIC);
 
 	Preferences prefs = Preferences.getPreferences();
 	prefs.beginTransaction();
@@ -118,41 +125,84 @@ class PreferencesDialog extends Utils.DialogFragment
 	prefs.endTransaction();
     }
 
+    private boolean setAftermarketContact() {
+	TextView name = (TextView) getDialog().findViewById(R.id.aftermarket_name_edittext);
+	if (name.length() == 0) {
+	    name.setHint("姓名不能为空");
+	    return false;
+	}
+	TextView phone = (TextView) getDialog().findViewById(R.id.aftermarket_phone_edittext);
+	if (phone.length() == 0) {
+	    phone.setHint("电话不能为空");
+	    return false;
+	}
+
+	Preferences prefs = Preferences.getPreferences();
+	prefs.setAftermarketName(name.getText().toString());
+	prefs.setAftermarketPhone(phone.getText().toString());
+	prefs.applyTransaction();
+
+	return true;
+    }
+
     @Override
     public void onClick(View view) {
 	super.onClick(view);
 
-	if (view instanceof Button) {
-	    Administrator admin = Administrator.getAdministrator();
+	Administrator admin = Administrator.getAdministrator();
+	Preferences prefs = Preferences.getPreferences();
+	AlertDialog dialog = (AlertDialog) getDialog();
 
-	    switch(view.getId()) {
-	    case R.id.member_password_button:
-		View table = getDialog().findViewById(R.id.member_password_table);
-		table.setVisibility(View.VISIBLE);
-		break;
-	    case R.id.member_list_button:
-		MemberListDialog dialog2 = new MemberListDialog();
-		dialog2.show(getFragmentManager(), "MemberListDialog");
-		break;
-	    case R.id.member_password_set_button:
-		table = getDialog().findViewById(R.id.member_password_table);
-		table.setVisibility(View.GONE);
-		break;
-	    case R.id.member_password_cancel_button:
-		table = getDialog().findViewById(R.id.member_password_table);
-		table.setVisibility(View.GONE);
-		break;
-	    case R.id.admin_logout_button:
-		admin.logout();
-		dismiss();
-		break;
-	    case R.id.admin_password_button:
-		admin.setPassword(getFragmentManager());
-		break;
-	    case R.id.system_settings_button:
-		startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-		break;
+	View view2;
+	TextView textview;
+
+	switch(view.getId()) {
+	case R.id.aftermarket_contact_button:
+	    view2 = dialog.findViewById(R.id.aftermarket_contact_table);
+	    view2.setVisibility(View.VISIBLE);
+	    textview = (TextView) dialog.findViewById(R.id.aftermarket_name_edittext);
+	    textview.setText(prefs.getAftermarketName());
+	    textview = (TextView) dialog.findViewById(R.id.aftermarket_phone_edittext);
+	    textview.setText(prefs.getAftermarketPhone());
+	    break;
+	case R.id.aftermarket_contact_set_button:
+	    if (setAftermarketContact()) {
+		hideIme(view);
+		showToast("修改成功！", R.drawable.smile);
+		view2 = dialog.findViewById(R.id.aftermarket_contact_table);
+		view2.setVisibility(View.GONE);
 	    }
+	    break;
+	case R.id.aftermarket_contact_cancel_button:
+	    view2 = dialog.findViewById(R.id.aftermarket_contact_table);
+	    view2.setVisibility(View.GONE);
+	    break;
+	case R.id.member_password_button:
+	    view2 = dialog.findViewById(R.id.member_password_table);
+	    view2.setVisibility(View.VISIBLE);
+	    break;
+	case R.id.member_list_button:
+	    MemberListDialog dialog2 = new MemberListDialog();
+	    dialog2.show(getFragmentManager(), "MemberListDialog");
+	    break;
+	case R.id.member_password_set_button:
+	    view2 = dialog.findViewById(R.id.member_password_table);
+	    view2.setVisibility(View.GONE);
+	    break;
+	case R.id.member_password_cancel_button:
+	    view2 = dialog.findViewById(R.id.member_password_table);
+	    view2.setVisibility(View.GONE);
+	    break;
+	case R.id.admin_logout_button:
+	    admin.logout();
+	    dismiss();
+	    break;
+	case R.id.admin_password_button:
+	    admin.setPassword(getFragmentManager());
+	    break;
+	case R.id.system_settings_button:
+	    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+	    break;
 	}
     }
 
@@ -172,14 +222,19 @@ class PreferencesDialog extends Utils.DialogFragment
 
     @Override
     public void onTabChanged(String tag) {
-	if (tag.equals(TAB_TAG_DEVICE)) {
+	if (tag.equals(TAB_TAG_GENERIC)) {
+	    if (!generic_tab_is_active) {
+		onGenericTabActived();
+		generic_tab_is_active = true;
+	    }
+	} else if (tag.equals(TAB_TAG_DEVICE)) {
 	    if (!device_tab_is_active) {
 		onDeviceTabActived();
 		device_tab_is_active = true;
 	    }
 	} else if (tag.equals(TAB_TAG_MEMBER)) {
 	    if (!member_tab_is_active) {
-		onMemberTabActive();
+		onMemberTabActived();
 		member_tab_is_active = true;
 	    }
 	} else if (tag.equals(TAB_TAG_ADVANCE)) {
@@ -188,6 +243,33 @@ class PreferencesDialog extends Utils.DialogFragment
 		advance_tab_is_active = true;
 	    }
 	}
+    }
+
+    private void onGenericTabActived() {
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	int[] ids = {
+		R.id.aftermarket_contact_button,
+		R.id.aftermarket_contact_set_button,
+		R.id.aftermarket_contact_cancel_button,
+	};
+	for (int id : ids) {
+	    Button button = (Button) dialog.findViewById(id);
+	    button.setOnClickListener(this);
+	}
+
+	int[] ids2 = {
+		R.id.aftermarket_name_clear_button,
+		R.id.aftermarket_phone_clear_button,
+	};
+	for (int id : ids2) {
+	    Button button = (Button) dialog.findViewById(id);
+	    button.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
+	    button.setOnClickListener(this);
+	}
+
+	View view = dialog.findViewById(R.id.aftermarket_contact_table);
+	view.setVisibility(View.GONE);
     }
 
     private void onDeviceTabActived() {
@@ -219,7 +301,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	});
     }
 
-    private void onMemberTabActive() {
+    private void onMemberTabActived() {
 	AlertDialog dialog = (AlertDialog) getDialog();
 
 	int[] ids = {
@@ -324,7 +406,7 @@ class MemberListDialog extends Utils.DialogFragment
 	private ArrayList<Member.MemberProfile> members;
 
 	public MemberListAdapter() {
-	    members = EFormSQLiteHelper.Member.listAll(getActivity());
+	    members = EFormSQLite.Member.listAll(getActivity());
 	}
 
 	@Override
@@ -394,6 +476,13 @@ public class Preferences
 	editor = prefs.edit();
     }
 
+    public void applyTransaction() {
+	if (editor != null) {
+	    editor.apply();
+	    editor = null;
+	}
+    }
+
     public void endTransaction() {
 	if (editor != null) {
 	    editor.commit();
@@ -435,6 +524,26 @@ public class Preferences
 
     public String getMagcardDevpath() {
 	return prefs.getString("MagcardDevpath", "/dev/ttyS0");
+    }
+
+    public void setAftermarketName(String name) {
+	if (editor != null) {
+	    editor.putString("AftermarketName", name);
+	}
+    }
+
+    public String getAftermarketName() {
+	return prefs.getString("AftermarketName", "");
+    }
+
+    public void setAftermarketPhone(String phone) {
+	if (editor != null) {
+	    editor.putString("AftermarketPhone", phone);
+	}
+    }
+
+    public String getAftermarketPhone() {
+	return prefs.getString("AftermarketPhone", "");
     }
 
 }
