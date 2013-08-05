@@ -159,11 +159,14 @@ class MemberLoginDialog extends Utils.DialogFragment
 	    public void onClick(View view) {
 		if (userid_edittext.length() == 0) {
 		    userid_edittext.setHint("证件号码不能为空");
+		    userid_edittext.setHintTextColor(getResources().getColor(R.color.red));
 		    userid_edittext.requestFocus();
 		    return;
 		}
-		if (password_edittext.length() == 0) {
-		    password_edittext.setHint("登录密码不能为空");
+		if (password_edittext.length() != 6) {
+		    password_edittext.setText("");
+		    password_edittext.setHint("密码必须是6位");
+		    password_edittext.setHintTextColor(getResources().getColor(R.color.red));
 		    password_edittext.requestFocus();
 		    return;
 		}
@@ -216,6 +219,7 @@ class MemberRegisterDialog extends Utils.DialogFragment
 	textview.setPadding(20, 10, 20, 10);
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	try {
+	    /* TODO: read protocol file from data dir */
 	    AssetManager assets = getActivity().getAssets();
 	    InputStream stream = assets.open("member_protocol.txt");
 
@@ -302,12 +306,14 @@ class MemberProfileDialog extends Utils.DialogFragment
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_member, null));
 
-	builder.setNegativeButton("取 消", null);
+	builder.setNegativeButton("放 弃", null);
 
-	if (profile == null)
+	if (profile == null) {
 	    builder.setPositiveButton("注 册", null);
-	else
+	} else {
+	    builder.setNeutralButton("注 销", null);
 	    builder.setPositiveButton("更 新", null);
+	}
 
 	return builder.create();
     }
@@ -351,8 +357,10 @@ class MemberProfileDialog extends Utils.DialogFragment
 	    view.setOnClickListener(this);
 	}
 
-	password_edittext.requestFocus();
+	if (profile == null)
+	    password_edittext.requestFocus();
 
+	/* TODO: remove below 2 lines when idcard is ready */
 	userid_edittext.setEnabled(true);
 	username_edittext.setEnabled(true);
 
@@ -433,17 +441,30 @@ class MemberProfileDialog extends Utils.DialogFragment
 			showToast("未知错误！", R.drawable.cry);
 		    }
 		} else {
-		    if (member.update(userid, username, password, company, phone)) {
+		    if (member.update(getActivity(), profile.rowid, password, company, phone)) {
 			showToast("会员信息已成功更新！", R.drawable.smile);
 			dismiss();
 		    } else {
-			showToast("不能更新会员信息！", R.drawable.cry);
+			showToast("更新会员信息失败！", R.drawable.cry);
 		    }
 		}
 	    }
 	});
-    }
 
+	if (profile != null) {
+	    button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
+	    button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    button.setOnClickListener(new View.OnClickListener() {
+		@Override
+		public void onClick(View view) {
+		    hideIme(view);
+		    dismiss();
+		    MemberDeleteDialog dialog = new MemberDeleteDialog();
+		    dialog.show(getFragmentManager(), "MemberDeleteDialog");
+		}
+	    });
+	}
+    }
 
     @Override
     public void onClick(View view) {
@@ -453,6 +474,52 @@ class MemberProfileDialog extends Utils.DialogFragment
 	case R.id.idcard_read_button:
 	    break;
 	}
+    }
+}
+
+
+class MemberDeleteDialog extends Utils.DialogFragment
+{
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setTitle("注销会员");
+        builder.setMessage("您真的要注销当前登录的会员吗？\n\n" +
+		"注销会员将会删除所有会员相关的数据，您必须明白这是不可逆的操作，" +
+		"数据一旦删除将无法找回，请务必在注销前做好备份！\n");
+
+	builder.setNegativeButton("放 弃", null);
+	builder.setPositiveButton("确认注销", null);
+
+	return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	final AlertDialog dialog = (AlertDialog) getDialog();
+
+	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+
+	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		dismiss();
+		Member member = Member.getMember();
+		if (member.delete(getActivity())) {
+		    Utils.showToast("会员注销成功！");
+		} else {
+		    Utils.showToast("注销会员失败！", R.drawable.cry);
+		}
+	    }
+	});
     }
 }
 
@@ -515,6 +582,7 @@ public class Member
 	profile.username = values.getAsString(EFormSQLite.Member.COLUMN_USERNAME);
 	profile.company = values.getAsString(EFormSQLite.Member.COLUMN_COMPANY);
 	profile.phone = values.getAsString(EFormSQLite.Member.COLUMN_PHONE);
+	profile.datetime = values.getAsLong(EFormSQLite.Member.COLUMN_DATETIME);
 	profile.password = password;
 
 	if (is_login && listener != null) {
@@ -538,9 +606,29 @@ public class Member
 	}
     }
 
-    public boolean update(String userid, String username, String password,
+    public boolean update(Context context, long rowid, String password,
 	    String company, String phone) {
-	return true;
+	String admin_passwd = null;
+
+	if (password != null && password.length() > 0) {
+	    Administrator admin = Administrator.getAdministrator();
+	    if (!admin.isLogin()) {
+		Utils.showToast("更新会员密码需要管理员登录");
+		return false;
+	    } else {
+		admin_passwd = admin.getPassword();
+	    }
+	}
+	if (EFormSQLite.Member.update(context, rowid, password,
+		company, phone, admin_passwd)) {
+	    if (profile != null) {
+		profile.company = company;
+		profile.password = password;
+		profile.phone = phone;
+	    }
+	    return true;
+	}
+	return false;
     }
 
     public void update(FragmentManager manager) {
@@ -551,6 +639,15 @@ public class Member
 	}
     }
 
+    public boolean delete(Context context) {
+	if (is_login) {
+	    if (EFormSQLite.Member.delete(context, profile.rowid)) {
+		logout();
+		return true;
+	    }
+	}
+	return false;
+    }
 
     public void setListener(MemberListener listener) {
 	this.listener = listener;

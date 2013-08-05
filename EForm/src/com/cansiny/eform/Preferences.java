@@ -57,6 +57,8 @@ class PreferencesDialog extends Utils.DialogFragment
     private boolean member_tab_is_active = false;
     private boolean advance_tab_is_active = false;
 
+    private long member_password_rowid = -1;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 	super.onCreateDialog(savedInstanceState);
@@ -151,6 +153,75 @@ class PreferencesDialog extends Utils.DialogFragment
 	return true;
     }
 
+    private void onMemberPasswordButtonClick() {
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	TextView userid_view = (TextView) dialog.findViewById(R.id.member_userid_textview);
+	View table = dialog.findViewById(R.id.member_password_table);
+
+	String userid = "1111";
+	member_password_rowid = EFormSQLite.Member.getid(getActivity(), userid);
+	if (member_password_rowid >= 0) {
+	    userid_view.setText(userid);
+	    table.setVisibility(View.VISIBLE);
+	} else {
+	    showToast("没有证件号码为“" + userid + "”的会员！");
+	    userid_view.setText("");
+	    table.setVisibility(View.GONE);
+	}
+    }
+
+    private void onMemberPasswordSetButtonClick() {
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	if (member_password_rowid < 0) {
+	    View view = dialog.findViewById(R.id.member_password_table);
+	    view.setVisibility(View.GONE);
+	}
+	Administrator admin = Administrator.getAdministrator();
+	String admin_passwd = admin.getPassword();
+	if (admin_passwd == null) {
+	    View view = dialog.findViewById(R.id.member_password_table);
+	    view.setVisibility(View.GONE);
+	}
+
+	TextView edit = (TextView) dialog.findViewById(R.id.member_password_edittext);
+	if (edit.length() != 6) {
+	    edit.setText("");
+	    edit.setHint("密码必须是6位");
+	    edit.setHintTextColor(getResources().getColor(R.color.red));
+	    edit.requestFocus();
+	    return;
+	}
+	String password = edit.getText().toString();
+
+	edit = (TextView) dialog.findViewById(R.id.member_password2_edittext);
+	if (edit.length() != 6) {
+	    edit.setText("");
+	    edit.setHint("密码必须是6位");
+	    edit.setHintTextColor(getResources().getColor(R.color.red));
+	    edit.requestFocus();
+	    return;
+	}
+	String password2 = edit.getText().toString();
+
+	if (!password.equals(password2)) {
+	    edit.setText("");
+	    edit.setHint("确认密码不一致");
+	    edit.setHintTextColor(getResources().getColor(R.color.red));
+	    edit.requestFocus();
+	    return;
+	}
+
+	if (EFormSQLite.Member.update(getActivity(), member_password_rowid,
+		password, null, null, admin_passwd)) {
+	    View view = dialog.findViewById(R.id.member_password_table);
+	    view.setVisibility(View.GONE);
+	    showToast("密码修改成功！", R.drawable.smile);
+	    member_password_rowid = -1;
+	}
+    }
+
     @Override
     public void onClick(View view) {
 	super.onClick(view);
@@ -183,23 +254,23 @@ class PreferencesDialog extends Utils.DialogFragment
 	    view2 = dialog.findViewById(R.id.aftermarket_contact_table);
 	    view2.setVisibility(View.GONE);
 	    break;
+
 	case R.id.member_password_button:
+	    onMemberPasswordButtonClick();
+	    break;
+	case R.id.member_password_set_button:
+	    onMemberPasswordSetButtonClick();
+	    break;
+	case R.id.member_password_cancel_button:
 	    view2 = dialog.findViewById(R.id.member_password_table);
-	    view2.setVisibility(View.VISIBLE);
+	    view2.setVisibility(View.GONE);
 	    break;
 	case R.id.member_list_button:
 	    showToast("正在加载，请稍候 ...");
 	    MemberListDialog dialog2 = new MemberListDialog();
 	    dialog2.show(getFragmentManager(), "MemberListDialog");
 	    break;
-	case R.id.member_password_set_button:
-	    view2 = dialog.findViewById(R.id.member_password_table);
-	    view2.setVisibility(View.GONE);
-	    break;
-	case R.id.member_password_cancel_button:
-	    view2 = dialog.findViewById(R.id.member_password_table);
-	    view2.setVisibility(View.GONE);
-	    break;
+
 	case R.id.admin_logout_button:
 	    admin.logout();
 	    dismiss();
@@ -605,7 +676,7 @@ public class Preferences
 
     public void beginTransaction() {
 	if (editor != null) {
-	    LogActivity.writeLog("Preferences transaction has been reenter");
+	    LogActivity.writeLog("Preferences事务被重入，可能是程序错误。");
 	    return;
 	}
 	editor = prefs.edit();

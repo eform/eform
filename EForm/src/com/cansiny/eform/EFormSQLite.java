@@ -64,17 +64,34 @@ public class EFormSQLite extends SQLiteOpenHelper
 	}
     }
 
-    static public String AESDecrypt(String input) {
-	return null;
+    static public byte[] AESDecrypt(byte[] password, byte[] input) {
+	try {
+	    SecretKeySpec key = new SecretKeySpec(password, "AES");
+	    Cipher cipher = Cipher.getInstance("AES");
+	    cipher.init(Cipher.DECRYPT_MODE, key);
+	    return cipher.doFinal(input);
+	} catch (Exception e) {
+	    LogActivity.writeLog(e);
+	    return null;
+	}
     }
 
     static public String AESEncryptPassword(byte[] password, String input) {
-	byte[] cipher = AESEncrypt(password, input.getBytes());
-	return Base64.encodeToString(cipher, Base64.NO_WRAP);
+	byte[] ciphertext = AESEncrypt(password, input.getBytes());
+	if (ciphertext == null)
+	    return null;
+
+	return Base64.encodeToString(ciphertext, Base64.NO_WRAP);
     }
 
     static public String AESDecryptPassword(byte[] password, String input) {
-	return null;
+	try {
+	    byte[] ciphertext = Base64.decode(input, Base64.NO_WRAP);
+	    return new String(AESDecrypt(password, ciphertext));
+	} catch (Exception e) {
+	    LogActivity.writeLog(e);
+	    return null;
+	}
     }
 
     public EFormSQLite(Context context, String name,
@@ -105,7 +122,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		+ "username TEXT NOT NULL,"
 		+ "password TEXT NOT NULL,"
 		+ "company  TEXT,"
-		+ "phone    TEXT"
+		+ "phone    TEXT,"
 		+ "datetime INTEGER NOT NULL"
 		+ ");");
 
@@ -159,6 +176,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 
 	    int count = cursor.getCount();
+
 	    cursor.close();
 	    sqlite.close();
 
@@ -168,6 +186,17 @@ public class EFormSQLite extends SQLiteOpenHelper
 	static public boolean setPassword(Context context, String password) {
 	    if (password.length() != 6) {
 		throw new IllegalArgumentException("管理员密码长度必须为6位");
+	    }
+
+	    Administrator admin = Administrator.getAdministrator();
+	    if (!admin.isLogin()) {
+		LogActivity.writeLog("设置管理员密码需要管理员先登录");
+		return false;
+	    }
+	    String old_password = admin.getPassword();
+	    if (old_password == null) {
+		LogActivity.writeLog("不能得到管理员旧密码");
+		return false;
 	    }
 
 	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
@@ -182,28 +211,69 @@ public class EFormSQLite extends SQLiteOpenHelper
 		return false;
 	    }
 
-	    ContentValues values = new ContentValues();
-	    values.put(COLUMN_PASSWORD, SHAPassword(password));
-
-	    database = sqlite.getWritableDatabase();
-	    boolean retval = false;
-
-	    if (cursor.getCount() == 0) {
-		values.put(COLUMN_USERID, 0);
-		values.put(COLUMN_ROLE, Account.ROLE_ADMINISTRATOR);
-		long rowid = database.insert(TABLE_NAME, null, values);
-		retval = (rowid >= 0) ? true : false;
-	    } else {
+	    long rowid = -1;
+	    if (cursor.getCount() > 0) {
 		cursor.moveToFirst();
-		int rows = database.update(TABLE_NAME, values,
-			"_id=?", new String[] { String.valueOf(cursor.getLong(0)) });
-		retval = (rows == 1) ? true : false;
+		rowid = cursor.getLong(0);
 	    }
-	    /* TODO: update member passwords */
-
 	    cursor.close();
-	    sqlite.close();
 
+	    boolean retval = false;
+	    database = sqlite.getWritableDatabase();
+	    database.beginTransaction();
+	    try {
+		ContentValues values = new ContentValues();
+
+		if (rowid == -1) {	// insert new
+		    values.put(COLUMN_USERID, 0);
+		    values.put(COLUMN_PASSWORD, SHAPassword(password));
+		    values.put(COLUMN_ROLE, Account.ROLE_ADMINISTRATOR);
+		    rowid = database.insert(TABLE_NAME, null, values);
+		    retval = (rowid >= 0) ? true : false;
+		} else {		// update exists
+		    values.put(COLUMN_PASSWORD, SHAPassword(password));
+		    int rows = database.update(TABLE_NAME, values,
+			    "_id=?", new String[] { String.valueOf(rowid) });
+		    retval = (rows == 1) ? true : false;
+		}
+
+		// continue update member passwords
+		if (retval) {
+		    cursor = database.query(TABLE_NAME, new String[] { COLUMN_ID,
+			    COLUMN_PASSWORD }, "role=1", null, null, null, null);
+
+		    byte[] old_hash = MD5Hash(old_password);
+		    byte[] new_hash = MD5Hash(password);
+
+		    while(cursor.moveToNext()) {
+			String cleartext = AESDecryptPassword(old_hash, cursor.getString(1));
+			if (cleartext == null) {
+			    retval = false;
+			    break;
+			}
+			String ciphetext = AESEncryptPassword(new_hash, cleartext);
+			if (ciphetext == null) {
+			    retval = false;
+			    break;
+			}
+			values.clear();
+			values.put(COLUMN_PASSWORD, ciphetext);
+			if (database.update(TABLE_NAME, values, "_id=?",
+				new String[] { cursor.getString(0) }) != 1) {
+			    retval = false;
+			    break;
+			}
+		    }
+		    cursor.close();
+
+		    if (retval) {
+			database.setTransactionSuccessful();
+		    }
+		}
+	    } finally {
+		database.endTransaction();
+		sqlite.close();
+	    }
 	    return retval;
 	}
 
@@ -273,6 +343,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 
 	    if (cursor.getCount() > 0) {
+		LogActivity.writeLog("会员 '%s' 已经存在。", userid);
 		cursor.close();
 		sqlite.close();
 		return -2;
@@ -295,14 +366,14 @@ public class EFormSQLite extends SQLiteOpenHelper
 		if (rowid >= 0) {
 		    byte[] md5hash = MD5Hash(admin_passwd);
 		    String member_passwd = AESEncryptPassword(md5hash, password);
-
-		    values.clear();
-		    values.put(Account.COLUMN_USERID, rowid);
-		    values.put(Account.COLUMN_PASSWORD, member_passwd);
-		    values.put(Account.COLUMN_ROLE, Account.ROLE_MEMBER);
-
-		    if (database.insert(Account.TABLE_NAME, null, values) >= 0) {
-			database.setTransactionSuccessful();
+		    if (member_passwd != null) {
+			values.clear();
+			values.put(Account.COLUMN_USERID, rowid);
+			values.put(Account.COLUMN_PASSWORD, member_passwd);
+			values.put(Account.COLUMN_ROLE, Account.ROLE_MEMBER);
+			if (database.insert(Account.TABLE_NAME, null, values) >= 0) {
+			    database.setTransactionSuccessful();
+			}
 		    }
 		}
 	    } finally {
@@ -313,23 +384,24 @@ public class EFormSQLite extends SQLiteOpenHelper
 	}
 
 	static public ContentValues login(Context context, String userid, String password) {
-	    EFormSQLite helper = EFormSQLite.getSQLite(context);
-	    SQLiteDatabase database = helper.getReadableDatabase();
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getReadableDatabase();
 
 	    String[] columns = { COLUMN_ID, COLUMN_USERNAME, COLUMN_PASSWORD,
-		    COLUMN_COMPANY, COLUMN_PHONE };
+		    COLUMN_COMPANY, COLUMN_PHONE, COLUMN_DATETIME };
 
 	    Cursor cursor = database.query(TABLE_NAME, columns,
 		    "userid=?", new String[]{ userid }, null, null, null);
 
-	    if (cursor == null || cursor.getCount() != 1) {
-		helper.close();
+	    if (cursor == null || cursor.getCount() <= 0) {
+		sqlite.close();
 		return null;
 	    }
+	    cursor.moveToFirst();
 
-	    String encoded_password = cursor.getString(2);
-	    if (!encoded_password.equals(SHAPassword(password))) {
-		helper.close();
+	    String sha_password = cursor.getString(2);
+	    if (!sha_password.equals(SHAPassword(password))) {
+		sqlite.close();
 		return null;
 	    }
 
@@ -337,21 +409,109 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    values.put(COLUMN_ID, cursor.getLong(0));
 	    values.put(COLUMN_USERID, userid);
-	    values.put(COLUMN_USERNAME, cursor.getLong(1));
-	    values.put(COLUMN_COMPANY, cursor.getLong(3));
-	    values.put(COLUMN_PHONE, cursor.getLong(4));
+	    values.put(COLUMN_USERNAME, cursor.getString(1));
+	    values.put(COLUMN_COMPANY, cursor.getString(3));
+	    values.put(COLUMN_PHONE, cursor.getString(4));
+	    values.put(COLUMN_DATETIME, cursor.getLong(5));
 
-	    helper.close();
+	    cursor.close();
+	    sqlite.close();
 
 	    return values;
 	}
 
-	public void update(Context context, ContentValues values) {
-	    
+	static public long getid(Context context, String userid) {
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getReadableDatabase();
+
+	    String[] columns = { COLUMN_ID };
+
+	    Cursor cursor = database.query(TABLE_NAME, columns,
+		    "userid=?", new String[]{ userid }, null, null, null);
+
+	    if (cursor == null || cursor.getCount() <= 0) {
+		sqlite.close();
+		return -1;
+	    }
+	    cursor.moveToFirst();
+
+	    long rowid = cursor.getLong(0);
+
+	    cursor.close();
+	    sqlite.close();
+
+	    return rowid;
 	}
 
-	public void delete(Context context) {
-	    
+	static public boolean update(Context context, long rowid, String password,
+		String company, String phone, String admin_passwd) {
+	    String sha_password = null;
+
+	    if (password != null && password.length() > 0) {
+		if (password.length() != 6) {
+		    Utils.showToast("密码长度必须是6位");
+		    return false;
+		}
+		if (admin_passwd == null || admin_passwd.length() != 6) {
+		    LogActivity.writeLog("更新会员密码需要管理员密码");
+		    return false;
+		}
+		sha_password = SHAPassword(password);
+	    }
+
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    ContentValues values = new ContentValues();
+
+	    if (company != null) {
+		values.put(COLUMN_COMPANY, company);
+	    }
+	    if (phone != null) {
+		values.put(COLUMN_PHONE, phone);
+	    }
+	    if (sha_password != null) {
+		values.put(COLUMN_PASSWORD, sha_password);
+	    }
+
+	    boolean retval = false;
+	    database.beginTransaction();
+	    try {
+		int rows = database.update(TABLE_NAME, values, "_id=?",
+			new String[] { String.valueOf(rowid) });
+		if (rows == 1) {
+		    if (sha_password != null) {
+			byte[] md5hash = MD5Hash(admin_passwd);
+			String member_passwd = AESEncryptPassword(md5hash, password);
+
+			values.clear();
+			values.put(Account.COLUMN_PASSWORD, member_passwd);
+
+			rows = database.update(Account.TABLE_NAME, values, "userid=?",
+				new String[] { String.valueOf(rowid) });
+			if (rows == 1) {
+			    database.setTransactionSuccessful();
+			    retval = true;
+			}
+		    } else {
+			database.setTransactionSuccessful();
+			retval = true;
+		    }
+		} else {
+		    LogActivity.writeLog("没有更新任何任何会员的信息");
+		}
+	    } finally {
+		database.endTransaction();
+		sqlite.close();
+	    }
+	    return retval;
+	}
+
+	static public boolean delete(Context context, long rowid) {
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    return true;
 	}
 
 	static public ArrayList<MemberProfile> listAll(Context context) {
