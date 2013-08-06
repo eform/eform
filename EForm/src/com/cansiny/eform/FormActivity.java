@@ -47,7 +47,7 @@ public class FormActivity extends Activity implements
 
     /* constants uses for identified the difference of event source */
     static private final int VIEW_TAG_PAGE_TITLE_BUTTON = 1;
-    static private final int VIEW_TAG_SIDEBAR_MEMBER_BUTTON = 2;
+    static private final int VIEW_TAG_MEMBER_SAVE_BUTTON = 2;
 
     static private final int TIMEOUT_VALUE = 90;
 
@@ -88,15 +88,15 @@ public class FormActivity extends Activity implements
 	    form = (Form) Class.forName(klass).getConstructor(Activity.class).newInstance(this);
 	    form.setListener(this);
 
-	    /* insert pages title */
-	    ViewGroup page_title = (ViewGroup) findViewById(R.id.page_title_layout);
+	    /* insert pages title buttons */
+	    ViewGroup page_title_layout = (ViewGroup) findViewById(R.id.page_title_layout);
 	    int n = 1;
 	    for (Form.FormPage page : form.pages) {
 		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 			 ViewGroup.LayoutParams.WRAP_CONTENT,
 			 ViewGroup.LayoutParams.MATCH_PARENT);
 		params.weight = 1;
-		page_title.addView(buildPageButton(n, page.title), params);
+		page_title_layout.addView(buildPageTitleButton(n, page.title), params);
 		n++;
 	    }
 
@@ -142,10 +142,14 @@ public class FormActivity extends Activity implements
     }
 
     @Override
+    protected void onDestroy() {
+	super.onDestroy();
+    }
+
+    @Override
     protected void onStart() {
 	super.onStart();
 
-	/* default active the first step */
 	setActivePage(0);
     }
 
@@ -181,7 +185,6 @@ public class FormActivity extends Activity implements
 
 	timeout_handler.removeCallbacks(timeout_runnable);
     }
-
 
     private void setTimeoutTipVisible(boolean visible) {
 	final View view = findViewById(R.id.form_tip_layout);
@@ -229,7 +232,7 @@ public class FormActivity extends Activity implements
 
 	Button button = new Button(this);
 	button.setId(atomic_int.incrementAndGet());
-	button.setTag(VIEW_TAG_SIDEBAR_MEMBER_BUTTON);
+	button.setTag(VIEW_TAG_MEMBER_SAVE_BUTTON);
 	button.setBackgroundResource(R.drawable.save);
 	button.setGravity(Gravity.CENTER_HORIZONTAL);
 	button.setOnClickListener(this);
@@ -261,7 +264,7 @@ public class FormActivity extends Activity implements
     }
 
 
-    private View buildPageButton(int index, String title) {
+    private View buildPageTitleButton(int index, String title) {
 	LinearLayout button_layout = new LinearLayout(getApplicationContext());
 	button_layout.setId(atomic_int.incrementAndGet());
 	button_layout.setOrientation(LinearLayout.VERTICAL);
@@ -292,7 +295,7 @@ public class FormActivity extends Activity implements
 	return button_layout;
     }
 
-    private void resetTitleButtons() {
+    private void resetPageTitleButtons() {
 	LinearLayout page_title = (LinearLayout) findViewById(R.id.page_title_layout);
 	for (int i = 0; i < page_title.getChildCount(); i++) {
 	    LinearLayout button_layout = (LinearLayout) page_title.getChildAt(i);
@@ -304,11 +307,6 @@ public class FormActivity extends Activity implements
 	}
     }
 
-    private void setActivePage(int index) {
-	page_switcher = new FormPageSwitcher();
-	page_switcher.execute(index);
-    }
-
     @Override
     public void onClick(View view) {
 	Object object = view.getTag();
@@ -317,12 +315,12 @@ public class FormActivity extends Activity implements
 		switch (((Integer) object).intValue()) {
 		case VIEW_TAG_PAGE_TITLE_BUTTON: /* page title button clicked */
 		    if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
-			LinearLayout step_layout = (LinearLayout) findViewById(R.id.page_title_layout);
-			setActivePage(step_layout.indexOfChild((View) view.getParent()));
+			LinearLayout title_layout = (LinearLayout) findViewById(R.id.page_title_layout);
+			setActivePage(title_layout.indexOfChild((View) view.getParent()));
 		    }
 		    break;
-		case VIEW_TAG_SIDEBAR_MEMBER_BUTTON:
-		    onSaveButtonClick(view);
+		case VIEW_TAG_MEMBER_SAVE_BUTTON:
+		    onMemberSaveButtonClick(view);
 		    break;
 		}
 	    }
@@ -345,6 +343,10 @@ public class FormActivity extends Activity implements
 	}
     }
 
+    private void setActivePage(int index) {
+	page_switcher = new FormPageSwitcher();
+	page_switcher.execute(index);
+    }
 
     private class FormPageSwitcher extends AsyncTask<Integer, Void, View>
     {
@@ -353,16 +355,14 @@ public class FormActivity extends Activity implements
 
 	@Override
 	protected View doInBackground(Integer... args) {
-	    this.index = args[0];
+	    index = args[0];
 
 	    if (index == form.getActivePage()) {
 		toast.cancel();
 		return null;
 	    }
-
-	    LinearLayout title_layout = (LinearLayout) findViewById(R.id.page_title_layout);
-	    if (index >= title_layout.getChildCount()) {
-		Log.e("ItemActivity", String.format("Try to goto unexists page %d", index));
+	    if (index < 0 || index >= form.pages.size()) {
+		LogActivity.writeLog("尝试切换到不存在的页面 %d", index);
 		return null;
 	    }
 	    return form.setActivePage(index);
@@ -370,15 +370,18 @@ public class FormActivity extends Activity implements
 	
 	@Override
 	protected void onPreExecute() {
+	    /* hide the soft keyboard until user touch the edit text */
+	    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+	    
 	    toast = showToast("正在加载页面...", 0);
 	}
 
 	@Override
-	protected void onPostExecute(View view) {
-	    if (view == null) return;
+	protected void onPostExecute(View page_view) {
+	    if (page_view == null) return;
 
-	    /* change page button appearance */
-	    resetTitleButtons();
+	    /* change page title button appearance */
+	    resetPageTitleButtons();
 	    LinearLayout title_layout = (LinearLayout) findViewById(R.id.page_title_layout);
 	    LinearLayout button_layout = (LinearLayout) title_layout.getChildAt(index);
 	    Button button = (Button) button_layout.getChildAt(0);
@@ -392,21 +395,18 @@ public class FormActivity extends Activity implements
 	    button = (Button) findViewById(R.id.next_button);
 	    button.setEnabled(index + 1 < form.pages.size());
 
+	    /* replace form page layout */
 	    FrameLayout page_layout = (FrameLayout) findViewById(R.id.page_layout);
 	    page_layout.removeAllViews();
 	    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
 		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    ViewGroup.LayoutParams.WRAP_CONTENT);
 	    params.gravity = Gravity.CENTER_VERTICAL;
-	    page_layout.addView(view, params);
+	    page_layout.addView(page_view, params);
 	    page_layout.forceLayout();
 
-	    form.onPageStart();
-
-	    /* hide the soft keyboard until user touch the edit text */
-	    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-	    
 	    toast.cancel();
+	    form.onPageStart(index);
 	}
     }
 
@@ -425,9 +425,8 @@ public class FormActivity extends Activity implements
 	}
     }
 
-
     @Override
-    public void onScrollViewScrolled(Form form, ScrollView scroll_view) {
+    public void onFormPageScrolled(Form form, ScrollView scroll_view) {
 	Form.FormPage page = form.getActiveFormPage();
 	findViewById(R.id.up_button).setEnabled((page.canScrollUp()));
 	findViewById(R.id.down_button).setEnabled((page.canScrollDown()));
@@ -468,15 +467,15 @@ public class FormActivity extends Activity implements
     }
 
 
-    public void onSaveButtonClick(View view) {
-	Log.d("", "save");
-    }
-
-
     public void onExitButtonClick(View view) {
 	setResult(RESULT_OK);
 	finish();
     }
+
+    public void onMemberSaveButtonClick(View view) {
+	Log.d("", "save");
+    }
+
 
     @Override
     public boolean onTouch(View arg0, MotionEvent event) {
@@ -487,12 +486,12 @@ public class FormActivity extends Activity implements
     }
 
     @Override
-    public void onViewTouched(Form form, View view) {
+    public void onFormViewTouched(Form form, View view) {
 	setTimeoutTipVisible(false);
     }
 
     @Override
-    public void onTextChanged(Form form, EditText textview) {
+    public void onFormTextChanged(Form form, EditText textview) {
 	setTimeoutTipVisible(false);
     }
 

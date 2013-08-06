@@ -511,7 +511,28 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
 	    SQLiteDatabase database = sqlite.getWritableDatabase();
 
-	    return true;
+	    database.beginTransaction();
+	    boolean retval = false;
+	    try {
+		int rows = database.delete(TABLE_NAME, "_id=?",
+			new String[] { String.valueOf(rowid) });
+		if (rows == 1) {
+		    rows = database.delete(Account.TABLE_NAME, "userid=?", 
+			    new String[] { String.valueOf(rowid) });
+		    if (rows == 1) {
+			database.setTransactionSuccessful();
+			retval = true;
+		    } else {
+			LogActivity.writeLog("从Account表删除会员返回 %d", rows);
+		    }
+		} else {
+		    LogActivity.writeLog("从Member表删除会员返回 %d", rows);
+		}
+	    } finally {
+		database.endTransaction();
+		database.close();
+	    }
+	    return retval;
 	}
 
 	static public ArrayList<MemberProfile> listAll(Context context) {

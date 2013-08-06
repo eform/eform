@@ -153,7 +153,7 @@ public class HomeActivity extends Activity
 
 	Member member = Member.getMember();
 	member.setListener(this);
-	setMemberLayoutVisible(member.isLogin());
+	setMemberLayoutVisible(member.isLogin(), member.isLogin());
     }
 
     @Override
@@ -405,8 +405,17 @@ public class HomeActivity extends Activity
     }
 
 
-    private void setMemberLayoutVisible(boolean visible) {
+    private void setMemberLayoutVisible(boolean visible, boolean use_anim) {
 	final View view = findViewById(R.id.member_layout);
+
+	if (!use_anim) {
+	    if (visible)
+		view.setVisibility(View.VISIBLE);
+	    else
+		view.setVisibility(View.GONE);
+	    return;
+	}
+
 	TranslateAnimation anim = null;
 
 	if (visible) {
@@ -417,6 +426,8 @@ public class HomeActivity extends Activity
 	    anim = new TranslateAnimation(0.0f, view.getWidth(), 0.0f, 0.0f);
 	    anim.setAnimationListener(new Animation.AnimationListener() {
 		public void onAnimationStart(Animation animation) {
+		    if (view.getVisibility() != View.VISIBLE)
+			view.setVisibility(View.GONE);
 		}
 		public void onAnimationRepeat(Animation animation) {
 		}
@@ -435,12 +446,12 @@ public class HomeActivity extends Activity
 
     @Override
     public void onMemberLogin() {
-	setMemberLayoutVisible(true);
+	setMemberLayoutVisible(true, true);
     }
 
     @Override
     public void onMemberLogout() {
-	setMemberLayoutVisible(false);
+	setMemberLayoutVisible(false, true);
     }
 
     @Override

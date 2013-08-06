@@ -26,6 +26,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -480,6 +482,52 @@ class MemberProfileDialog extends Utils.DialogFragment
 
 class MemberDeleteDialog extends Utils.DialogFragment
 {
+    private LinearLayout buildLayout() {
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.HORIZONTAL);
+	linear.setPadding(10, 10, 10, 5);
+
+	ImageView image = new ImageView(getActivity());
+	image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+	image.setImageResource(R.drawable.warning);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(60),
+		(int) Utils.convertDpToPixel(60));
+	params.leftMargin = 20;
+	params.rightMargin = 20;
+	linear.addView(image, params);
+
+	LinearLayout linear2 = new LinearLayout(getActivity());
+	linear2.setOrientation(LinearLayout.VERTICAL);
+	linear.addView(linear2);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("您真的要注销当前登录的会员吗？");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	linear2.addView(textview);
+
+	textview = new TextView(getActivity());
+	textview.setText("注销会员将删除所有与会员关联的数据！");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = 20;
+	linear2.addView(textview, params);
+
+	textview = new TextView(getActivity());
+	textview.setText("您必须明白这是不可逆的操作，会员数据一旦删除将无法找回，请务必在注销前做好数据备份！");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	textview.setTextColor(getResources().getColor(R.color.red));
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = 20;
+	linear2.addView(textview, params);
+
+	return linear;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 	super.onCreateDialog(savedInstanceState);
@@ -487,10 +535,7 @@ class MemberDeleteDialog extends Utils.DialogFragment
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
 	builder.setTitle("注销会员");
-        builder.setMessage("您真的要注销当前登录的会员吗？\n\n" +
-		"注销会员将会删除所有会员相关的数据，您必须明白这是不可逆的操作，" +
-		"数据一旦删除将无法找回，请务必在注销前做好备份！\n");
-
+	builder.setView(buildLayout());
 	builder.setNegativeButton("放 弃", null);
 	builder.setPositiveButton("确认注销", null);
 
@@ -512,6 +557,9 @@ class MemberDeleteDialog extends Utils.DialogFragment
 	    @Override
 	    public void onClick(View view) {
 		dismiss();
+
+		/* TODO: read member idcard before delete it */
+
 		Member member = Member.getMember();
 		if (member.delete(getActivity())) {
 		    Utils.showToast("会员注销成功！");

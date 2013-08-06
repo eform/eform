@@ -8,13 +8,8 @@ package com.cansiny.eform;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -37,77 +32,13 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 
-/**
- * Read ID Card dialog
- */
-class ReadIdcardDialogFragment extends DialogFragment
-{
-    private int  total_seconds = 30;
-    private long starttime;
-
-    private Handler  handler = new Handler();
-    private Runnable runable = new Runnable() {
-	    @Override
-	    public void run() {
-		long currtime = System.currentTimeMillis();
-		long millis = currtime - starttime;
-		starttime = currtime;
-		int seconds = (int) (millis / 1000);
-
-		total_seconds -= seconds;
-		if (total_seconds <= 0) {
-		    dismiss();
-		    return;
-		}
-			
-		TextView textview = (TextView) getDialog().findViewById(R.id.second_textview);
-		textview.setText("" + total_seconds);
-			
-		handler.postDelayed(this, 1000);
-	    }
-	};
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-	super.onCreateDialog(savedInstanceState);
-
-	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle("请将“身份证”放在感应区域");
-	LayoutInflater inflater = getActivity().getLayoutInflater();
-	builder.setView(inflater.inflate(R.layout.dialog_idcard, null));
-	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-		}
-	    });
-	return builder.create();
-    }
-	
-    @Override
-    public void onStart() {
-	super.onStart();
-
-	starttime = System.currentTimeMillis();
-	TextView textview = (TextView) getDialog().findViewById(R.id.second_textview);
-	textview.setText("" + total_seconds);
-	handler.postDelayed(runable, 0);
-    }
-	
-    @Override
-    public void onDismiss (DialogInterface dialog) {
-	super.onDismiss(dialog);
-	handler.removeCallbacks(runable);
-    }
-}
-
-
-public abstract class Form implements OnClickListener, OnFocusChangeListener, OnTouchListener
+public abstract class Form
+    implements OnClickListener, OnFocusChangeListener, OnTouchListener
 {
     protected Activity activity;
     protected ArrayList<FormPage> pages;
     protected int active_page;
-    protected ReadIdcardDialogFragment idcard_dialog;
-    protected ArrayList<Integer> cardno_views; 
+    protected ArrayList<Integer> cardno_views;
     protected ArrayList<Integer> verify_views;
     private FormListener listener;
 
@@ -124,7 +55,6 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
     public void setListener(FormListener listener) {
 	this.listener = listener;
     }
-
 
     /* convenient method to find view and cast to corresponding type */
     protected View findView(int id) {
@@ -162,28 +92,11 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	reader.readCardno(activity, textview);
     }
 
-
-    /* popup a dialog and read id card information */
     protected void readIdCard() {
-	idcard_dialog = new ReadIdcardDialogFragment();
-	idcard_dialog.show(activity.getFragmentManager(), "ReadIdcardDialog");
+	IDCardReader reader = new IDCardReader();
+	reader.show(activity.getFragmentManager(), "ReadIdcardDialog");
     }
 
-
-    public View setActivePage(int index) {
-	if (index < 0 || index >= pages.size() || index == active_page)
-	    return null;
-
-	/* save current page state */
-	if (active_page >= 0) {
-	    pages.get(active_page).saveState();
-	}
-	/* restore new page state */
-	View view = pages.get(index).restoreState();
-
-	active_page = index;
-	return view;
-    }
 
     public int getActivePage() {
 	return active_page;
@@ -193,8 +106,25 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	return pages.get(active_page);
     }
 
-    /* call by page when its state be saved */
-    public void onPageSaved(FormPage page) {
+    public View setActivePage(int page_no) {
+	if (page_no < 0 || page_no >= pages.size())
+	    return null;
+	if (page_no == active_page)
+	    return null;
+
+	/* store current page state and load new page state. */
+	storePage(active_page);
+	active_page = page_no;
+	return loadPage(active_page);
+    }
+
+    private void storePage(int page_no) {
+	if (page_no < 0 || page_no >= pages.size())
+	    return;
+
+	FormPage page = pages.get(active_page);
+	page.store();
+
 	/* save card no tag */
 	if (page.scroll_view != null) {
 	    for (Integer viewid : cardno_views) {
@@ -212,31 +142,36 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	}
     }
 
-	
-    /* call by page when its state be restored */
-    public void onPageRestored(FormPage page) {
-	/* listen all views event */
-	addViewsListener(page.scroll_view);
+    private ScrollView loadPage(int page_no) {
+	if (page_no < 0 || page_no >= pages.size())
+	    return null;
+
+	FormPage page = pages.get(page_no);
+
+	ScrollView scroll_view = page.load();
+
+	/* listen all views event of new page */
+	addViewsListener(scroll_view);
 		
 	/* restore card no tag */
 	for (Integer viewid : cardno_views) {
 	    View view = page.scroll_view.findViewById(viewid.intValue());
-	    if (view == null)
-		continue;
-	    String key = viewid.toString() + "-tag";
-	    if (page.bundle.containsKey(key)) {
-		view.setTag(page.bundle.getCharSequence(key));
+	    if (view != null) {
+		String key = viewid.toString() + "-tag";
+		if (page.bundle.containsKey(key)) {
+		    view.setTag(page.bundle.getCharSequence(key));
+		}
 	    }
 	}
+	return scroll_view;
     }
 
-
     /* call by activity when page be insert to layout */
-    public void onPageStart() {
-	if (active_page < 0 || active_page >= pages.size())
+    public void onPageStart(int index) {
+	if (index < 0 || index >= pages.size())
 	    return;
 		
-	FormPage page = pages.get(active_page);
+	FormPage page = pages.get(index);
 		
 	/* restore view focus */
 	int focus_id = page.bundle.getInt("focus-view");
@@ -272,23 +207,23 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	}
     }
 
-	
     public boolean scrollUp() {
-	FormPage page = pages.get(active_page);
-	if (page == null || !page.canScrollUp())
-	    return false;
-	page.scrollUp();
-	return true;
+	FormPage page = getActiveFormPage();
+	if (page != null && !page.canScrollUp()) {
+	    page.scrollUp();
+	    return true;
+	}
+	return false;
     }
 
     public boolean scrollDown() {
-	FormPage page = pages.get(active_page);
-	if (page == null || !page.canScrollDown())
-	    return false;
-	page.scrollDown();
-	return true;
+	FormPage page = getActiveFormPage();
+	if (page != null && !page.canScrollDown()) {
+	    page.scrollDown();
+	    return true;
+	}
+	return false;
     }
-
 
     @Override
     public void onClick(View view) {
@@ -335,7 +270,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
     public boolean onTouch(View view, MotionEvent event) {
 	if (event.getAction() == MotionEvent.ACTION_DOWN) {
 	    if (listener != null) {
-		listener.onViewTouched(this, view);
+		listener.onFormViewTouched(this, view);
 	    }
 	}
 	return false;
@@ -363,7 +298,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
     protected void beforeTextChanged(TextView textview, CharSequence sequence,
 				     int start, int count, int after) {
 	if (listener != null) {
-	    listener.onTextChanged(this, (EditText) textview);
+	    listener.onFormTextChanged(this, (EditText) textview);
 	}
     }
 	
@@ -391,10 +326,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	}
     }
 
-	
-    /**
-     * a class to attach view parameter to text watcher callback
-     */
+
     private class GenericTextWatcher implements TextWatcher
     {
 	private TextView textview;
@@ -520,7 +452,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	    }
 	}
 		
-	/* let problem view get focus */
+	/* let first problem view get focus */
 	if (focus_view != null) {
 	    focus_view.requestFocus();
 	}
@@ -536,9 +468,9 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 
     public interface FormListener
     {
-	public void onScrollViewScrolled(Form form, ScrollView scroll_view);
-	public void onViewTouched(Form form, View view);
-	public void onTextChanged(Form form, EditText textview);
+	public void onFormPageScrolled(Form form, ScrollView scroll_view);
+	public void onFormViewTouched(Form form, View view);
+	public void onFormTextChanged(Form form, EditText textview);
     }
 
 
@@ -591,21 +523,20 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	    initialize(title, layout);
 	}
 
-	public ScrollView restoreState() {
+	public ScrollView load() {
 	    FormScrollView scroll = new FormScrollView(activity);
 	    LayoutInflater inflater = activity.getLayoutInflater();
 	    scroll_view = (FormScrollView) inflater.inflate(layout, scroll);
 	    scroll_view.setScrollListener(this);
-	    restoreViewState(scroll_view);
-	    onPageRestored(this);
+	    loadViews(scroll_view);
 	    return scroll_view;
 	}
 
-	private void restoreViewState(Object object) {
+	private void loadViews(Object object) {
 	    if (object instanceof ViewGroup) {
 		ViewGroup group = (ViewGroup) object;
 		for (int i = 0; i < group.getChildCount(); i++) {
-		    restoreViewState(group.getChildAt(i));
+		    loadViews(group.getChildAt(i));
 		}
 		return;
 	    }
@@ -627,25 +558,23 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	}
 
 
-	public void saveState() {
+	public void store() {
 	    if (scroll_view != null) {
-		saveViewState(scroll_view);
+		storeViews(scroll_view);
 
 		View view = scroll_view.findFocus();
 		if (view != null)
 		    bundle.putInt("focus-view", view.getId());
 		else
 		    bundle.remove("focus-view");
-
-		onPageSaved(this);
 	    }
 	}
 
-	private void saveViewState(Object object) {
+	private void storeViews(Object object) {
 	    if (object instanceof ViewGroup) {
 		ViewGroup group = (ViewGroup) object;
 		for (int i = 0; i < group.getChildCount(); i++) {
-		    saveViewState(group.getChildAt(i));
+		    storeViews(group.getChildAt(i));
 		}
 		return;
 	    }
@@ -697,7 +626,7 @@ public abstract class Form implements OnClickListener, OnFocusChangeListener, On
 	@Override
 	public void onScollChanged(ScrollView scroll_view) {
 	    if (listener != null)
-		listener.onScrollViewScrolled(Form.this, scroll_view);
+		listener.onFormPageScrolled(Form.this, scroll_view);
 	}
     }
 
