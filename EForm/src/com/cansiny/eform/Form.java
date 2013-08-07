@@ -166,12 +166,16 @@ public abstract class Form
 	return scroll_view;
     }
 
-    /* call by activity when page be insert to layout */
-    public void onPageStart(int index) {
-	if (index < 0 || index >= pages.size())
+    public String getPagesContents() {
+	return "hello中文";
+    }
+
+    /* call by activity when page has been insert into layout */
+    public void onPageStart(int page_no) {
+	if (page_no < 0 || page_no >= pages.size())
 	    return;
 		
-	FormPage page = pages.get(index);
+	FormPage page = pages.get(page_no);
 		
 	/* restore view focus */
 	int focus_id = page.bundle.getInt("focus-view");

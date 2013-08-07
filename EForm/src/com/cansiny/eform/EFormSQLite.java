@@ -5,6 +5,7 @@
  */
 package com.cansiny.eform;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -110,29 +111,34 @@ public class EFormSQLite extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Account.TABLE_NAME + " ("
-        	+ "_id      INTEGER PRIMARY KEY,"
-        	+ "userid   INTEGER UNIQUE,"
-        	+ "password TEXT NOT NULL,"
-        	+ "role     INTEGER NOT NULL"
-        	+ ");");
+		   + "_id      INTEGER PRIMARY KEY,"
+		   + "userid   INTEGER UNIQUE,"
+		   + "password TEXT NOT NULL,"
+		   + "role     INTEGER NOT NULL"
+		   + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Member.TABLE_NAME + " ("
-        	+ "_id      INTEGER PRIMARY KEY,"
-		+ "userid   TEXT UNIQUE,"
-		+ "username TEXT NOT NULL,"
-		+ "password TEXT NOT NULL,"
-		+ "company  TEXT,"
-		+ "phone    TEXT,"
-		+ "datetime INTEGER NOT NULL"
-		+ ");");
+		   + "_id      INTEGER PRIMARY KEY,"
+		   + "userid   TEXT UNIQUE,"
+		   + "username TEXT NOT NULL,"
+		   + "password TEXT NOT NULL,"
+		   + "company  TEXT,"
+		   + "phone    TEXT,"
+		   + "datetime INTEGER NOT NULL"
+		   + ");");
 
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Voucher.TABLE_NAME + " ("
-        	+ "_id       INTEGER PRIMARY KEY,"
-        	+ "userid    INTEGER UNIQUE,"
-        	+ "formclass TEXT NOT NULL,"
-        	+ "contents  BLOB NOT NULL,"
-        	+ "datetime  TEXT NOT NULL"
-        	+ ");");
+		   + "_id       INTEGER PRIMARY KEY,"
+		   + "userid    INTEGER NOT NULL,"
+		   + "comment   TEXT NOT NULL,"
+		   + "formclass TEXT NOT NULL,"
+		   + "formlabel TEXT NOT NULL,"
+		   + "formimage INTEGER NOT NULL,"
+		   + "contents  BLOB NOT NULL,"
+		   + "ctime     INTEGER NOT NULL,"
+		   + "mtime     INTEGER NOT NULL,"
+		   + "atime     INTEGER NOT NULL"
+		   + ");");
     }
 
     @Override
@@ -568,12 +574,194 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    return members;
 	}
+
+	static boolean hasUserWithRowid(Context context, long rowid) {
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getReadableDatabase();
+
+	    Cursor cursor = database.query(TABLE_NAME, null,
+		    "_id=?", new String[] { String.valueOf(rowid) },
+		    null, null, null);
+
+	    if (cursor == null) {
+		sqlite.close();
+		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
+		return false;
+	    }
+
+	    int count = cursor.getCount();
+
+	    cursor.close();
+	    sqlite.close();
+
+	    return (count > 0) ? true : false;
+	}
     }
 
 
-    public class Voucher
+    static public class Voucher
     {
 	static final public String TABLE_NAME = "voucher";
+
+	static final public String COLUMN_ID = "_id";
+	static final public String COLUMN_USERID = "userid";
+	static final public String COLUMN_COMMENT = "comment";
+	static final public String COLUMN_FORMCLASS = "formclass";
+	static final public String COLUMN_FORMLABEL = "formlabel";
+	static final public String COLUMN_FORMIMAGE = "formimage";
+	static final public String COLUMN_CONTENTS = "contents";
+	static final public String COLUMN_CTIME = "ctime";
+	static final public String COLUMN_MTIME = "mtime";
+	static final public String COLUMN_ATIME = "atime";
+
+	static public boolean insert(Context context, long userid, String formclass,
+		String formlabel, int formimage, String contents, String comment) {
+	    if (comment == null || formclass == null ||
+		    formlabel == null || contents == null) {
+		LogActivity.writeLog("插入凭证失败，因为参数错误.");
+		return false;
+	    }
+	    if (!Member.hasUserWithRowid(context, userid)) {
+		LogActivity.writeLog("插入凭证失败，因为会员 %d 不存在", userid);
+		return false;
+	    }
+
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    ContentValues values = new ContentValues();
+
+	    values.put(COLUMN_USERID, userid);
+	    values.put(COLUMN_FORMCLASS, formclass);
+	    values.put(COLUMN_FORMLABEL, formlabel);
+	    values.put(COLUMN_FORMIMAGE, formimage);
+	    try {
+		values.put(COLUMN_CONTENTS, contents.getBytes("utf-8"));
+	    } catch (UnsupportedEncodingException e) {
+		LogActivity.writeLog(e);
+		sqlite.close();
+		return false;
+	    }
+	    values.put(COLUMN_COMMENT, comment);
+
+	    long currtime = System.currentTimeMillis();
+	    values.put(COLUMN_CTIME, currtime);
+	    values.put(COLUMN_MTIME, currtime);
+	    values.put(COLUMN_ATIME, currtime);
+
+	    long rowid = database.insert(TABLE_NAME, null, values);
+	    sqlite.close();
+	    return (rowid >= 0) ? true : false;
+	}
+
+	static public boolean update(Context context, long rowid, long userid,
+		String formclass, String formlabel, int formimage,
+		String contents, String comment) {
+	    if (!Member.hasUserWithRowid(context, userid)) {
+		LogActivity.writeLog("更新凭证失败，因为会员 %d 不存在", userid);
+		return false;
+	    }
+	    ContentValues values = new ContentValues();
+
+	    if (formclass != null && formclass.length() > 0)
+		values.put(COLUMN_FORMCLASS, formclass);
+	    if (formlabel != null && formlabel.length() > 0)
+		values.put(COLUMN_FORMLABEL, formlabel);
+	    if (formimage > 0)
+		values.put(COLUMN_FORMIMAGE, formimage);
+	    if (contents != null && contents.length() > 0) {
+		try {
+		    values.put(COLUMN_CONTENTS, contents.getBytes("utf-8"));
+		} catch (UnsupportedEncodingException e) {
+		    LogActivity.writeLog(e);
+		    return false;
+		}
+	    }
+	    if (comment != null && comment.length() > 0)
+		values.put(COLUMN_COMMENT, comment);
+
+	    if (values.size() == 0) {
+		LogActivity.writeLog("凭证没有需要更新的数据");
+		return false;
+	    }
+	    long currtime = System.currentTimeMillis();
+	    values.put(COLUMN_MTIME, currtime);
+	    values.put(COLUMN_ATIME, currtime);
+
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    int rows = database.update(TABLE_NAME, values, "_id=?",
+		    new String[] { String.valueOf(rowid) });
+	    sqlite.close();
+	    return (rows == 1) ? true : false;
+	}
+
+	static public ArrayList<com.cansiny.eform.Voucher> listForUser(Context context, long userid) {
+	    if (userid < 0) {
+		LogActivity.writeLog("不能得到用户 %s 的凭条，用户ID必须大于0");
+		return null;
+	    }
+
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    String[] columns = { COLUMN_ID, COLUMN_FORMCLASS, COLUMN_FORMLABEL,
+		    COLUMN_FORMIMAGE, COLUMN_CONTENTS, COLUMN_COMMENT,
+		    COLUMN_CTIME, COLUMN_MTIME, COLUMN_ATIME };
+
+	    Cursor cursor = database.query(TABLE_NAME, columns,
+		    "userid=?", new String[] { String.valueOf(userid) },
+		    null, null, "atime DESC");
+
+	    if (cursor == null || cursor.getCount() <= 0) {
+		sqlite.close();
+		return null;
+	    }
+
+	    ArrayList<com.cansiny.eform.Voucher> vouchers = new ArrayList<com.cansiny.eform.Voucher>();
+	    while(cursor.moveToNext()) {
+		com.cansiny.eform.Voucher voucher = new com.cansiny.eform.Voucher();
+
+		voucher.rowid = cursor.getLong(0);
+		voucher.userid = userid;
+		voucher.formclass = cursor.getString(1);
+		voucher.formlabel = cursor.getString(2);
+		voucher.formimage = cursor.getInt(3);
+		try {
+		    voucher.contents = new String(cursor.getBlob(4), "utf-8");
+		} catch (UnsupportedEncodingException e) {
+		    LogActivity.writeLog(e);
+		    cursor.close();
+		    sqlite.close();
+		    return null;
+		}
+		voucher.comment = cursor.getString(5);
+		voucher.ctime = cursor.getLong(6);
+		voucher.mtime = cursor.getLong(7);
+		voucher.atime = cursor.getLong(8);
+
+		vouchers.add(voucher);
+	    }
+	    cursor.close();
+	    sqlite.close();
+
+	    return vouchers;
+	}
+
+	static public boolean updateAtime(Context context, long rowid) {
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    ContentValues values = new ContentValues();
+	    values.put(COLUMN_ATIME, System.currentTimeMillis());
+
+	    int rows = database.update(TABLE_NAME, values, "_id=?",
+		    new String[] { String.valueOf(rowid) });
+	    sqlite.close();
+	    return (rows == 1) ? true : false;
+	}
+
     }
 
 }

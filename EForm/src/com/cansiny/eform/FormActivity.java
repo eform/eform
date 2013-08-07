@@ -12,10 +12,12 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -40,10 +42,11 @@ public class FormActivity extends Activity implements
 	OnClickListener, OnTouchListener, Form.FormListener
 {
     /* constants uses for communication with previous activity. */
-    static public final String INTENT_MESSAGE_CLASS    = "com.cansiny.eform.CLASS";
-    static public final String INTENT_MESSAGE_LABEL    = "com.cansiny.eform.LABEL";
-    static public final String INTENT_MESSAGE_MEMBER   = "com.cansiny.eform.MEMBER";
-    static public final String INTENT_RESULT_ERRREASON = "com.cansiny.eform.ERRREASON";
+    static public final String INTENT_MESSAGE_FORMCLASS = "com.cansiny.eform.FORMCLASS";
+    static public final String INTENT_MESSAGE_FORMLABEL = "com.cansiny.eform.FORMLABEL";
+    static public final String INTENT_MESSAGE_FORMIMAGE = "com.cansiny.eform.FORMIMAGE";
+    static public final String INTENT_MESSAGE_VOUCHER   = "com.cansiny.eform.VOUCHER";
+    static public final String INTENT_RESULT_ERRREASON  = "com.cansiny.eform.ERRREASON";
 
     /* constants uses for identified the difference of event source */
     static private final int VIEW_TAG_PAGE_TITLE_BUTTON = 1;
@@ -55,7 +58,6 @@ public class FormActivity extends Activity implements
     private Form form;
     private long last_verify_time = 0;
     private FormPageSwitcher page_switcher;
-    private boolean is_member;
     private int timeout_remains = TIMEOUT_VALUE;
     private Handler timeout_handler;
     private Runnable timeout_runnable;
@@ -80,7 +82,7 @@ public class FormActivity extends Activity implements
 
 	try {
 	    /* get form class from home activity */
-	    String klass = getIntent().getStringExtra(INTENT_MESSAGE_CLASS);
+	    String klass = getIntent().getStringExtra(INTENT_MESSAGE_FORMCLASS);
 	    if (klass == null)
 		throw new ClassNotFoundException("Intent missing 'klass' attribute");
 
@@ -100,8 +102,8 @@ public class FormActivity extends Activity implements
 		n++;
 	    }
 
-	    is_member = getIntent().getBooleanExtra(INTENT_MESSAGE_MEMBER, false);
-	    if (is_member) {
+	    Member member = Member.getMember();
+	    if (member.isLogin()) {
 		addMemberButtons();
 	    }
 	    View view = findViewById(R.id.form_main_layout);
@@ -184,6 +186,10 @@ public class FormActivity extends Activity implements
 	super.onPause();
 
 	timeout_handler.removeCallbacks(timeout_runnable);
+    }
+
+    public Form getForm() {
+	return this.form;
     }
 
     private void setTimeoutTipVisible(boolean visible) {
@@ -473,7 +479,19 @@ public class FormActivity extends Activity implements
     }
 
     public void onMemberSaveButtonClick(View view) {
-	Log.d("", "save");
+	Member member = Member.getMember();
+	if (!member.isLogin()) {
+	    showToast("会员未登录或已退出登录！", R.drawable.cry);
+	    return;
+	}
+
+	long voucher_id = getIntent().getLongExtra(INTENT_MESSAGE_VOUCHER, -1);
+	if (voucher_id == -1) {
+	    VoucherInsertDialog dialog = new VoucherInsertDialog();
+	    dialog.show(getFragmentManager(), "VoucherInsertDialog");
+	} else {
+	    
+	}
     }
 
 
@@ -493,6 +511,113 @@ public class FormActivity extends Activity implements
     @Override
     public void onFormTextChanged(Form form, EditText textview) {
 	setTimeoutTipVisible(false);
+    }
+
+}
+
+
+class VoucherInsertDialog extends Utils.DialogFragment
+{
+    private EditText comment_edittext;
+
+    private View buildLayout() {
+	LinearLayout layout = new LinearLayout(getActivity());
+	layout.setOrientation(LinearLayout.VERTICAL);
+	layout.setPadding(10, 10, 10, 10);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("请简单描述一下要保存的凭证信息");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	layout.addView(textview);
+
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.HORIZONTAL);
+	linear.setGravity(Gravity.CENTER_VERTICAL);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = 20;
+	layout.addView(linear, params);
+
+//	textview = new TextView(getActivity());
+//	textview.setText("描 述：");
+//	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+//	linear.addView(textview);
+//
+	comment_edittext = new EditText(getActivity());
+	params = new LinearLayout.LayoutParams(
+		0, ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.weight = 1;
+	linear.addView(comment_edittext, params);
+
+	addClearButton(linear);
+
+	return layout;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setTitle("保存凭条");
+	builder.setView(buildLayout());
+	builder.setNegativeButton("放 弃", null);
+	builder.setPositiveButton("保 存", null);
+
+	return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	final AlertDialog dialog = (AlertDialog) getDialog();
+
+	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+
+	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		Member member = Member.getMember();
+		if (!member.isLogin() || member.getProfile() == null) {
+		    LogActivity.writeLog("程序错误，不能得到会员信息");
+		    dismiss();
+		    return;
+		}
+		Voucher voucher = new Voucher();
+
+		voucher.userid = member.getProfile().rowid;
+		voucher.comment = comment_edittext.getText().toString();
+		if (voucher.comment.length() == 0) {
+		    comment_edittext.setHint("描述信息不能为空");
+		    comment_edittext.setHintTextColor(getResources().getColor(R.color.red));
+		    return;
+		}
+		Intent intent = getActivity().getIntent();
+		int formlabel = intent.getIntExtra(FormActivity.INTENT_MESSAGE_FORMLABEL, 0);
+		if (formlabel == 0) {
+		    LogActivity.writeLog("程序错误，不能得到Form的标题(formlabel)，请检查传递的Intent参数");
+		    dismiss();
+		    return;
+		}
+		voucher.formclass = intent.getStringExtra(FormActivity.INTENT_MESSAGE_FORMCLASS);
+		voucher.formlabel = getResources().getString(formlabel);
+		voucher.formimage = intent.getIntExtra(FormActivity.INTENT_MESSAGE_FORMIMAGE, 0);
+		voucher.contents = ((FormActivity) getActivity()).getForm().getPagesContents();
+
+		if (voucher.insert(getActivity())) {
+		    Utils.showToast("凭条信息保存成功！", R.drawable.smile);
+		} else {
+		    Utils.showToast("凭条信息保存失败！", R.drawable.cry);
+		}
+		dismiss();
+	    }
+	});
     }
 
 }

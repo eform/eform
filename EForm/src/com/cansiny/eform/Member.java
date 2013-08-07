@@ -7,6 +7,8 @@ package com.cansiny.eform;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -24,13 +26,18 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.TableLayout.LayoutParams;
 
 
 class MemberLoginDialog extends Utils.DialogFragment
@@ -308,13 +315,14 @@ class MemberProfileDialog extends Utils.DialogFragment
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_member, null));
 
-	builder.setNegativeButton("放 弃", null);
 
 	if (profile == null) {
+	    builder.setNegativeButton("放 弃", null);
 	    builder.setPositiveButton("注 册", null);
 	} else {
-	    builder.setNeutralButton("注 销", null);
-	    builder.setPositiveButton("更 新", null);
+	    builder.setNegativeButton("关闭窗口", null);
+	    builder.setNeutralButton("注销会员", null);
+	    builder.setPositiveButton("更新信息", null);
 	}
 
 	return builder.create();
@@ -572,6 +580,198 @@ class MemberDeleteDialog extends Utils.DialogFragment
 }
 
 
+class MemberVouchersDialog extends Utils.DialogFragment
+{
+    private static final int TAG_BUTTON_SCROLLUP = 1;
+    private static final int TAG_BUTTON_SCROLLDOWN = 2;
+
+    private ListView listview;
+    private TextView total_textview;
+
+    private View customTitleView() {
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setPadding(10, 5, 10, 5);
+	linear.setGravity(Gravity.CENTER_VERTICAL);
+
+	total_textview = new TextView(getActivity());
+	total_textview.setTextColor(getResources().getColor(R.color.darkgray));
+	total_textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		0, ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.weight = 1;
+	linear.addView(total_textview, params);
+
+	Button button = new Button(getActivity());
+	button.setBackgroundResource(R.drawable.up);
+	button.setTag(TAG_BUTTON_SCROLLUP);
+	button.setOnClickListener(this);
+	params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(48),
+		(int) Utils.convertDpToPixel(48));
+	params.leftMargin = 20;
+	params.rightMargin = 10;
+	linear.addView(button, params);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("上下滚动");
+	textview.setTextColor(getResources().getColor(R.color.black));
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	linear.addView(textview);
+
+	button = new Button(getActivity());
+	button.setBackgroundResource(R.drawable.down);
+	button.setTag(TAG_BUTTON_SCROLLDOWN);
+	button.setOnClickListener(this);
+	params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(48),
+		(int) Utils.convertDpToPixel(48));
+	params.leftMargin = 10;
+	linear.addView(button, params);
+
+	return linear;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setCustomTitle(customTitleView());
+
+	listview = new ListView(getActivity());
+	builder.setView(listview);
+
+	return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	VoucherListAdapter adapter = new VoucherListAdapter();
+	listview.setAdapter(adapter);
+
+	total_textview.setText("共 " + adapter.getCount() + " 张凭证");
+
+	if(adapter.getCount() > 8) {
+	    View item = adapter.getView(0, null, listview);
+	    item.measure(0, 0);
+	    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+		    LayoutParams.MATCH_PARENT,
+		    (int) (8.5 * item.getMeasuredHeight()));
+	    listview.setLayoutParams(params);
+	}
+    }
+
+    @Override
+    public void onClick(View view) {
+	super.onClick(view);
+
+	ListAdapter adapter = listview.getAdapter();
+	if (adapter.getCount() <= 0)
+	    return;
+
+	View item = adapter.getView(0, null, listview);
+	item.measure(0, 0);
+	int distance = (int) (2.2 * item.getMeasuredHeight());
+
+	switch(((Integer) view.getTag()).intValue()) {
+	case TAG_BUTTON_SCROLLUP:
+	    listview.smoothScrollBy(0 - distance, 200);
+	    break;
+	case TAG_BUTTON_SCROLLDOWN:
+	    listview.smoothScrollBy(distance, 200);
+	    break;
+	}
+    }
+
+    class VoucherListAdapter extends BaseAdapter
+    {
+	private ArrayList<Voucher> vouchers = null;
+
+	public VoucherListAdapter() {
+	    Member member = Member.getMember();
+	    if (member.isLogin() && member.getProfile() != null) {
+		vouchers = EFormSQLite.Voucher.listForUser(getActivity(),
+			member.getProfile().rowid);
+	    }
+	}
+
+	@Override
+	public int getCount() {
+	    return (vouchers != null) ? vouchers.size() : 0;
+	}
+
+	@Override
+	public Object getItem(int position) {
+	    if (position < 0 || position >= vouchers.size())
+		return null;
+	    return (vouchers != null) ? vouchers.get(position) : null;
+	}
+
+	@Override
+	public long getItemId(int position) {
+	    if (position < 0 || position >= vouchers.size())
+		return position;
+	    Voucher voucher = vouchers.get(position);
+	    return voucher.rowid;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+	    if (vouchers == null) return null;
+
+	    Voucher voucher = vouchers.get(position);
+	    SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
+
+	    LinearLayout linear = new LinearLayout(getActivity());
+	    linear.setPadding(8, 6, 8, 0);
+
+	    ImageView image = new ImageView(getActivity());
+	    image.setImageResource(voucher.formimage);
+	    image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		    (int) Utils.convertDpToPixel(40),
+		    (int) Utils.convertDpToPixel(40));
+	    params.rightMargin = 10;
+	    params.gravity = Gravity.CENTER_VERTICAL;
+	    linear.addView(image, params);
+
+	    TableLayout table = new TableLayout(getActivity());
+	    table.setColumnStretchable(0, true);
+	    linear.addView(table);
+
+	    TableRow row = new TableRow(getActivity());
+	    table.addView(row);
+
+	    TextView textview = new TextView(getActivity());
+	    textview.setText(voucher.formlabel.replace("\n", ""));
+	    textview.setSingleLine();
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
+	    row.addView(textview);
+
+	    row = new TableRow(getActivity());
+	    table.addView(row);
+
+	    textview = new TextView(getActivity());
+	    textview.setText(voucher.comment);
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    row.addView(textview);
+
+	    textview = new TextView(getActivity());
+	    textview.setText(format.format(voucher.atime));
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    textview.setTextColor(getResources().getColor(R.color.darkgray));
+	    row.addView(textview);
+
+	    return linear;
+	}
+
+    }
+}
+
+
 public class Member
 {
     static private Member _singleInstance = null;
@@ -592,6 +792,9 @@ public class Member
 	listener = null;
     }
 
+    public MemberProfile getProfile() {
+	return profile;
+    }
 
     public boolean isLogin() {
 	return is_login;
@@ -695,6 +898,13 @@ public class Member
 	    }
 	}
 	return false;
+    }
+
+    public void listVouchers(FragmentManager manager) {
+	if (is_login) {
+	    MemberVouchersDialog dialog = new MemberVouchersDialog();
+	    dialog.show(manager, "MemberVouchersDialog");
+	}
     }
 
     public void setListener(MemberListener listener) {

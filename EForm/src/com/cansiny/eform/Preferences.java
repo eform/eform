@@ -536,6 +536,9 @@ class MemberListDialog extends Utils.DialogFragment
 	super.onClick(view);
 
 	ListAdapter adapter = listview.getAdapter();
+	if (adapter.getCount() <= 0)
+	    return;
+
 	View item = adapter.getView(0, null, listview);
 	item.measure(0, 0);
 	int distance = (int) (2.2 * item.getMeasuredHeight());

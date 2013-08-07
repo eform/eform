@@ -36,9 +36,9 @@ public class FormCIB01 extends Form
 
 	
     @Override
-    public void onPageStart() {
+    public void onPageStart(int page_no) {
 	/* call super method */
-	super.onPageStart();
+	super.onPageStart(page_no);
 
 	/* set current date to request date */
 	TextView year = findTextView(R.id.p1_date_year_edittext);

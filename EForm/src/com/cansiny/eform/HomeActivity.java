@@ -8,15 +8,17 @@ package com.cansiny.eform;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cansiny.eform.Administrator.AdministratorListener;
-import com.cansiny.eform.HomeInfo.HomeItem;
 import com.cansiny.eform.Member.MemberListener;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
@@ -147,6 +149,8 @@ public class HomeActivity extends Activity
 	super.onStart();
 
 	Log.d("HomeActivity", "onStart");
+
+	Log.d("", Environment.getExternalStorageDirectory().getAbsolutePath());
 
 	Administrator admin = Administrator.getAdministrator();
 	admin.addListener(this);
@@ -329,11 +333,11 @@ public class HomeActivity extends Activity
 		Log.e("HomeActivity", "Programming error: Image Button missing class tag");
 		return;
 	    }
-	    HomeInfo.HomeItem item = (HomeItem) object;
+	    HomeInfo.HomeItem item = (HomeInfo.HomeItem) object;
 	    Intent intent = new Intent(this, FormActivity.class);
-	    intent.putExtra(FormActivity.INTENT_MESSAGE_CLASS, item.klass);
-	    intent.putExtra(FormActivity.INTENT_MESSAGE_LABEL, item.label);
-	    intent.putExtra(FormActivity.INTENT_MESSAGE_MEMBER, Member.getMember().isLogin());
+	    intent.putExtra(FormActivity.INTENT_MESSAGE_FORMCLASS, item.klass);
+	    intent.putExtra(FormActivity.INTENT_MESSAGE_FORMLABEL, item.label);
+	    intent.putExtra(FormActivity.INTENT_MESSAGE_FORMIMAGE, item.image);
 	    startActivityForResult(intent, ITEM_ACTIVITY_REQUEST_CODE);
 	}
     }
@@ -389,7 +393,8 @@ public class HomeActivity extends Activity
 
 
     public void onMemberVoucherButtonClick(View view) {
-	
+	Member member = Member.getMember();
+	member.listVouchers(getFragmentManager());
     }
 
 
@@ -400,8 +405,18 @@ public class HomeActivity extends Activity
 
 
     public void onMemberLogoutButtonClick(View view) {
-	Member member = Member.getMember();
-	member.logout();
+	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	builder.setTitle("退出登录");
+	builder.setMessage("\n您真的要退出登录吗？\n");
+	builder.setNegativeButton("不退出", null);
+	builder.setPositiveButton("退出登录", new DialogInterface.OnClickListener() {
+	    @Override
+	    public void onClick(DialogInterface dialog, int which) {
+		Member member = Member.getMember();
+		member.logout();
+	    }
+	});
+	builder.create().show();
     }
 
 
