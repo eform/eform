@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -26,18 +27,19 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.TableLayout.LayoutParams;
 
 
 class MemberLoginDialog extends Utils.DialogFragment
@@ -581,9 +583,10 @@ class MemberDeleteDialog extends Utils.DialogFragment
 
 
 class MemberVouchersDialog extends Utils.DialogFragment
+	implements OnItemClickListener, OnItemLongClickListener
 {
-    private static final int TAG_BUTTON_SCROLLUP = 1;
-    private static final int TAG_BUTTON_SCROLLDOWN = 2;
+    private static final int TAG_BUTTON_SCROLLUP   = 0x00010001;
+    private static final int TAG_BUTTON_SCROLLDOWN = 0x00010002;
 
     private ListView listview;
     private TextView total_textview;
@@ -640,6 +643,9 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	builder.setCustomTitle(customTitleView());
 
 	listview = new ListView(getActivity());
+	listview.setOnItemClickListener(this);
+	listview.setOnItemLongClickListener(this);
+
 	builder.setView(listview);
 
 	return builder.create();
@@ -650,6 +656,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	super.onStart();
 
 	VoucherListAdapter adapter = new VoucherListAdapter();
+	adapter.loadFromDB();
 	listview.setAdapter(adapter);
 
 	total_textview.setText("共 " + adapter.getCount() + " 张凭证");
@@ -658,7 +665,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    View item = adapter.getView(0, null, listview);
 	    item.measure(0, 0);
 	    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-		    LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    (int) (8.5 * item.getMeasuredHeight()));
 	    listview.setLayoutParams(params);
 	}
@@ -668,7 +675,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
     public void onClick(View view) {
 	super.onClick(view);
 
-	ListAdapter adapter = listview.getAdapter();
+	VoucherListAdapter adapter = (VoucherListAdapter) listview.getAdapter();
 	if (adapter.getCount() <= 0)
 	    return;
 
@@ -676,14 +683,65 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	item.measure(0, 0);
 	int distance = (int) (2.2 * item.getMeasuredHeight());
 
-	switch(((Integer) view.getTag()).intValue()) {
+	int tagval = ((Integer) view.getTag()).intValue();
+	switch(tagval) {
 	case TAG_BUTTON_SCROLLUP:
 	    listview.smoothScrollBy(0 - distance, 200);
 	    break;
 	case TAG_BUTTON_SCROLLDOWN:
 	    listview.smoothScrollBy(distance, 200);
 	    break;
+	default:
+	    break;
 	}
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long rowid) {
+	Voucher voucher = (Voucher) parent.getItemAtPosition(position);
+	voucher.updateAccessTime(getActivity());
+
+	dismiss();
+
+	Activity activity = getActivity();
+	if (activity instanceof HomeActivity) {
+	    HomeActivity home = (HomeActivity) activity;
+	    home.startFormActivity(voucher);
+	}
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long rowid) {
+	final Voucher voucher = (Voucher) parent.getItemAtPosition(position);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	builder.setTitle("删除凭条");
+	builder.setMessage("\n确认要删除选择的凭条吗？\n");
+	builder.setNegativeButton("取 消", null);
+	builder.setPositiveButton("删 除", new DialogInterface.OnClickListener() {
+	    @Override
+	    public void onClick(DialogInterface dialog, int which) {
+		if (voucher.delete(getActivity())) {
+		    showToast("凭条已删除!");
+		    VoucherListAdapter adapter = (VoucherListAdapter) listview.getAdapter();
+		    adapter.loadFromDB();
+		    if(adapter.getCount() <= 8) {
+			View item = adapter.getView(0, null, listview);
+			if (item != null) {
+			    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+				    ViewGroup.LayoutParams.MATCH_PARENT,
+				    ViewGroup.LayoutParams.WRAP_CONTENT);
+			    listview.setLayoutParams(params);
+			}
+		    }
+		    total_textview.setText("共 " + adapter.getCount() + " 张凭证");
+		    adapter.notifyDataSetChanged();
+		}
+	    }
+	});
+	builder.create().show();
+
+	return true;
     }
 
     class VoucherListAdapter extends BaseAdapter
@@ -691,6 +749,10 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	private ArrayList<Voucher> vouchers = null;
 
 	public VoucherListAdapter() {
+	    vouchers = null;
+	}
+
+	public void loadFromDB() {
 	    Member member = Member.getMember();
 	    if (member.isLogin() && member.getProfile() != null) {
 		vouchers = EFormSQLite.Voucher.listForUser(getActivity(),
@@ -705,28 +767,28 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	@Override
 	public Object getItem(int position) {
-	    if (position < 0 || position >= vouchers.size())
+	    if (vouchers == null || position < 0 || position >= vouchers.size())
 		return null;
-	    return (vouchers != null) ? vouchers.get(position) : null;
+	    return vouchers.get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-	    if (position < 0 || position >= vouchers.size())
+	    if (vouchers == null || position < 0 || position >= vouchers.size())
 		return position;
-	    Voucher voucher = vouchers.get(position);
-	    return voucher.rowid;
+	    return vouchers.get(position).rowid;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    if (vouchers == null) return null;
+	    if (vouchers == null || position < 0 || position >= vouchers.size())
+		return null;
 
 	    Voucher voucher = vouchers.get(position);
-	    SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
 
 	    LinearLayout linear = new LinearLayout(getActivity());
-	    linear.setPadding(8, 6, 8, 0);
+	    linear.setPadding(10, 6, 8, 2);
+	    linear.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
 
 	    ImageView image = new ImageView(getActivity());
 	    image.setImageResource(voucher.formimage);
@@ -739,8 +801,11 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    linear.addView(image, params);
 
 	    TableLayout table = new TableLayout(getActivity());
-	    table.setColumnStretchable(0, true);
-	    linear.addView(table);
+	    table.setColumnStretchable(1, true);
+	    params = new LinearLayout.LayoutParams(
+		    0, ViewGroup.LayoutParams.WRAP_CONTENT);
+	    params.weight = 1;
+	    linear.addView(table, params);
 
 	    TableRow row = new TableRow(getActivity());
 	    table.addView(row);
@@ -749,26 +814,51 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    textview.setText(voucher.formlabel.replace("\n", ""));
 	    textview.setSingleLine();
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
-	    row.addView(textview);
+	    TableRow.LayoutParams row_params = new TableRow.LayoutParams();
+	    row_params.span = 2;
+	    row.addView(textview, row_params);
 
 	    row = new TableRow(getActivity());
 	    table.addView(row);
 
 	    textview = new TextView(getActivity());
+	    textview.setTag(position);
 	    textview.setText(voucher.comment);
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    textview.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.edit, 0);
+	    textview.setCompoundDrawablePadding(5);
+	    textview.setPadding(0, 2, 0, 0);
+	    textview.setOnClickListener(new View.OnClickListener() {
+	        @Override
+	        public void onClick(View v) {
+	            Integer tag = (Integer) v.getTag();
+	            final Voucher voucher = vouchers.get(tag.intValue());
+	            voucher.setListener(new Voucher.VoucherListener() {
+	        	@Override
+	        	public void onVoucherChanged(Voucher voucher_new) {
+	        	    voucher.comment = voucher_new.comment;
+	        	    VoucherListAdapter adapter = (VoucherListAdapter) listview.getAdapter();
+	        	    adapter.notifyDataSetChanged();
+	        	}
+	            });
+	            voucher.update(getFragmentManager(), false);
+	        }
+	    });
 	    row.addView(textview);
 
 	    textview = new TextView(getActivity());
+	    SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
 	    textview.setText(format.format(voucher.atime));
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    textview.setTextColor(getResources().getColor(R.color.darkgray));
+	    textview.setGravity(Gravity.RIGHT);
 	    row.addView(textview);
 
 	    return linear;
 	}
 
     }
+
 }
 
 

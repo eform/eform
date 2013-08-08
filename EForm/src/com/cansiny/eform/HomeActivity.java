@@ -142,6 +142,9 @@ public class HomeActivity extends Activity
 
 	slogan_lasttime = System.currentTimeMillis();
 	handler.postDelayed(runable, 0);
+
+	Member member = Member.getMember();
+	member.login(this, "222", "222222");
     }
 
     @Override
@@ -330,16 +333,25 @@ public class HomeActivity extends Activity
 	if (view.getClass() == ImageButton.class) {
 	    Object object = view.getTag();
 	    if (object == null || !(object instanceof HomeInfo.HomeItem)) {
-		Log.e("HomeActivity", "Programming error: Image Button missing class tag");
+		Log.e("HomeActivity", "Programming error: HomeButton missing class tag");
 		return;
 	    }
 	    HomeInfo.HomeItem item = (HomeInfo.HomeItem) object;
-	    Intent intent = new Intent(this, FormActivity.class);
-	    intent.putExtra(FormActivity.INTENT_MESSAGE_FORMCLASS, item.klass);
-	    intent.putExtra(FormActivity.INTENT_MESSAGE_FORMLABEL, item.label);
-	    intent.putExtra(FormActivity.INTENT_MESSAGE_FORMIMAGE, item.image);
-	    startActivityForResult(intent, ITEM_ACTIVITY_REQUEST_CODE);
+
+	    Voucher voucher = new Voucher();
+
+	    voucher.formclass = item.klass;
+	    voucher.formlabel = getResources().getString(item.label);
+	    voucher.formimage = item.image;
+
+	    startFormActivity(voucher);
 	}
+    }
+
+    public void startFormActivity(Voucher voucher) {
+	Intent intent = new Intent(this, FormActivity.class);
+	intent.putExtra(FormActivity.INTENT_MESSAGE_VOUCHER, voucher);
+	startActivityForResult(intent, ITEM_ACTIVITY_REQUEST_CODE);
     }
 
     @Override

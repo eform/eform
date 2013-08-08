@@ -663,12 +663,15 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 	    ContentValues values = new ContentValues();
 
-	    if (formclass != null && formclass.length() > 0)
+	    if (formclass != null && formclass.length() > 0) {
 		values.put(COLUMN_FORMCLASS, formclass);
-	    if (formlabel != null && formlabel.length() > 0)
+	    }
+	    if (formlabel != null && formlabel.length() > 0) {
 		values.put(COLUMN_FORMLABEL, formlabel);
-	    if (formimage > 0)
+	    }
+	    if (formimage > 0) {
 		values.put(COLUMN_FORMIMAGE, formimage);
+	    }
 	    if (contents != null && contents.length() > 0) {
 		try {
 		    values.put(COLUMN_CONTENTS, contents.getBytes("utf-8"));
@@ -677,8 +680,9 @@ public class EFormSQLite extends SQLiteOpenHelper
 		    return false;
 		}
 	    }
-	    if (comment != null && comment.length() > 0)
+	    if (comment != null && comment.length() > 0) {
 		values.put(COLUMN_COMMENT, comment);
+	    }
 
 	    if (values.size() == 0) {
 		LogActivity.writeLog("凭证没有需要更新的数据");
@@ -749,7 +753,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    return vouchers;
 	}
 
-	static public boolean updateAtime(Context context, long rowid) {
+	static public boolean updateAccesstime(Context context, long rowid) {
 	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
 	    SQLiteDatabase database = sqlite.getWritableDatabase();
 
@@ -759,6 +763,17 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    int rows = database.update(TABLE_NAME, values, "_id=?",
 		    new String[] { String.valueOf(rowid) });
 	    sqlite.close();
+	    return (rows == 1) ? true : false;
+	}
+
+	static public boolean delete(Context context, long rowid) {
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
+
+	    int rows = database.delete(TABLE_NAME, "_id=?",
+		    new String[] { String.valueOf(rowid) });
+	    database.close();
+
 	    return (rows == 1) ? true : false;
 	}
 

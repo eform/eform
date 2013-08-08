@@ -168,6 +168,7 @@ public class Utils
 
     static public class DialogFragment extends android.app.DialogFragment
     	implements OnClickListener
+
     {
 	static final public String CLEAR_BUTTON_TAG = "ClearButton";
 
@@ -261,6 +262,7 @@ public class Utils
 		}
 	    }
 	}
+
     }
 
 

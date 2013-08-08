@@ -40,7 +40,6 @@ import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabWidget;
-import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 
 
@@ -449,8 +448,8 @@ class PreferencesDialog extends Utils.DialogFragment
 
 class MemberListDialog extends Utils.DialogFragment
 {
-    private static final int TAG_BUTTON_SCROLLUP = 1;
-    private static final int TAG_BUTTON_SCROLLDOWN = 2;
+    private static final int TAG_BUTTON_SCROLLUP   = 0x00010001;
+    private static final int TAG_BUTTON_SCROLLDOWN = 0x00010002;
 
     private ListView listview;
     private TextView total_textview;
@@ -525,7 +524,7 @@ class MemberListDialog extends Utils.DialogFragment
 	    View item = adapter.getView(0, null, listview);
 	    item.measure(0, 0);
 	    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-		    LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    (int) (8.5 * item.getMeasuredHeight()));
 	    listview.setLayoutParams(params);
 	}
