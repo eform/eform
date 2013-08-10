@@ -81,7 +81,8 @@ public class FormActivity extends Activity implements
 		throw new ClassNotFoundException("Intent missing 'voucher' attribute");
 
 	    /* build form instance from class name */
-	    form = (Form) Class.forName(voucher.formclass).getConstructor(Activity.class).newInstance(this);
+	    form = (Form) Class.forName(voucher.getFormClass()).getConstructor(Activity.class).newInstance(this);
+	    form.setPagesContents(voucher.getContents());
 	    form.setListener(this);
 
 	    /* insert pages title buttons */
@@ -184,7 +185,7 @@ public class FormActivity extends Activity implements
 			    view.setBackgroundResource(R.color.white);
 			}
 		    }
-		    TextView textview = ((TextView) findViewById(R.id.tip_timeout_textview));
+		    TextView textview = ((TextView) findViewById(R.id.form_tip_timeout_textview));
 		    textview.setText("" + timeout_remains);
 
 		    if (timeout_remains <= 0) {
@@ -210,12 +211,20 @@ public class FormActivity extends Activity implements
     }
 
     private void setTimeoutTipVisible(boolean visible) {
-	final View view = findViewById(R.id.form_tip_layout);
+	final View layout = findViewById(R.id.form_tip_layout);
 	AlphaAnimation anim = null;
 
 	if (visible) {
-	    view.setVisibility(View.VISIBLE);
-	    view.setOnTouchListener(this);
+	    layout.setVisibility(View.VISIBLE);
+	    layout.setBackgroundResource(R.color.white);
+	    for (int i = 0; i < ((ViewGroup) layout).getChildCount(); i++) {
+		TextView textview = (TextView) ((ViewGroup) layout).getChildAt(i);
+		if (textview.getId() == R.id.form_tip_timeout_textview)
+		    textview.setTextColor(getResources().getColor(R.color.red));
+		else
+		    textview.setTextColor(getResources().getColor(R.color.black));
+	    }
+	    layout.setOnTouchListener(this);
 	    anim = new AlphaAnimation(0.0f, 1.0f);
 	} else {
 	    anim = new AlphaAnimation(1.0f, 0.0f);
@@ -225,7 +234,14 @@ public class FormActivity extends Activity implements
 		public void onAnimationRepeat(Animation animation) {
 		}
 		public void onAnimationEnd(Animation animation) {
-		    view.setVisibility(View.GONE);
+		    layout.setOnTouchListener(null);
+		    layout.setBackgroundResource(R.color.transparent);
+		    for (int i = 0; i < ((ViewGroup) layout).getChildCount(); i++) {
+			TextView textview = (TextView) ((ViewGroup) layout).getChildAt(i);
+			textview.setTextColor(getResources().getColor(R.color.transparent));
+		    }
+		    layout.clearAnimation();
+		    layout.setVisibility(View.GONE);
 		}
 	    });
 	}
@@ -233,7 +249,7 @@ public class FormActivity extends Activity implements
 	AnimationSet anim_set = new AnimationSet(true);
 	anim_set.addAnimation(anim);
 	anim_set.setDuration(400);
-	view.startAnimation(anim_set);
+	layout.startAnimation(anim_set);
     }
 
     private void addMemberButtons() {
@@ -364,6 +380,13 @@ public class FormActivity extends Activity implements
 	private Toast toast;
 
 	@Override
+	protected void onPreExecute() {
+	    /* hide the soft keyboard until user touch the edit text */
+	    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+	    toast = showToast("正在加载页面...", 0);
+	}
+
+	@Override
 	protected View doInBackground(Integer... args) {
 	    index = args[0];
 
@@ -376,14 +399,6 @@ public class FormActivity extends Activity implements
 		return null;
 	    }
 	    return form.setActivePage(index);
-	}
-	
-	@Override
-	protected void onPreExecute() {
-	    /* hide the soft keyboard until user touch the edit text */
-	    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-	    
-	    toast = showToast("正在加载页面...", 0);
 	}
 
 	@Override
@@ -423,15 +438,13 @@ public class FormActivity extends Activity implements
 
     public void onScrollUpButtonClick(View view) {
 	if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
-	    if (!form.scrollUp())
-		findViewById(R.id.up_button).setEnabled(false);
+	    form.scrollPageUp();
 	}
     }
 
     public void onScrollDownButtonClick(View view) {
 	if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
-	    if (!form.scrollDown())
-		findViewById(R.id.down_button).setEnabled(false);
+	    form.scrollPageDown();
 	}
     }
 
@@ -489,7 +502,9 @@ public class FormActivity extends Activity implements
 	    return;
 	}
 
-	if (voucher.rowid == -1) {
+	voucher.setContents(form.getPagesContents());
+
+	if (voucher.getRowid() == -1) {
 	    voucher.insert(getFragmentManager());
 	} else {
 	    voucher.replace(getFragmentManager());

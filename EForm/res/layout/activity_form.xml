@@ -112,7 +112,7 @@
           android:textSize="24sp" />
 
       <TextView
-          android:id="@+id/tip_timeout_textview"
+          android:id="@+id/form_tip_timeout_textview"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginLeft="10dp"

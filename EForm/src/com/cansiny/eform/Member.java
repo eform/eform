@@ -776,7 +776,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	public long getItemId(int position) {
 	    if (vouchers == null || position < 0 || position >= vouchers.size())
 		return position;
-	    return vouchers.get(position).rowid;
+	    return vouchers.get(position).getRowid();
 	}
 
 	@Override
@@ -791,7 +791,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    linear.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
 
 	    ImageView image = new ImageView(getActivity());
-	    image.setImageResource(voucher.formimage);
+	    image.setImageResource(voucher.getFormImage());
 	    image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 		    (int) Utils.convertDpToPixel(40),
@@ -811,7 +811,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    table.addView(row);
 
 	    TextView textview = new TextView(getActivity());
-	    textview.setText(voucher.formlabel.replace("\n", ""));
+	    textview.setText(voucher.getFormLabel().replace("\n", ""));
 	    textview.setSingleLine();
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
 	    TableRow.LayoutParams row_params = new TableRow.LayoutParams();
@@ -823,7 +823,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	    textview = new TextView(getActivity());
 	    textview.setTag(position);
-	    textview.setText(voucher.comment);
+	    textview.setText(voucher.getComment());
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    textview.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.edit, 0);
 	    textview.setCompoundDrawablePadding(5);
@@ -836,19 +836,19 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	            voucher.setListener(new Voucher.VoucherListener() {
 	        	@Override
 	        	public void onVoucherChanged(Voucher voucher_new) {
-	        	    voucher.comment = voucher_new.comment;
+	        	    voucher.setComment(voucher_new.getComment());
 	        	    VoucherListAdapter adapter = (VoucherListAdapter) listview.getAdapter();
 	        	    adapter.notifyDataSetChanged();
 	        	}
 	            });
-	            voucher.update(getFragmentManager(), false);
+	            voucher.update(getFragmentManager());
 	        }
 	    });
 	    row.addView(textview);
 
 	    textview = new TextView(getActivity());
 	    SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
-	    textview.setText(format.format(voucher.atime));
+	    textview.setText(format.format(voucher.getAtime()));
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    textview.setTextColor(getResources().getColor(R.color.darkgray));
 	    textview.setGravity(Gravity.RIGHT);

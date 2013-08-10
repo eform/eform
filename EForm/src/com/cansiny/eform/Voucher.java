@@ -70,11 +70,10 @@ class VoucherDialog extends Utils.DialogFragment
 		    int before, int count) {
 	    }
 	});
-	if (voucher != null && voucher.comment != null) {
-	    comment_edittext.setText(voucher.comment);
+	if (voucher != null && voucher.getComment() != null) {
+	    comment_edittext.setText(voucher.getComment());
 	}
-	params = new LinearLayout.LayoutParams(
-		0, ViewGroup.LayoutParams.WRAP_CONTENT);
+	params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
 	params.weight = 1;
 	linear.addView(comment_edittext, params);
 
@@ -124,11 +123,14 @@ class VoucherInsertDialog extends VoucherDialog
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		voucher.comment = comment_edittext.getText().toString();
-		if (voucher.comment.length() == 0) {
+		String comment = comment_edittext.getText().toString();
+		if (comment.length() == 0) {
 		    comment_edittext.setHint("描述信息不能为空");
 		    comment_edittext.setHintTextColor(getResources().getColor(R.color.red));
 		    return;
+		}
+		if (!comment.equals(voucher.getComment())) {
+		    voucher.setComment(comment);
 		}
 		hideIme(view);
 
@@ -146,17 +148,9 @@ class VoucherInsertDialog extends VoucherDialog
 
 class VoucherUpdateDialog extends VoucherDialog
 {
-    private boolean update_contents;
-
-    public void setUpdateContents(boolean set) {
-	update_contents = set;
-    }
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 	super.onCreateDialog(savedInstanceState);
-
-	update_contents = false;
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -178,31 +172,23 @@ class VoucherUpdateDialog extends VoucherDialog
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		if (voucher == null || voucher.rowid < 0) {
+		if (voucher == null || voucher.getRowid() < 0) {
 		    LogActivity.writeLog("不能更新凭条，voucher成员没有正确设置(程序错误)");
 		    return;
 		}
 
-		voucher.comment = comment_edittext.getText().toString();
-		if (voucher.comment.length() == 0) {
+		String comment = comment_edittext.getText().toString();
+		if (comment.length() == 0) {
 		    comment_edittext.setHint("描述信息不能为空");
 		    comment_edittext.setHintTextColor(getResources().getColor(R.color.red));
 		    return;
 		}
+		voucher.setComment(comment);
+
 		hideIme(view);
 
-		Voucher voucher2 = new Voucher();
-
-		voucher2.rowid = voucher.rowid;
-		voucher2.userid = voucher.userid;
-		voucher2.comment = voucher.comment;
-		if (update_contents) {
-		    voucher2.contents = voucher.contents;
-		}
-
-		if (voucher2.update(getActivity())) {
+		if (voucher.update(getActivity())) {
 		    Utils.showToast("凭条信息更新成功！", R.drawable.smile);
-		    voucher.fireOnVoucherChanged();
 		} else {
 		    Utils.showToast("凭条信息更新失败！", R.drawable.cry);
 		}
@@ -281,7 +267,7 @@ class VoucherReplaceDialog extends VoucherDialog
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		if (voucher == null || voucher.rowid < 0) {
+		if (voucher == null || voucher.getRowid() < 0) {
 		    LogActivity.writeLog("不能更新凭条，voucher成员没有正确设置(程序错误)");
 		    return;
 		}
@@ -289,7 +275,7 @@ class VoucherReplaceDialog extends VoucherDialog
 		dismiss();
 
 		if (update_radio.isChecked()) {
-		    voucher.update(getFragmentManager(), true);
+		    voucher.update(getFragmentManager());
 		} else {
 		    voucher.insert(getFragmentManager());
 		}
@@ -301,16 +287,19 @@ class VoucherReplaceDialog extends VoucherDialog
 
 public class Voucher implements Parcelable
 {
-    public long   rowid;
-    public long   userid;
-    public String formclass;
-    public String formlabel;
-    public int    formimage;
-    public String contents;
-    public String comment;
-    public long   ctime;
-    public long   mtime;
-    public long   atime;
+    private long   rowid;
+    private long   userid;
+    private String formclass;
+    private String formlabel;
+    private int    formimage;
+    private String contents;
+    private String comment;
+    private long   ctime;
+    private long   mtime;
+    private long   atime;
+
+    private boolean contents_changed;
+    private boolean comment_changed;
 
     private VoucherListener listener;
     private VoucherDialogListener dialog_listener;
@@ -320,8 +309,33 @@ public class Voucher implements Parcelable
 	userid = -1;
 	formclass = null;
 	formlabel = null;
+	formimage = 0;
 	contents = null;
 	comment = null;
+	ctime = 0;
+	mtime = 0;
+	atime = 0;
+
+	contents_changed = false;
+	comment_changed = false;
+    }
+
+    public Voucher(long rowid, long userid, String formclass,
+	    String formlabel, int formimage, String contents,
+	    String comment, long ctime, long mtime, long atime) {
+	this.rowid = rowid;
+	this.userid = userid;
+	this.formclass = formclass;
+	this.formlabel = formlabel;
+	this.formimage = formimage;
+	this.contents = contents;
+	this.comment = comment;
+	this.ctime = ctime;
+	this.mtime = mtime;
+	this.atime = atime;
+
+	contents_changed = false;
+	comment_changed = false;
     }
 
     private Voucher(Parcel parcel) {
@@ -356,15 +370,73 @@ public class Voucher implements Parcelable
 	dest.writeLong(atime);
     }
 
-    public static final Parcelable.Creator<Voucher> CREATOR = new Parcelable.Creator<Voucher>() {
+    public static final Parcelable.Creator<Voucher> CREATOR =
+	    new Parcelable.Creator<Voucher>() {
 	public Voucher createFromParcel(Parcel parcel) {
 	    return new Voucher(parcel);
 	}
-
 	public Voucher[] newArray(int size) {
 	    return new Voucher[size];
 	}
     };
+
+    public long getRowid() {
+	return rowid;
+    }
+
+    public long getUserid() {
+	return userid;
+    }
+
+    public String getFormClass() {
+	return formclass;
+    }
+
+    public void setFormClass(String klass) {
+	formclass = klass;
+    }
+
+    public String getFormLabel() {
+	return formlabel;
+    }
+
+    public void setFormLabel(String label) {
+	formlabel = label;
+    }
+
+    public int getFormImage() {
+	return formimage;
+    }
+
+    public void setFormImage(int image) {
+	formimage = image;
+    }
+
+    public String getContents() {
+	return contents;
+    }
+
+    public void setContents(String contents) {
+	if (this.contents == null || !this.contents.equals(contents)) {
+	    this.contents = contents;
+	    contents_changed = true;
+	}
+    }
+
+    public String getComment() {
+	return comment;
+    }
+
+    public void setComment(String comment) {
+	if (this.comment == null || !this.comment.equals(comment)) {
+	    this.comment = comment;
+	    comment_changed = true;
+	}
+    }
+
+    public long getAtime() {
+	return atime;
+    }
 
     public boolean insert(Context context) {
 	Member member = Member.getMember();
@@ -374,8 +446,13 @@ public class Voucher implements Parcelable
 	}
 	userid = member.getProfile().rowid;
 
-	return EFormSQLite.Voucher.insert(context, userid,
+	long id = EFormSQLite.Voucher.insert(context, userid,
 		formclass, formlabel, formimage, contents, comment);
+	if (id >= 0) {
+	    rowid = id;
+	    return true;
+	}
+	return false;
     }
 
     public void insert(FragmentManager manager) {
@@ -395,14 +472,32 @@ public class Voucher implements Parcelable
 	    LogActivity.writeLog("尝试更新不属于当前会员的凭条，不允许");
 	    return false;
 	}
-	return EFormSQLite.Voucher.update(context, rowid, userid,
-		formclass, formlabel, formimage, contents, comment);
+
+	String new_contents = null;
+	String new_comment = null;
+
+	if (contents_changed) {
+	    new_contents = contents;
+	}
+	if (comment_changed) {
+	    new_comment = comment;
+	}
+	if (EFormSQLite.Voucher.update(context, rowid, userid,
+		new_contents, new_comment)) {
+	    contents_changed = false;
+	    comment_changed = false;
+
+	    if (listener != null)
+		listener.onVoucherChanged(this);
+
+	    return true;
+	}
+	return false;
     }
 
-    public void update(FragmentManager manager, boolean update_contents) {
+    public void update(FragmentManager manager) {
 	VoucherUpdateDialog dialog = new VoucherUpdateDialog();
 	dialog.setVoucher(this);
-	dialog.setUpdateContents(update_contents);
 	dialog.show(manager, "VoucherUpdateDialog");
     }
 
@@ -442,11 +537,6 @@ public class Voucher implements Parcelable
 
     public void setListener(VoucherListener listener) {
 	this.listener = listener;
-    }
-
-    public void fireOnVoucherChanged() {
-	if (listener != null)
-	    listener.onVoucherChanged(this);
     }
 
     public void setDialogListener(VoucherDialogListener listener) {

@@ -614,16 +614,16 @@ public class EFormSQLite extends SQLiteOpenHelper
 	static final public String COLUMN_MTIME = "mtime";
 	static final public String COLUMN_ATIME = "atime";
 
-	static public boolean insert(Context context, long userid, String formclass,
+	static public long insert(Context context, long userid, String formclass,
 		String formlabel, int formimage, String contents, String comment) {
 	    if (comment == null || formclass == null ||
 		    formlabel == null || contents == null) {
 		LogActivity.writeLog("插入凭证失败，因为参数错误.");
-		return false;
+		return -1;
 	    }
 	    if (!Member.hasUserWithRowid(context, userid)) {
 		LogActivity.writeLog("插入凭证失败，因为会员 %d 不存在", userid);
-		return false;
+		return -1;
 	    }
 
 	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
@@ -640,7 +640,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    } catch (UnsupportedEncodingException e) {
 		LogActivity.writeLog(e);
 		sqlite.close();
-		return false;
+		return -1;
 	    }
 	    values.put(COLUMN_COMMENT, comment);
 
@@ -651,11 +651,10 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    long rowid = database.insert(TABLE_NAME, null, values);
 	    sqlite.close();
-	    return (rowid >= 0) ? true : false;
+	    return rowid;
 	}
 
 	static public boolean update(Context context, long rowid, long userid,
-		String formclass, String formlabel, int formimage,
 		String contents, String comment) {
 	    if (!Member.hasUserWithRowid(context, userid)) {
 		LogActivity.writeLog("更新凭证失败，因为会员 %d 不存在", userid);
@@ -663,15 +662,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 	    ContentValues values = new ContentValues();
 
-	    if (formclass != null && formclass.length() > 0) {
-		values.put(COLUMN_FORMCLASS, formclass);
-	    }
-	    if (formlabel != null && formlabel.length() > 0) {
-		values.put(COLUMN_FORMLABEL, formlabel);
-	    }
-	    if (formimage > 0) {
-		values.put(COLUMN_FORMIMAGE, formimage);
-	    }
 	    if (contents != null && contents.length() > 0) {
 		try {
 		    values.put(COLUMN_CONTENTS, contents.getBytes("utf-8"));
@@ -686,7 +676,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    if (values.size() == 0) {
 		LogActivity.writeLog("凭证没有需要更新的数据");
-		return false;
+		return true;
 	    }
 	    long currtime = System.currentTimeMillis();
 	    values.put(COLUMN_MTIME, currtime);
@@ -725,27 +715,16 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    ArrayList<com.cansiny.eform.Voucher> vouchers = new ArrayList<com.cansiny.eform.Voucher>();
 	    while(cursor.moveToNext()) {
-		com.cansiny.eform.Voucher voucher = new com.cansiny.eform.Voucher();
-
-		voucher.rowid = cursor.getLong(0);
-		voucher.userid = userid;
-		voucher.formclass = cursor.getString(1);
-		voucher.formlabel = cursor.getString(2);
-		voucher.formimage = cursor.getInt(3);
 		try {
-		    voucher.contents = new String(cursor.getBlob(4), "utf-8");
+		    vouchers.add(new com.cansiny.eform.Voucher(
+			    cursor.getLong(0), userid, cursor.getString(1),
+			    cursor.getString(2), cursor.getInt(3),
+			    new String(cursor.getBlob(4), "utf-8"), cursor.getString(5),
+			    cursor.getLong(6), cursor.getLong(7), cursor.getLong(8)));
 		} catch (UnsupportedEncodingException e) {
 		    LogActivity.writeLog(e);
-		    cursor.close();
-		    sqlite.close();
-		    return null;
+		    continue;
 		}
-		voucher.comment = cursor.getString(5);
-		voucher.ctime = cursor.getLong(6);
-		voucher.mtime = cursor.getLong(7);
-		voucher.atime = cursor.getLong(8);
-
-		vouchers.add(voucher);
 	    }
 	    cursor.close();
 	    sqlite.close();

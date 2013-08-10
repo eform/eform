@@ -25,12 +25,15 @@ import android.widget.TextView;
 
 public class MagcardReader extends DialogFragment
 {
-    static CharSequence formatCardno(CharSequence cardno, int start_leave, int end_leave) {
+    static final private int LEAVE_START = 4;
+    static final private int LEAVE_END   = 3;
+
+    static CharSequence formatCardno(CharSequence cardno) {
 	StringBuilder builder = new StringBuilder();
 	int length = cardno.length();
 
 	for (int i = 0; i < length; i++) {
-	    if (i < start_leave || i > length - end_leave)
+	    if (i < LEAVE_START || i > length - LEAVE_END)
 		builder.append(cardno.charAt(i));
 	    else
 		builder.append('*');
@@ -141,9 +144,7 @@ public class MagcardReader extends DialogFragment
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 	builder.setTitle("请刷磁条卡或存折");
-
 	builder.setView(buildLayout());
-
 	builder.setNegativeButton("取 消", null);
 	return builder.create();
     }
@@ -187,7 +188,7 @@ public class MagcardReader extends DialogFragment
 		return null;
 	    }
 	    try {
-		Thread.sleep(5000);
+		Thread.sleep(2000);
 	    } catch (InterruptedException e) {
 		e.printStackTrace();
 	    }

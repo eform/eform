@@ -340,9 +340,9 @@ public class HomeActivity extends Activity
 
 	    Voucher voucher = new Voucher();
 
-	    voucher.formclass = item.klass;
-	    voucher.formlabel = getResources().getString(item.label);
-	    voucher.formimage = item.image;
+	    voucher.setFormClass(item.klass);
+	    voucher.setFormLabel(getResources().getString(item.label));
+	    voucher.setFormImage(item.image);
 
 	    startFormActivity(voucher);
 	}
@@ -460,6 +460,7 @@ public class HomeActivity extends Activity
 		}
 		public void onAnimationEnd(Animation animation) {
 		    view.setVisibility(View.GONE);
+		    view.clearAnimation();
 		}
 	    });
 	}

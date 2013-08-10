@@ -19,19 +19,19 @@ public class FormCIB01 extends Form
     public FormCIB01(Activity activity) {
 	super(activity);
 
-	pages.add(new FormPage(R.string.form_title_cib01_1, R.layout.form_cib01_1));
-	pages.add(new FormPage(R.string.form_title_cib01_2, R.layout.form_cib01_2));
-	pages.add(new FormPage(R.string.form_title_cib01_3, R.layout.form_cib01_3));
-	pages.add(new FormPage(R.string.form_title_cib01_4, R.layout.form_cib01_4));
+	pages.add(new FormPage(activity, R.string.form_title_cib01_1, R.layout.form_cib01_1));
+	pages.add(new FormPage(activity, R.string.form_title_cib01_2, R.layout.form_cib01_2));
+	pages.add(new FormPage(activity, R.string.form_title_cib01_3, R.layout.form_cib01_3));
+	pages.add(new FormPage(activity, R.string.form_title_cib01_4, R.layout.form_cib01_4));
 
 	/* card no views for this form */
-	cardno_views.add(R.id.p1_oldcard_no_edittext);
-	cardno_views.add(R.id.p2_credit1_edittext);
-	cardno_views.add(R.id.p2_credit2_edittext);
+	cardno_edittexts.add(R.id.p1_oldcard_no_edittext);
+	cardno_edittexts.add(R.id.p2_credit1_edittext);
+	cardno_edittexts.add(R.id.p2_credit2_edittext);
 
 	/* verify views for this form */
-	verify_views.add(R.id.p1_name_edittext);
-	verify_views.add(R.id.p1_idno_edittext);
+	verify_edittexts.add(R.id.p1_name_edittext);
+	verify_edittexts.add(R.id.p1_idno_edittext);
     }
 
 	
@@ -64,15 +64,15 @@ public class FormCIB01 extends Form
 		removeWarningImage(findView(R.id.p1_request_info_textview));
 		removeWarningImage(findView(R.id.p1_oldcard_no_edittext));
 
-		verify_views.add(R.id.p1_issue_depart_edittext);
-		verify_views.add(R.id.p1_address_edittext);
-		verify_views.add(R.id.p1_company_edittext);
-		verify_views.add(R.id.p1_enddate_year_edittext);
-		verify_views.add(R.id.p1_enddate_month_edittext);
-		verify_views.add(R.id.p1_enddate_day_edittext);
-		verify_views.add(R.id.p1_date_year_edittext);
-		verify_views.add(R.id.p1_date_month_edittext);
-		verify_views.add(R.id.p1_date_day_edittext);
+		verify_edittexts.add(R.id.p1_issue_depart_edittext);
+		verify_edittexts.add(R.id.p1_address_edittext);
+		verify_edittexts.add(R.id.p1_company_edittext);
+		verify_edittexts.add(R.id.p1_enddate_year_edittext);
+		verify_edittexts.add(R.id.p1_enddate_month_edittext);
+		verify_edittexts.add(R.id.p1_enddate_day_edittext);
+		verify_edittexts.add(R.id.p1_date_year_edittext);
+		verify_edittexts.add(R.id.p1_date_month_edittext);
+		verify_edittexts.add(R.id.p1_date_day_edittext);
 	    }
 	    break;
 
@@ -87,9 +87,9 @@ public class FormCIB01 extends Form
 		removeWarningImage(findView(R.id.p1_cardtype_other_edittext));
 		removeWarningImage(findView(R.id.p1_cardtype_standard_checkbox));
 
-		verify_views.clear();
-		verify_views.add(R.id.p1_name_edittext);
-		verify_views.add(R.id.p1_idno_edittext);
+		verify_edittexts.clear();
+		verify_edittexts.add(R.id.p1_name_edittext);
+		verify_edittexts.add(R.id.p1_idno_edittext);
 	    }
 	    break;
 

@@ -6,5 +6,7 @@
          ?android:attr/buttonBarStyle is new as of API 11 so this is
          necessary to support previous API levels.
     -->
-
+    <item name="FormWarningViewTagKey" type="id"/>
+    <item name="FormCardnoViewTagKey" type="id"/>
+    
 </resources>
