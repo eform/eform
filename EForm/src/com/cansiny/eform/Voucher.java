@@ -55,6 +55,7 @@ class VoucherDialog extends Utils.DialogFragment
 	layout.addView(linear, params);
 
 	comment_edittext = new EditText(getActivity());
+	comment_edittext.setSingleLine();
 	comment_edittext.addTextChangedListener(new TextWatcher() {
 	    @Override
 	    public void afterTextChanged(Editable editable) {

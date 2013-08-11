@@ -10,8 +10,8 @@ import android.app.Activity;
 
 public class FormCIB02 extends Form {
 
-	public FormCIB02(Activity activity) {
-		super(activity);
+	public FormCIB02(Activity activity, String label) {
+		super(activity, label);
 
 		pages.add(new FormPage(activity, R.string.form_title_cib01_2, R.layout.form_cib02_1));
 	}

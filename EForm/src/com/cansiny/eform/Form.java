@@ -46,15 +46,17 @@ public abstract class Form extends DefaultHandler
     static final private String TAG_CLEAR_BUTTON = "edittext_clear_button";
 
     protected Activity activity;
+    protected String label;
     protected ArrayList<FormPage> pages;
     protected int active_page;
     protected ArrayList<Integer> cardno_edittexts;
     protected ArrayList<Integer> verify_edittexts;
     private FormListener listener;
 
-    public Form(Activity activity) {
+    public Form(Activity activity, String label) {
 	this.activity = activity;
 	listener = null;
+	this.label = label;
 	pages = new ArrayList<FormPage>();
 	active_page = -1;
 	cardno_edittexts = new ArrayList<Integer>();
@@ -128,6 +130,9 @@ public abstract class Form extends DefaultHandler
 	reader.show(activity.getFragmentManager(), "ReadIdcardDialog");
     }
 
+    public int getPageCount() {
+	return pages.size();
+    }
 
     public int getActivePage() {
 	return active_page;
@@ -197,7 +202,9 @@ public abstract class Form extends DefaultHandler
     public String getPagesContents() {
 	StringBuilder builder = new StringBuilder();
 
-	builder.append("<pages>\n");
+	builder.append("<form ");
+	builder.append("class=\"" + getClass().getName() + "\" ");
+	builder.append(">\n");
 
 	for (int i = 0; i < pages.size(); i++) {
 	    FormPage page = pages.get(i);
@@ -205,7 +212,7 @@ public abstract class Form extends DefaultHandler
 	    builder.append(page.toXmlString());
 	    builder.append("  </page>\n");
 	}
-	builder.append("</pages>\n");
+	builder.append("</form>\n");
 
 	return builder.toString();
     }
@@ -230,30 +237,35 @@ public abstract class Form extends DefaultHandler
 	@Override
 	public void startElement(String uri, String localName,
 		String qName, Attributes attrs) throws SAXException {
-	    if (level == 0 && !localName.equals("pages")) {
-		throw new SAXException("解析页面内容失败，根结点名称必须是'pages'");
+	    if (level == 0 && !localName.equals("form")) {
+		LogActivity.writeLog("解析页面内容失败，根结点名称必须是'form'");
+		throw new SAXException();
 	    }
 
-	    if (localName.equals("pages")) {
+	    if (localName.equals("form")) {
 		if (level != 0) {
-		    throw new SAXException("元素'pages'必须是根结点");
+		    LogActivity.writeLog("元素'form'必须是根结点");
+		    throw new SAXException();
 		}
 	    } else if (localName.equals("page")) {
 		if (level != 1) {
-		    throw new SAXException("元素'page'必须二级结点");
+		    LogActivity.writeLog("元素'page'必须二级结点");
+		    throw new SAXException();
 		}
 		int page_no = Integer.parseInt(attrs.getValue("", "index"));
 		if (page_no < 0 || page_no >= pages.size()) {
-		    throw new SAXException("解析页面内容失败，页面索引 "
-			    + page_no + " 超出范围 " + pages.size());
+		    LogActivity.writeLog("解析页面内容失败，页面索引%d超出范围%d", page_no, pages.size());
+		    throw new SAXException();
 		}
 		page = pages.get(page_no);
 	    } else if (localName.equals("view")) {
 		if (level != 2) {
-		    throw new SAXException("元素'page'必须三级结点");
+		    LogActivity.writeLog("元素'page'必须三级结点");
+		    throw new SAXException();
 		}
 		if (page == null) {
-		    throw new SAXException("解析页面内容失败，view元素必须是page元素的子元素");
+		    LogActivity.writeLog("解析页面内容失败，view元素必须是page元素的子元素");
+		    throw new SAXException();
 		}
 
 		String resname = attrs.getValue("", "resname");
@@ -284,6 +296,32 @@ public abstract class Form extends DefaultHandler
 	    }
 	    level--;
 	}
+    }
+
+    public String toPrintTemplate() {
+	StringBuilder builder = new StringBuilder();
+
+	builder.append("<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n");
+	builder.append("<!--\n");
+	builder.append("本文件是通过程序生成的模板，请根据需要进行修改\n");
+	builder.append("Copyright © 2013 Cansiny Trade Co.,Ltd.\n");
+	builder.append("-->\n");
+
+	builder.append("<form ");
+	builder.append("class=\"" + getClass().getName() + "\" ");
+	builder.append("label=\"" + label.replace("\n", "") + "\" ");
+	builder.append(">\n");
+
+	for (int i = 0; i < pages.size(); i++) {
+	    FormPage page = pages.get(i);
+	    builder.append("  <page ");
+	    builder.append("index=\"" + i + "\" ");
+	    builder.append(">\n");
+	    builder.append(page.toPrintTemplate());
+	    builder.append("  </page>\n");
+	}
+	builder.append("</form>\n");
+	return builder.toString();
     }
 
     /* call by activity when page has been insert into layout */
@@ -416,7 +454,6 @@ public abstract class Form extends DefaultHandler
 	
     protected void onTextChanged(TextView textview, CharSequence sequence,
 				 int start, int before, int count) {
-	LogActivity.writeLog("Text Changed: %s", sequence);
 	for (Integer viewid : cardno_edittexts) {
 	    if (textview.getId() == viewid.intValue()) {
 		if (sequence.toString().matches("[0-9]*")) {
@@ -722,12 +759,75 @@ public abstract class Form extends DefaultHandler
 		    }
 		    builder.append("value=\"" + object.toString() + "\" ");
 		    builder.append(" />\n");
-		} catch (NumberFormatException e) {
+		} catch (Exception e) {
 		    LogActivity.writeLog(e);
 		    continue;
 		}
 	    }
 	    return builder.toString();
+	}
+
+	public String toPrintTemplate() {
+	    if (getChildCount() == 0) {
+		LayoutInflater inflater = activity.getLayoutInflater();
+		inflater.inflate(this.layout, this);
+	    }
+	    StringBuilder builder = new StringBuilder();
+
+	    toPrintElement(builder, this, 1);
+	    return builder.toString();
+	}
+
+	private void toPrintElement(StringBuilder builder, View object, int order) {
+	    if (object instanceof ViewGroup) {
+		ViewGroup group = (ViewGroup) object;
+		for (int i = 0; i < group.getChildCount(); i++) {
+		    toPrintElement(builder, group.getChildAt(i), order + 1);
+		}
+		return;
+	    }
+
+	    if (!(object instanceof EditText) && !(object instanceof CheckBox)) {
+		return;
+	    }
+
+	    int viewid = object.getId();
+	    if (viewid == -1) {
+		LogActivity.writeLog("界面设计错误: %s(%s)没有指定ID",
+			object.getClass().getName(), ((TextView) object).getText());
+		return;
+	    }
+
+	    builder.append("    <field ");
+	    Resources res = activity.getResources();
+	    builder.append("resid=\"" + res.getResourceEntryName(viewid) + "\" ");
+	    String canon_name = object.getClass().getCanonicalName();
+	    if (canon_name != null) {
+		builder.append("class=\"" + canon_name + "\" ");
+	    } else {
+		builder.append("class=\"" + object.getClass().getName() + "\" ");
+	    }
+
+	    if (object instanceof EditText) {
+		ViewGroup parent = (ViewGroup) object.getParent();
+		int index = parent.indexOfChild(object);
+		boolean set = false;
+		if (index > 0) {
+		    View sibling = parent.getChildAt(index - 1);
+		    if (sibling instanceof TextView) {
+			builder.append("name=\"" + ((TextView) sibling).getText() + "\" ");
+			set = true;
+		    }
+		}
+		if (!set) {
+		    builder.append("name=\"\" ");
+		}
+	    } else if (object instanceof CheckBox) {
+		builder.append("name=\"" + ((TextView) object).getText() + "\" ");
+	    }
+	    builder.append("page_order=\"" + order + "\" ");
+	    builder.append("x=\"\" y=\"\" space=\"\" width=\"\" ");
+	    builder.append("/>\n");
 	}
 
 	public void putValue(String entryname, String typename,

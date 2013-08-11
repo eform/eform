@@ -16,8 +16,8 @@ import android.widget.TextView;
 
 public class FormCIB01 extends Form
 {
-    public FormCIB01(Activity activity) {
-	super(activity);
+    public FormCIB01(Activity activity, String label) {
+	super(activity, label);
 
 	pages.add(new FormPage(activity, R.string.form_title_cib01_1, R.layout.form_cib01_1));
 	pages.add(new FormPage(activity, R.string.form_title_cib01_2, R.layout.form_cib01_2));

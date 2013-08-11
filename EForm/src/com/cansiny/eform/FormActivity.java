@@ -5,6 +5,9 @@
  */
 package com.cansiny.eform;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,11 +15,14 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -81,7 +87,9 @@ public class FormActivity extends Activity implements
 		throw new ClassNotFoundException("Intent missing 'voucher' attribute");
 
 	    /* build form instance from class name */
-	    form = (Form) Class.forName(voucher.getFormClass()).getConstructor(Activity.class).newInstance(this);
+	    form = (Form) Class.forName(voucher.getFormClass()).
+		    getConstructor(Activity.class, String.class).
+		    newInstance(this, voucher.getFormLabel());
 	    form.setPagesContents(voucher.getContents());
 	    form.setListener(this);
 
@@ -486,7 +494,16 @@ public class FormActivity extends Activity implements
 
 
     public void onPrintButtonClick(View view) {
-	form.print();
+	File cachedir = getCacheDir();
+	try {
+	    String fname = voucher.getFormClass() + ".xml";
+	    FileOutputStream stream = new FileOutputStream(new File(cachedir, fname));
+	    stream.write(form.toPrintTemplate().getBytes("utf-8"));
+	} catch (Exception e) {
+	    LogActivity.writeLog(e);
+	}
+	PrintDialog dialog = new PrintDialog();
+	dialog.show(getFragmentManager(), "PrintDialog");
     }
 
 
@@ -531,6 +548,87 @@ public class FormActivity extends Activity implements
     public void onFormTextChanged(Form form, EditText textview) {
 	timeout_remains = TIMEOUT_VALUE;
 	setTimeoutTipVisible(false);
+    }
+
+}
+
+class PrintDialog extends Utils.DialogFragment
+{
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setTitle("打印凭条");
+	LayoutInflater inflater = getActivity().getLayoutInflater();
+	builder.setView(inflater.inflate(R.layout.dialog_print, null));
+	builder.setNegativeButton("取 消", null);
+	builder.setPositiveButton("打 印", null);
+
+	return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	final AlertDialog dialog = (AlertDialog) getDialog();
+
+	View view = dialog.findViewById(R.id.coord_adjust_textview);
+	view.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		View edittext = dialog.findViewById(R.id.coord_adjust_x_edittext);
+		edittext.setEnabled(!edittext.isEnabled());
+		edittext.requestFocus();
+		edittext = dialog.findViewById(R.id.coord_adjust_y_edittext);
+		edittext.setEnabled(!edittext.isEnabled());
+
+		if (edittext.isEnabled()) {
+		    ((TextView) view).setTextColor(getResources().getColor(R.color.darkred));
+		} else {
+		    ((TextView) view).setTextColor(getResources().getColor(R.color.darkgray));
+		}
+	    }
+	});
+
+	Button button = (Button) dialog.findViewById(R.id.tips_button);
+	button.setOnClickListener(new OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		showToastLong("有时，同样的凭条因为切纸原因导致左边和上边的留白存在差异，" +
+			"可以通过调整打印坐标来克服这个问题。\n\n如横向偏移小于0，" +
+			"表示所有打印元素往左边偏移指定的距离，大于0则表示整体向右边偏移指定的距离，纵向亦然。");
+	    }
+	});
+//	Button button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+//	button.setOnClickListener(new View.OnClickListener() {
+//	    @Override
+//	    public void onClick(View view) {
+//		if (voucher == null || voucher.getRowid() < 0) {
+//		    LogActivity.writeLog("不能更新凭条，voucher成员没有正确设置(程序错误)");
+//		    return;
+//		}
+//
+//		String comment = comment_edittext.getText().toString();
+//		if (comment.length() == 0) {
+//		    comment_edittext.setHint("描述信息不能为空");
+//		    comment_edittext.setHintTextColor(getResources().getColor(R.color.red));
+//		    return;
+//		}
+//		voucher.setComment(comment);
+//
+//		hideIme(view);
+//
+//		if (voucher.update(getActivity())) {
+//		    Utils.showToast("凭条信息更新成功！", R.drawable.smile);
+//		} else {
+//		    Utils.showToast("凭条信息更新失败！", R.drawable.cry);
+//		}
+//		dismiss();
+//	    }
+//	});
     }
 
 }
