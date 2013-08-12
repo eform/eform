@@ -86,14 +86,6 @@ class VoucherDialog extends Utils.DialogFragment
     @Override
     public void onStart() {
 	super.onStart();
-
-	AlertDialog dialog = (AlertDialog) getDialog();
-
-	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-
-	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     }
 }
 

@@ -754,4 +754,37 @@ public class Preferences
 	return prefs.getString("AftermarketPhone", "");
     }
 
+    public void setPageLeftMargin(Form form, int page_no, int value) {
+	String key = form.getClass().getName() + "." + page_no + ".left";
+
+	if (editor != null) {
+	    editor.putInt(key, value);
+	} else {
+	    beginTransaction();
+	    editor.putInt(key, value);
+	    endTransaction();
+	}
+    }
+
+    public int getPageLeftMargin(Form form, int page_no) {
+	String key = form.getClass().getName() + "." + page_no + ".left";
+	return prefs.getInt(key, 0);
+    }
+
+    public void setPageTopMargin(Form form, int page_no, int value) {
+	String key = form.getClass().getName() + "." + page_no + ".top";
+
+	if (editor != null) {
+	    editor.putInt(key, value);
+	} else {
+	    beginTransaction();
+	    editor.putInt(key, value);
+	    endTransaction();
+	}
+    }
+
+    public int getPageTopMargin(Form form, int page_no) {
+	String key = form.getClass().getName() + "." + page_no + ".top";
+	return prefs.getInt(key, 0);
+    }
 }

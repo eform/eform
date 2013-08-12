@@ -13,7 +13,12 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.cansiny.eform.Print.PrintListener;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +36,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -38,7 +44,7 @@ import android.widget.Toast;
 
 
 public class FormActivity extends Activity implements
-	OnClickListener, OnTouchListener, Form.FormListener
+	OnClickListener, OnTouchListener, Form.FormListener, PrintListener
 {
     /* constants uses for communication with previous activity. */
     static public final String INTENT_MESSAGE_VOUCHER   = "com.cansiny.eform.VOUCHER";
@@ -58,7 +64,7 @@ public class FormActivity extends Activity implements
     private int timeout_remains = TIMEOUT_VALUE;
     private Handler timeout_handler;
     private Runnable timeout_runnable;
-
+    private boolean print_in_progress = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -196,7 +202,9 @@ public class FormActivity extends Activity implements
 			finish();
 		    }
 		}
-		timeout_remains--;
+		if (!print_in_progress) {
+		    timeout_remains--;
+		}
 		timeout_handler.postDelayed(this, 1000);
 	    }
 	};
@@ -470,7 +478,6 @@ public class FormActivity extends Activity implements
 	return toast;
     }
 
-
     public void onVerifyButtonClick(View view) {
 	/* prevent click too fast */
 	long time = System.currentTimeMillis() / 1000;
@@ -479,15 +486,14 @@ public class FormActivity extends Activity implements
 
 	last_verify_time = time;
 
-	int retval = form.verify();
+	int retval = form.verify(false, true);
 	if (retval > 0) {
-	    showToast(String.format("本页共 %d 个必填项未填写，点击警告标志可查看详细说明...", retval),
-		    R.drawable.cry);
+	    String message =  "本页有 " + retval + " 个未填写项，点击标记可查看详细说明...";
+	    showToast(message, R.drawable.cry);
 	} else {
 	    showToast("检查完成，没有发现问题！", R.drawable.smile);
 	}
     }
-
 
     public void onPrintButtonClick(View view) {
 	try {
@@ -498,10 +504,18 @@ public class FormActivity extends Activity implements
 	} catch (Exception e) {
 	    LogActivity.writeLog(e);
 	}
-	Print print = new Print(form);
-	print.print(getFragmentManager());
-    }
 
+	int retval = form.verify(true, false);
+	if (retval > 0) {
+	    String message = "还剩 " + retval + " 个未填写项，是否继续打印？";
+	    PrintConfirmDialog dialog = new PrintConfirmDialog(form, message);
+	    dialog.show(getFragmentManager(), "PrintConfirmDialog");
+	} else {
+	    Print print = new Print(form);
+	    print.setPrintListener(this);
+	    print.print(getFragmentManager());
+	}
+    }
 
     public void onExitButtonClick(View view) {
 	setResult(RESULT_OK);
@@ -547,4 +561,68 @@ public class FormActivity extends Activity implements
 	setTimeoutTipVisible(false);
     }
 
+    @Override
+    public void onPrintStart(Print print) {
+	timeout_remains = TIMEOUT_VALUE;
+	print_in_progress = true;
+    }
+
+    @Override
+    public void onPrintStop(Print print) {
+	timeout_remains = TIMEOUT_VALUE;
+	print_in_progress = false;
+    }
+
+}
+
+class PrintConfirmDialog extends Utils.DialogFragment
+{
+    private Form form;
+    private String message;
+
+    public PrintConfirmDialog(Form form, String message) {
+	this.form = form;
+	this.message = message;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setTitle("是否继续打印");
+
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.HORIZONTAL);
+	linear.setPadding(20, 10, 10, 10);
+	linear.setGravity(Gravity.CENTER_VERTICAL);
+
+	ImageView image = new ImageView(getActivity());
+	image.setImageResource(R.drawable.warning);
+	image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(48),
+		(int) Utils.convertDpToPixel(48));
+	params.rightMargin = 20;
+	linear.addView(image, params);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText(message);
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	linear.addView(textview);
+
+	builder.setView(linear);
+
+	builder.setNegativeButton("取 消", null);
+	builder.setPositiveButton("继续打印", new DialogInterface.OnClickListener() {
+	    @Override
+	    public void onClick(DialogInterface dialog, int which) {
+		Print print = new Print(form);
+		print.setPrintListener((PrintListener) getActivity());
+		print.print(getFragmentManager());
+	    }
+	});
+	return builder.create();
+    }
 }

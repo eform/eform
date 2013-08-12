@@ -8,7 +8,6 @@ package com.cansiny.eform;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,13 +16,12 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-public class MagcardReader extends DialogFragment
+public class MagcardReader extends Utils.DialogFragment
 {
     static final private int LEAVE_START = 4;
     static final private int LEAVE_END   = 3;
@@ -154,9 +152,6 @@ public class MagcardReader extends DialogFragment
 	super.onStart();
 
 	setCancelable(false);
-
-	Button button = ((AlertDialog) getDialog()).getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
 	seconds_textview.setText("" + total_seconds);
 	starttime = System.currentTimeMillis();

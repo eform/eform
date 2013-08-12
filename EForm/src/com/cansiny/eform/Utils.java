@@ -10,12 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -186,6 +190,23 @@ public class Utils
 
 	    getDialog().getWindow().setSoftInputMode(
 		    WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+	    AlertDialog dialog = (AlertDialog) getDialog();
+
+	    Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
+	    if (button != null) {
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    }
+
+	    button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
+	    if (button != null) {
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    }
+
+	    button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	    if (button != null) {
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    }
 	}
 
 	@Override
@@ -412,6 +433,46 @@ public class Utils
 	    linear.addView(textview);
 
 	    return linear;
+	}
+    }
+
+    static public class GenericTextWatcher implements TextWatcher
+    {
+	private TextView textview;
+	TextWatcherListener listener;
+
+	public GenericTextWatcher(TextView view, TextWatcherListener listener) {
+	    textview = view;
+	    this.listener = listener;
+	}
+
+	@Override
+	public void afterTextChanged(Editable editable) {
+	    if (listener != null)
+		listener.afterTextChanged(textview, editable);
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence sequence,
+				      int start, int count, int after) {
+	    if (listener != null)
+		listener.beforeTextChanged(textview, sequence, start, count, after);
+	}
+
+	@Override
+	public void onTextChanged(CharSequence sequence,
+				  int start, int before, int count) {
+	    if (listener != null)
+		listener.onTextChanged(textview, sequence, start, before, count);
+	}
+
+	public interface TextWatcherListener
+	{
+	    public void afterTextChanged(TextView textview, Editable editable);
+	    public void beforeTextChanged(TextView textview, CharSequence sequence,
+		    int start, int count, int after);
+	    public void onTextChanged(TextView textview, CharSequence sequence,
+		    int start, int before, int count);
 	}
     }
 

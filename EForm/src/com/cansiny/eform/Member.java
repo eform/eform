@@ -133,7 +133,6 @@ class MemberLoginDialog extends Utils.DialogFragment
 	AlertDialog dialog = (AlertDialog) getDialog();
 
 	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -152,7 +151,6 @@ class MemberLoginDialog extends Utils.DialogFragment
 	});
 
 	button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -164,7 +162,6 @@ class MemberLoginDialog extends Utils.DialogFragment
 	});
 
 	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -276,14 +273,6 @@ class MemberRegisterDialog extends Utils.DialogFragment
 	super.onStart();
 
 	setCancelable(false);
-
-	AlertDialog dialog = (AlertDialog) getDialog();
-
-	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-
-	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
     }
 
 }
@@ -377,7 +366,6 @@ class MemberProfileDialog extends Utils.DialogFragment
 	username_edittext.setEnabled(true);
 
 	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -387,7 +375,6 @@ class MemberProfileDialog extends Utils.DialogFragment
 	});
 
 	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -465,7 +452,6 @@ class MemberProfileDialog extends Utils.DialogFragment
 
 	if (profile != null) {
 	    button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
-	    button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	    button.setOnClickListener(new View.OnClickListener() {
 		@Override
 		public void onClick(View view) {
@@ -558,11 +544,7 @@ class MemberDeleteDialog extends Utils.DialogFragment
 
 	final AlertDialog dialog = (AlertDialog) getDialog();
 
-	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-
-	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	Button button = dialog.getButton(Dialog.BUTTON_POSITIVE);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {

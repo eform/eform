@@ -508,7 +508,7 @@ public class FormCIB01 extends Form
 
 
     @Override
-    protected void afterTextChanged(TextView textview, Editable editable) {
+    public void afterTextChanged(TextView textview, Editable editable) {
 	super.afterTextChanged(textview, editable);
 
 	if (editable.length() <= 0)
@@ -528,8 +528,8 @@ public class FormCIB01 extends Form
 
 	
     @Override
-    public int verify() {
-	int retval = super.verify();
+    public int verify(boolean verify_all, boolean markit) {
+	int retval = super.verify(verify_all, markit);
 
 	switch (active_page) {
 	case 0:

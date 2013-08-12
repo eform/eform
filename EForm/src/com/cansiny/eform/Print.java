@@ -8,26 +8,34 @@ package com.cansiny.eform;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 
 class PrintDialog extends Utils.DialogFragment
 {
-    private Form form;
+    private Print print;
     private Spinner page_from_spinner;
     private Spinner page_to_spinner;
 
-    public PrintDialog(Form form) {
-	this.form = form;
+    public PrintDialog(Print print) {
+	this.print = print;
     }
 
     private View buildPagesLayout() {
@@ -44,7 +52,7 @@ class PrintDialog extends Utils.DialogFragment
 
 	page_from_spinner = new Spinner(getActivity());
 	page_from_spinner.setPadding(0, 0, 0, 0);
-	Utils.IntegerAdapter adapter = new Utils.IntegerAdapter(1, form.getPageCount());
+	Utils.IntegerAdapter adapter = new Utils.IntegerAdapter(1, print.getForm().getPageCount());
 	page_from_spinner.setAdapter(adapter);
 	page_from_spinner.setSelection(0);
 	params = new LinearLayout.LayoutParams(
@@ -61,7 +69,7 @@ class PrintDialog extends Utils.DialogFragment
 
 	page_to_spinner = new Spinner(getActivity());
 	page_to_spinner.setPadding(0, 0, 0, 0);
-	adapter = new Utils.IntegerAdapter(1, form.getPageCount());
+	adapter = new Utils.IntegerAdapter(1, print.getForm().getPageCount());
 	page_to_spinner.setAdapter(adapter);
 	page_to_spinner.setSelection(adapter.getCount() - 1);
 	params = new LinearLayout.LayoutParams(
@@ -97,9 +105,8 @@ class PrintDialog extends Utils.DialogFragment
 
 	builder.setTitle("打印凭条");
 	builder.setView(buildLayout());
-//	LayoutInflater inflater = getActivity().getLayoutInflater();
-//	builder.setView(inflater.inflate(R.layout.dialog_print, null));
 	builder.setNegativeButton("取 消", null);
+	builder.setNeutralButton("页面设置", null);
 	builder.setPositiveButton("打 印", null);
 
 	return builder.create();
@@ -108,6 +115,10 @@ class PrintDialog extends Utils.DialogFragment
     @Override
     public void onStart() {
 	super.onStart();
+
+	setCancelable(false);
+
+	print.printStart();
 
 	final AlertDialog dialog = (AlertDialog) getDialog();
 
@@ -168,6 +179,16 @@ class PrintDialog extends Utils.DialogFragment
 //			"表示所有打印元素往左边偏移指定的距离，大于0则表示整体向右边偏移指定的距离，纵向亦然。");
 //	    }
 //	});
+
+	Button button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		PrintPageSetupDialog dialog = new PrintPageSetupDialog(print);
+		dialog.show(getFragmentManager(), "PrintPageSetupDialog");
+	    }
+	});
+
 //	Button button = dialog.getButton(Dialog.BUTTON_POSITIVE);
 //	button.setOnClickListener(new View.OnClickListener() {
 //	    @Override
@@ -197,14 +218,257 @@ class PrintDialog extends Utils.DialogFragment
 //	});
     }
 
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+	super.onDismiss(dialog);
+	print.printStop();
+    }
 }
+
+
+class PrintPageSetupDialog extends Utils.DialogFragment
+{
+    private Print print;
+
+    public PrintPageSetupDialog(Print print) {
+	this.print = print;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	builder.setTitle("页面设置");
+
+	ListView listview = new ListView(getActivity());
+	builder.setView(listview);
+
+	PageSetupAdapter adapter = new PageSetupAdapter(print.getForm());
+	listview.setAdapter(adapter);
+
+	return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	Preferences prefs = Preferences.getPreferences();
+	prefs.beginTransaction();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+	super.onDismiss(dialog);
+
+	Preferences prefs = Preferences.getPreferences();
+	prefs.endTransaction();
+    }
+
+    class PageSetupAdapter extends BaseAdapter
+    	implements Utils.GenericTextWatcher.TextWatcherListener
+    {
+	private Form form;
+
+	public PageSetupAdapter(Form form) {
+	    this.form = form;
+	}
+
+	@Override
+	public int getCount() {
+	    return form.getPageCount() + 1;
+	}
+
+	@Override
+	public Object getItem(int position) {
+	    if (position < form.getPageCount())
+		return form.getPage(position);
+
+	    return null;
+	}
+
+	@Override
+	public long getItemId(int position) {
+	    return position;
+	}
+
+	private View marginSetView(Context context, int page_no, boolean isleft) {
+	    LinearLayout linear = new LinearLayout(context);
+	    linear.setPadding(10, 5, 10, 5);
+	    linear.setGravity(Gravity.CENTER_VERTICAL);
+	    linear.setBackgroundResource(R.color.yellow);
+
+	    TextView textview = new TextView(context);
+	    if (isleft) {
+		textview.setText("左边距");
+	    } else {
+		textview.setText("上边距");
+	    }
+	    textview.setTextColor(context.getResources().getColor(R.color.darkblue));
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    linear.addView(textview);
+
+	    Preferences prefs = Preferences.getPreferences();
+
+	    EditText edittext = new EditText(context);
+	    edittext.setTag(R.id.PrintPageSetupPageNoKey, page_no);
+	    edittext.setTag(R.id.PrintPageSetupIsLeftKey, isleft);
+	    edittext.setInputType(InputType.TYPE_CLASS_NUMBER);
+	    edittext.setSingleLine();
+	    edittext.setMinEms(3);
+	    int margin = 0;
+	    if (isleft) {
+		margin = prefs.getPageLeftMargin(form, page_no);
+	    } else {
+		margin = prefs.getPageTopMargin(form, page_no);
+	    }
+	    edittext.setText(String.valueOf(margin));
+	    edittext.setTextColor(context.getResources().getColor(R.color.purple));
+	    edittext.addTextChangedListener(new Utils.GenericTextWatcher(edittext, this));
+	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		    0, ViewGroup.LayoutParams.WRAP_CONTENT);
+	    params.weight = 1;
+	    params.leftMargin = 2;
+	    params.rightMargin = 2;
+	    linear.addView(edittext, params);
+
+	    Button button = new Button(context);
+	    button.setTag(edittext);
+	    button.setBackgroundResource(R.drawable.add);
+	    button.setOnClickListener(new View.OnClickListener() {
+		@Override
+		public void onClick(View view) {
+		    EditText edittext = (EditText) view.getTag();
+		    int value = Integer.parseInt(edittext.getText().toString());
+		    edittext.setText(String.valueOf(value + 1));
+		}
+	    });
+	    params = new LinearLayout.LayoutParams(
+		    (int) Utils.convertDpToPixel(24),
+		    (int) Utils.convertDpToPixel(24));
+	    params.leftMargin = 2;
+	    linear.addView(button, params);
+
+	    button = new Button(context);
+	    button.setTag(edittext);
+	    button.setBackgroundResource(R.drawable.subtract);
+	    button.setOnClickListener(new View.OnClickListener() {
+		@Override
+		public void onClick(View view) {
+		    EditText edittext = (EditText) view.getTag();
+		    int value = Integer.parseInt(edittext.getText().toString());
+		    edittext.setText(String.valueOf(value - 1));
+		}
+	    });
+	    params = new LinearLayout.LayoutParams(
+		    (int) Utils.convertDpToPixel(24),
+		    (int) Utils.convertDpToPixel(24));
+	    params.leftMargin = 6;
+	    linear.addView(button, params);
+
+	    return linear;
+	}
+
+	private View commentTextview(Context context) {
+	    TextView textview = new TextView(context);
+	    textview.setText("有时同样的凭条因为切纸原因导致左边和上边的留白存在差异，" +
+			"可以通过调整页边距来克服这个问题。\n如左边距小于0，" +
+			"表示所有打印元素往左边偏移指定的距离，大于0则表示整体向右边偏移指定的距离，纵向亦然。\n" +
+			"偏移单位为毫米。");
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	    textview.setPadding(10, 10, 10, 5);
+	    textview.setLineSpacing(1, 1.2f);
+	    textview.setTextColor(context.getResources().getColor(R.color.black));
+
+	    return textview;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+	    Context context = parent.getContext();
+
+	    if (position >= form.getPageCount()) {
+		return commentTextview(context);
+	    }
+
+	    Form.FormPage page = form.getPage(position);
+	    if (page == null)
+		return null;
+
+	    LinearLayout linear = new LinearLayout(context);
+	    linear.setGravity(Gravity.CENTER_VERTICAL);
+
+	    TextView textview = new TextView(context);
+	    textview.setText("" + (position + 1) + "." + page.getTitle());
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	    textview.setPadding(10, 0, 10, 0);
+	    textview.setGravity(Gravity.CENTER_VERTICAL);
+	    textview.setTextColor(context.getResources().getColor(R.color.darkred));
+	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.WRAP_CONTENT,
+		    ViewGroup.LayoutParams.MATCH_PARENT);
+	    linear.addView(textview, params);
+
+	    params = new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.WRAP_CONTENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT);
+	    params.weight = 1;
+	    params.leftMargin = 1;
+	    linear.addView(marginSetView(context, position, true), params);
+
+	    params = new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.WRAP_CONTENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT);
+	    params.weight = 1;
+	    params.leftMargin = 1;
+	    linear.addView(marginSetView(context, position, false), params);
+
+	    return linear;
+	}
+
+	@Override
+	public void afterTextChanged(TextView textview, Editable editable) {
+	    Preferences prefs = Preferences.getPreferences();
+
+	    Integer page_no = (Integer) textview.getTag(R.id.PrintPageSetupPageNoKey);
+	    Boolean isleft = (Boolean) textview.getTag(R.id.PrintPageSetupIsLeftKey);
+	    int value = Integer.parseInt(editable.toString());
+	    if (isleft) {
+		prefs.setPageLeftMargin(form, page_no, value);
+	    } else {
+		prefs.setPageTopMargin(form, page_no, value);
+	    }
+	}
+
+	@Override
+	public void beforeTextChanged(TextView textview, CharSequence sequence,
+		int start, int count, int after) {
+	}
+
+	@Override
+	public void onTextChanged(TextView textview, CharSequence sequence,
+		int start, int before, int count) {
+	}
+    }
+}
+
 
 public class Print
 {
     private Form form;
+    private PrintListener listener;
 
     public Print(Form form) {
 	this.form = form;
+    }
+
+    public Form getForm() {
+	return form;
+    }
+
+    public void setPrintListener(PrintListener listener) {
+	this.listener = listener;
     }
 
     public boolean print(FragmentManager manager) {
@@ -212,8 +476,30 @@ public class Print
 	    LogActivity.writeLog("没有需要打印的凭条");
 	    return false;
 	}
-	PrintDialog dialog = new PrintDialog(form);
-	dialog.show(manager, "PrintDialog");
+
+	new PrintDialog(this).show(manager, "PrintDialog");
+
+	if (listener != null) {
+	    listener.onPrintStart(this);
+	}
 	return true;
+    }
+
+    public void printStart() {
+	if (listener != null) {
+	    listener.onPrintStart(this);
+	}
+    }
+
+    public void printStop() {
+	if (listener != null) {
+	    listener.onPrintStop(this);
+	}
+    }
+
+    public interface PrintListener
+    {
+	public void onPrintStart(Print print);
+	public void onPrintStop(Print print);
     }
 }

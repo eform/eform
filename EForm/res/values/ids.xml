@@ -8,5 +8,7 @@
     -->
     <item name="FormWarningViewTagKey" type="id"/>
     <item name="FormCardnoViewTagKey" type="id"/>
-    
+    <item name="PrintPageSetupPageNoKey" type="id"/>
+    <item name="PrintPageSetupIsLeftKey" type="id"/>
+
 </resources>

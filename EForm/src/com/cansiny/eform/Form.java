@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Xml;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -40,7 +39,7 @@ import android.widget.TextView;
 
 
 public abstract class Form extends DefaultHandler
-    implements OnClickListener, OnFocusChangeListener, OnTouchListener
+    implements OnClickListener, OnFocusChangeListener, OnTouchListener, Utils.GenericTextWatcher.TextWatcherListener
 {
     static final private String TAG_KEY_WARNING = "Warning";
     static final private String TAG_CLEAR_BUTTON = "edittext_clear_button";
@@ -132,6 +131,10 @@ public abstract class Form extends DefaultHandler
 
     public int getPageCount() {
 	return pages.size();
+    }
+
+    public FormPage getPage(int page_no) {
+	return pages.get(page_no);
     }
 
     public int getActivePage() {
@@ -354,9 +357,9 @@ public abstract class Form extends DefaultHandler
 	}
 
 	if (object instanceof TextView) {
-	    TextView text_view = (TextView) object;
-	    GenericTextWatcher wathcer = new GenericTextWatcher(text_view);
-	    text_view.addTextChangedListener(wathcer);
+	    TextView textview = (TextView) object;
+	    Utils.GenericTextWatcher wathcer = new Utils.GenericTextWatcher(textview, this);
+	    textview.addTextChangedListener(wathcer);
 	}
     }
 
@@ -445,14 +448,16 @@ public abstract class Form extends DefaultHandler
 	}
     }
 
-    protected void beforeTextChanged(TextView textview, CharSequence sequence,
+    @Override
+    public void beforeTextChanged(TextView textview, CharSequence sequence,
 				     int start, int count, int after) {
 	if (listener != null) {
 	    listener.onFormTextChanged(this, (EditText) textview);
 	}
     }
-	
-    protected void onTextChanged(TextView textview, CharSequence sequence,
+
+    @Override
+    public void onTextChanged(TextView textview, CharSequence sequence,
 				 int start, int before, int count) {
 	for (Integer viewid : cardno_edittexts) {
 	    if (textview.getId() == viewid.intValue()) {
@@ -464,7 +469,8 @@ public abstract class Form extends DefaultHandler
 	}
     }
 
-    protected void afterTextChanged(TextView textview, Editable editable) {
+    @Override
+    public void afterTextChanged(TextView textview, Editable editable) {
 	for (Integer viewid : verify_edittexts) {
 	    if (textview.getId() == viewid.intValue()) {
 		if (editable.length() > 0) {
@@ -474,30 +480,6 @@ public abstract class Form extends DefaultHandler
 	}
     }
 
-
-    private class GenericTextWatcher implements TextWatcher
-    {
-	private TextView textview;
-	private GenericTextWatcher(TextView view) {
-	    textview = view;
-	}
-	@Override
-	public void afterTextChanged(Editable editable) {
-	    Form.this.afterTextChanged(textview, editable);
-	}
-	@Override
-	public void beforeTextChanged(CharSequence sequence,
-				      int start, int count, int after) {
-	    Form.this.beforeTextChanged(textview, sequence, start, count, after);
-	}
-	@Override
-	public void onTextChanged(CharSequence sequence,
-				  int start, int before, int count) {
-	    Form.this.onTextChanged(textview, sequence, start, before, count);
-	}
-    }
-
-	
     protected ImageView createWarningImage(CharSequence description) {
 	ImageView image = new ImageView(activity.getApplicationContext());
 	image.setTag(R.id.FormWarningViewTagKey, TAG_KEY_WARNING);
@@ -574,29 +556,39 @@ public abstract class Form extends DefaultHandler
     }
 
 
-    public int verify() {
+    public int verify(boolean verify_all, boolean markit) {
 	clearWarningImage();
 
 	int retval = 0;
 	View focus_view = null;
 
 	for (Integer viewid : verify_edittexts) {
-	    View view = findView(viewid.intValue());
-	    if (view == null)
-		continue;
-			
-	    if ((Object) view instanceof EditText) {
+	    View view = null;
+
+	    if (verify_all) {
+		for (FormPage page : pages) {
+		    view = page.findViewById(viewid);
+		    if (view != null)
+			break;
+		}
+	    } else {
+		view = findView(viewid.intValue());
+	    }
+
+	    if (view != null && (Object) view instanceof EditText) {
 		if (((EditText) view).getText().length() == 0) {
-		    insertWarningImage(view, "此项不能为空");
 		    retval++;
 
+		    if (markit) {
+			insertWarningImage(view, "此项不能为空");
+		    }
 		    if (focus_view == null) {
 			focus_view = view;
 		    }
 		}
 	    }
 	}
-		
+
 	if (focus_view != null) {
 	    focus_view.requestFocus();
 	}
@@ -645,6 +637,10 @@ public abstract class Form extends DefaultHandler
 	    super(context);
 	    String title = activity.getResources().getString(title_id);
 	    initialize(title, layout);
+	}
+
+	public String getTitle() {
+	    return title;
 	}
 
 	public void loadViewValues() {

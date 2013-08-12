@@ -108,7 +108,6 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 	AlertDialog dialog = (AlertDialog) getDialog();
 
 	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -119,7 +118,6 @@ class AdministratorLoginDialog extends Utils.DialogFragment
 	});
 
 	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
@@ -274,11 +272,7 @@ class AdministratorPasswordDialog extends Utils.DialogFragment
 
 	AlertDialog dialog = (AlertDialog) getDialog();
 
-	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-
-	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	Button button = dialog.getButton(Dialog.BUTTON_POSITIVE);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
