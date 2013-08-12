@@ -18,6 +18,7 @@ import com.cansiny.eform.Member.MemberProfile;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -133,7 +134,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		   + "comment   TEXT NOT NULL,"
 		   + "formclass TEXT NOT NULL,"
 		   + "formlabel TEXT NOT NULL,"
-		   + "formimage INTEGER NOT NULL,"
+		   + "formimage TEXT NOT NULL,"
 		   + "contents  BLOB NOT NULL,"
 		   + "ctime     INTEGER NOT NULL,"
 		   + "mtime     INTEGER NOT NULL,"
@@ -639,7 +640,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    values.put(COLUMN_USERID, userid);
 	    values.put(COLUMN_FORMCLASS, formclass);
 	    values.put(COLUMN_FORMLABEL, formlabel);
-	    values.put(COLUMN_FORMIMAGE, formimage);
+	    values.put(COLUMN_FORMIMAGE, context.getResources().getResourceName(formimage));
 	    try {
 		byte[] utf8_contents = contents.getBytes("utf-8");
 		values.put(COLUMN_CONTENTS, AESEncrypt(MD5Hash(member_password), utf8_contents));
@@ -737,9 +738,11 @@ public class EFormSQLite extends SQLiteOpenHelper
 			LogActivity.writeLog("解密会员数据失败");
 			continue;
 		    }
+		    int image = context.getResources().getIdentifier(cursor.getString(3), null, null);
+
 		    vouchers.add(new com.cansiny.eform.Voucher(
 			    cursor.getLong(0), userid, cursor.getString(1),
-			    cursor.getString(2), cursor.getInt(3),
+			    cursor.getString(2), image,
 			    new String(utf8_contents, "utf-8"), cursor.getString(5),
 			    cursor.getLong(6), cursor.getLong(7), cursor.getLong(8)));
 		} catch (UnsupportedEncodingException e) {
