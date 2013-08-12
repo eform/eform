@@ -614,8 +614,9 @@ public class EFormSQLite extends SQLiteOpenHelper
 	static final public String COLUMN_MTIME = "mtime";
 	static final public String COLUMN_ATIME = "atime";
 
-	static public long insert(Context context, long userid, String formclass,
-		String formlabel, int formimage, String contents, String comment) {
+	static public long insert(Context context, String member_password,
+		long userid, String formclass, String formlabel, int formimage,
+		String contents, String comment) {
 	    if (comment == null || formclass == null ||
 		    formlabel == null || contents == null) {
 		LogActivity.writeLog("插入凭证失败，因为参数错误.");
@@ -623,6 +624,10 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 	    if (!Member.hasUserWithRowid(context, userid)) {
 		LogActivity.writeLog("插入凭证失败，因为会员 %d 不存在", userid);
+		return -1;
+	    }
+	    if (member_password == null) {
+		LogActivity.writeLog("插入凭证失败，未提供会员密码");
 		return -1;
 	    }
 
@@ -636,7 +641,8 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    values.put(COLUMN_FORMLABEL, formlabel);
 	    values.put(COLUMN_FORMIMAGE, formimage);
 	    try {
-		values.put(COLUMN_CONTENTS, contents.getBytes("utf-8"));
+		byte[] utf8_contents = contents.getBytes("utf-8");
+		values.put(COLUMN_CONTENTS, AESEncrypt(MD5Hash(member_password), utf8_contents));
 	    } catch (UnsupportedEncodingException e) {
 		LogActivity.writeLog(e);
 		sqlite.close();
@@ -654,17 +660,23 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    return rowid;
 	}
 
-	static public boolean update(Context context, long rowid, long userid,
-		String contents, String comment) {
+	static public boolean update(Context context, String member_password,
+		long rowid, long userid, String contents, String comment) {
 	    if (!Member.hasUserWithRowid(context, userid)) {
 		LogActivity.writeLog("更新凭证失败，因为会员 %d 不存在", userid);
 		return false;
 	    }
+	    if (contents != null && member_password == null) {
+		LogActivity.writeLog("更新凭证失败，没有提供会员密码");
+		return false;
+	    }
+
 	    ContentValues values = new ContentValues();
 
 	    if (contents != null && contents.length() > 0) {
 		try {
-		    values.put(COLUMN_CONTENTS, contents.getBytes("utf-8"));
+		    byte[] utf8_contents = contents.getBytes("utf-8");
+		    values.put(COLUMN_CONTENTS, AESEncrypt(MD5Hash(member_password), utf8_contents));
 		} catch (UnsupportedEncodingException e) {
 		    LogActivity.writeLog(e);
 		    return false;
@@ -691,9 +703,13 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    return (rows == 1) ? true : false;
 	}
 
-	static public ArrayList<com.cansiny.eform.Voucher> listForUser(Context context, long userid) {
+	static public ArrayList<com.cansiny.eform.Voucher> listForUser(Context context, String member_password, long userid) {
 	    if (userid < 0) {
-		LogActivity.writeLog("不能得到用户 %s 的凭条，用户ID必须大于0");
+		LogActivity.writeLog("不能得到用户的凭条，用户ID必须大于0");
+		return null;
+	    }
+	    if (member_password == null) {
+		LogActivity.writeLog("不能得到用户的凭条，未提供会员密码");
 		return null;
 	    }
 
@@ -716,10 +732,15 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    ArrayList<com.cansiny.eform.Voucher> vouchers = new ArrayList<com.cansiny.eform.Voucher>();
 	    while(cursor.moveToNext()) {
 		try {
+		    byte[] utf8_contents = AESDecrypt(MD5Hash(member_password), cursor.getBlob(4));
+		    if (utf8_contents == null) {
+			LogActivity.writeLog("解密会员数据失败");
+			continue;
+		    }
 		    vouchers.add(new com.cansiny.eform.Voucher(
 			    cursor.getLong(0), userid, cursor.getString(1),
 			    cursor.getString(2), cursor.getInt(3),
-			    new String(cursor.getBlob(4), "utf-8"), cursor.getString(5),
+			    new String(utf8_contents, "utf-8"), cursor.getString(5),
 			    cursor.getLong(6), cursor.getLong(7), cursor.getLong(8)));
 		} catch (UnsupportedEncodingException e) {
 		    LogActivity.writeLog(e);

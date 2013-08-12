@@ -306,7 +306,7 @@ public class Utils
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 	    SerialDevice device = null;
-	    if (position <= devices.size())
+	    if (position < devices.size())
 		device = devices.get(position);
 
 	    LinearLayout linear = new LinearLayout(parent.getContext());
@@ -362,4 +362,57 @@ public class Utils
 	}
 
     }
+
+
+    static public class IntegerAdapter extends BaseAdapter
+    {
+	private ArrayList<Integer> numbers;
+
+	public IntegerAdapter(int min, int max) {
+	    numbers = new ArrayList<Integer>();
+	    for (int i = min; i <= max; i++) {
+		numbers.add(i);
+	    }
+	}
+
+	@Override
+	public int getCount() {
+	    return numbers.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+	    if (position < numbers.size() && position >= 0) {
+		return numbers.get(position);
+	    } else {
+		return null;
+	    }
+	}
+
+	@Override
+	public long getItemId(int position) {
+	    return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+	    int value = 0;
+	    if (position < numbers.size())
+		value = numbers.get(position);
+
+	    LinearLayout linear = new LinearLayout(parent.getContext());
+	    linear.setOrientation(LinearLayout.HORIZONTAL);
+	    linear.setPadding(10, 5, 10, 5);
+	    linear.setGravity(Gravity.RIGHT);
+
+	    TextView textview = new TextView(parent.getContext());
+	    textview.setText(String.valueOf(value));
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    textview.setTextColor(parent.getResources().getColor(R.color.blue));
+	    linear.addView(textview);
+
+	    return linear;
+	}
+    }
+
 }

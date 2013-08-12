@@ -447,7 +447,8 @@ public class Voucher implements Parcelable
 	}
 	userid = member.getProfile().rowid;
 
-	long id = EFormSQLite.Voucher.insert(context, userid,
+	long id = EFormSQLite.Voucher.insert(context,
+		member.getProfile().password, userid,
 		formclass, formlabel, formimage, contents, comment);
 	if (id >= 0) {
 	    rowid = id;
@@ -483,8 +484,8 @@ public class Voucher implements Parcelable
 	if (comment_changed) {
 	    new_comment = comment;
 	}
-	if (EFormSQLite.Voucher.update(context, rowid, userid,
-		new_contents, new_comment)) {
+	if (EFormSQLite.Voucher.update(context, profile.password,
+		rowid, userid, new_contents, new_comment)) {
 	    contents_changed = false;
 	    comment_changed = false;
 

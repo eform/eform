@@ -754,9 +754,11 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	public void loadFromDB() {
 	    Member member = Member.getMember();
-	    if (member.isLogin() && member.getProfile() != null) {
+	    Member.MemberProfile profile = member.getProfile();
+
+	    if (member.isLogin() && profile != null) {
 		vouchers = EFormSQLite.Voucher.listForUser(getActivity(),
-			member.getProfile().rowid);
+			profile.password, profile.rowid);
 	    }
 	}
 

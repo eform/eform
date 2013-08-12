@@ -28,12 +28,12 @@ public class MagcardReader extends DialogFragment
     static final private int LEAVE_START = 4;
     static final private int LEAVE_END   = 3;
 
-    static CharSequence formatCardno(CharSequence cardno) {
+    static String formatCardno(CharSequence cardno) {
 	StringBuilder builder = new StringBuilder();
 	int length = cardno.length();
 
 	for (int i = 0; i < length; i++) {
-	    if (i < LEAVE_START || i > length - LEAVE_END)
+	    if (i < LEAVE_START || i >= length - LEAVE_END)
 		builder.append(cardno.charAt(i));
 	    else
 		builder.append('*');
@@ -41,7 +41,7 @@ public class MagcardReader extends DialogFragment
 	    if ((i + 1) % 4 == 0)
 		builder.append(' ');
 	}
-	return builder;
+	return builder.toString();
     }
 
 

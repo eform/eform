@@ -188,7 +188,7 @@ public abstract class Form extends DefaultHandler
 	    if (view != null) {
 		String key = viewid.toString();
 		if (page.bundle.containsKey(key)) {
-		    CharSequence cardno = page.getCharSequence(key);
+		    String cardno = page.getString(key);
 		    view.setTag(R.id.FormCardnoViewTagKey, cardno);
 		    if (!view.hasFocus()) {
 			((TextView) view).setText(MagcardReader.formatCardno(cardno));
@@ -739,6 +739,17 @@ public abstract class Form extends DefaultHandler
 
 	public String toXmlString() {
 	    storeViewValues();
+
+	    for (Integer viewid : cardno_edittexts) {
+		View view = findViewById(viewid.intValue());
+		if (view != null) {
+		    Object cardno = view.getTag(R.id.FormCardnoViewTagKey);
+		    if (cardno != null && ((CharSequence) cardno).length() > 0) {
+			String key = viewid.toString();
+			putString(key, cardno.toString());
+		    }
+		}
+	    }
 
 	    StringBuilder builder = new StringBuilder();
 	    for (String key : bundle.keySet()) {
