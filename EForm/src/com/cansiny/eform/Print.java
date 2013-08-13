@@ -10,6 +10,7 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -168,8 +169,8 @@ class PrintDialog extends Utils.DialogFragment
 	    @Override
 	    public void onClick(View view) {
 		in_progress = true;
-		long page_from = page_from_spinner.getSelectedItemId();
-		long page_to = page_to_spinner.getSelectedItemId();
+		int page_from = (int) page_from_spinner.getSelectedItemId();
+		int page_to = (int) page_to_spinner.getSelectedItemId();
 		PrintProgressDialog dialog = new PrintProgressDialog(print, page_from, page_to);
 		dialog.show(getFragmentManager(), "PrintProgressDialog");
 		dismiss();
@@ -418,12 +419,13 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 class PrintProgressDialog extends Utils.DialogFragment
 {
     private Print print;
-    private long page_from;
-    private long page_to;
+    private int page_from;
+    private int page_to;
     private TextView contents;
     private TextView status;
+    private PrintTask print_task;
 
-    public PrintProgressDialog(Print print, long page_from, long page_to) {
+    public PrintProgressDialog(Print print, int page_from, int page_to) {
 	this.print = print;
 	this.page_from = (page_from < 0) ? 0 : page_from;
 	this.page_to = (page_to > print.getForm().getPageCount())
@@ -436,7 +438,7 @@ class PrintProgressDialog extends Utils.DialogFragment
 
 	contents = new TextView(getActivity());
 	contents.setText("正在打印");
-	contents.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	contents.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 	contents.setGravity(Gravity.CENTER_HORIZONTAL);
 	contents.setPadding(0, 20, 0, 20);
 	linear.addView(contents, new LinearLayout.LayoutParams(
@@ -475,15 +477,74 @@ class PrintProgressDialog extends Utils.DialogFragment
 
 	setCancelable(false);
 
-	for (int i = (int) page_from; i <= page_to; i++) {
-	    contents.setText("正在打印第 " + i + " 页："
-		    + print.getForm().getPage(i - 1).getTitle() + " ...");
-	    try {
-		Thread.sleep(1000);
-	    } catch (InterruptedException e) {
-		e.printStackTrace();
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		if (print_task != null) {
+		    print_task.pause();
+		}
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setTitle("停止打印");
+		builder.setMessage("\n确认要停止打印吗？\n");
+		builder.setNegativeButton("继续打印", null);
+		builder.setPositiveButton("停止打印", new DialogInterface.OnClickListener() {
+		    @Override
+		    public void onClick(DialogInterface dialog, int which) {
+			if (print_task != null) {
+			    print_task.cancel(true);
+			}
+		    }
+		});
+		AlertDialog confirm = builder.create();
+
+		confirm.setCancelable(true);
+
+		confirm.setOnShowListener(new DialogInterface.OnShowListener() {
+		    @Override
+		    public void onShow(DialogInterface dialog) {
+			Button button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_NEGATIVE);
+			button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+			button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_POSITIVE);
+			button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+		    }
+		});
+
+		confirm.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		    @Override
+		    public void onDismiss(DialogInterface dialog) {
+			if (print_task != null && !print_task.isCancelled()) {
+			    print_task.resume();
+			}
+		    }
+		});
+		confirm.show();
 	    }
-	}
+	});
+
+	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		if (print_task != null) {
+		    if (print_task.isPaused()) {
+			showToast("继续打印，点击“暂停”按钮暂停打印");
+			print_task.resume();
+			((Button) view).setText("暂 停");
+		    } else {
+			showToast("暂停打印，点击“继续”按钮继续打印");
+			print_task.pause();
+			((Button) view).setText("继 续");
+		    }
+		}
+	    }
+	});
+
+	print_task = new PrintTask();
+	print_task.execute(page_from, page_to);
     }
 
     @Override
@@ -491,6 +552,106 @@ class PrintProgressDialog extends Utils.DialogFragment
 	super.onDismiss(dialog);
 
 	print.printStop();
+    }
+
+    public void setContents(String string) {
+	contents.setText(string);
+    }
+
+    public void setStatus(String string, boolean important) {
+	status.setText(string);
+	if (important) {
+	    status.setTextColor(getResources().getColor(R.color.red));
+	} else {
+	    status.setTextColor(getResources().getColor(R.color.darkgray));
+	}
+    }
+
+    private class PrintTask extends AsyncTask<Integer, Integer, Long>
+    {
+	private Printer printer;
+	private boolean paused = false;
+
+	@Override
+	protected Long doInBackground(Integer... args) {
+	    for (int i = args[0]; i <= args[1]; i++) {
+		this.publishProgress(i - 1);
+		try {
+		    Thread.sleep(3000);
+		} catch (InterruptedException e) {
+		    e.printStackTrace();
+		    return 0L;
+		}
+
+		if (isCancelled()) {
+		    return 0L;
+		}
+
+		while(paused == true) {
+		    try {
+			if (isCancelled()) {
+			    return 0L;
+			}
+			Thread.sleep(500);
+		    } catch (InterruptedException e) {
+			e.printStackTrace();
+			return 0L;
+		    }
+		}
+	    }
+	    return null;
+	}
+
+	protected void onProgressUpdate(Integer... args) {
+	    int page_no = args[0];
+	    String title = print.getForm().getPage(page_no).getTitle();
+	    setContents("正在打印第 " + (page_no + 1) + " 页：" + title + " ...");
+	}
+
+	protected void onPreExecute () {
+	    paused = false;
+
+	    printer = print.getPrinter();
+	    if (printer == null) {
+		LogActivity.writeLog("不能得到打印机，请检查配置");
+		cancel(true);
+		return;
+	    }
+	    if (!printer.open()) {
+		LogActivity.writeLog("打开打印机失败");
+		cancel(true);
+		return;
+	    }
+	}
+
+	protected void onPostExecute(Long result) {
+	    if (printer != null) {
+		printer.close();
+	    }
+	    Utils.showToast("打印完成！");
+	    dismiss();
+	}
+
+	protected void onCancelled (Long result) {
+	    if (printer != null) {
+		printer.close();
+	    }
+	    Utils.showToast("打印任务被取消！");
+	    dismiss();
+	}
+
+	public void pause() {
+	    paused = true;
+	    setStatus("暂停打印，点击“继续”按钮继续打印...", true);
+	}
+
+	public void resume() {
+	    paused = false;
+	}
+
+	public boolean isPaused() {
+	    return paused;
+	}
     }
 }
 
@@ -502,6 +663,7 @@ public class Print
 
     public Print(Form form) {
 	this.form = form;
+
     }
 
     public Form getForm() {
@@ -512,8 +674,10 @@ public class Print
 	this.listener = listener;
     }
 
-    public void setPrinter(Printer printer) {
-	this.printer = printer;
+    public Printer getPrinter() {
+	if (printer == null)
+	    printer = Printer.getPrinter();
+	return printer;
     }
 
     public boolean print(FragmentManager manager) {
@@ -521,6 +685,8 @@ public class Print
 	    LogActivity.writeLog("没有需要打印的凭条");
 	    return false;
 	}
+	printer = Printer.getPrinter();
+
 	new PrintDialog(this).show(manager, "PrintDialog");
 
 	if (listener != null) {
@@ -546,45 +712,4 @@ public class Print
 	public void onPrintStart(Print print);
 	public void onPrintStop(Print print);
     }
-}
-
-
-abstract class Printer
-{
-    static public final int PRINT_WIDTH_NORMAL = 0;
-    static public final int PRINT_WIDTH_HALF = 1;
-
-    abstract public boolean open();
-    abstract public void close();
-    abstract public boolean move(int x, int y);
-    abstract public boolean write(byte[] bytes);
-
-    public class PrintParam
-    {
-	public int spacing;
-	public int width;
-    }
-}
-
-class PrinterPLQ20K extends Printer
-{
-    @Override
-    public boolean open() {
-	return false;
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public boolean move(int x, int y) {
-	return false;
-    }
-
-    @Override
-    public boolean write(byte[] bytes) {
-	return false;
-    }
-
 }

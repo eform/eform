@@ -787,4 +787,9 @@ public class Preferences
 	String key = form.getClass().getName() + "." + page_no + ".top";
 	return prefs.getInt(key, 0);
     }
+
+    public String getPrinterClass() {
+	return prefs.getString("PrinterClass", "com.cansiny.eform.PrinterLog");
+    }
+
 }

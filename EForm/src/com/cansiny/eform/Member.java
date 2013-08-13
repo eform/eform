@@ -747,7 +747,18 @@ class MemberVouchersDialog extends Utils.DialogFragment
 		}
 	    }
 	});
-	builder.create().show();
+	Dialog confirm = builder.create();
+
+	confirm.setOnShowListener(new DialogInterface.OnShowListener() {
+	    @Override
+	    public void onShow(DialogInterface dialog) {
+		Button button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_NEGATIVE);
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+		button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_POSITIVE);
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    }
+	});
+	confirm.show();
 
 	return true;
     }
