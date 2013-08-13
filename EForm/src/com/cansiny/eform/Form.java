@@ -614,9 +614,9 @@ public abstract class Form extends DefaultHandler
     {
 	final private static String KEY_FOCUS_VIEW = "page_focus_view";
 
-	public String title;
-	public int layout;
-	public Bundle bundle;
+	private String title;
+	private int layout;
+	private Bundle bundle;
 
 	private void initialize(String title, int layout) {
 	    this.title = title;

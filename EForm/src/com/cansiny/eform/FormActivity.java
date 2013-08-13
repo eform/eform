@@ -103,7 +103,7 @@ public class FormActivity extends Activity implements
 			 ViewGroup.LayoutParams.WRAP_CONTENT,
 			 ViewGroup.LayoutParams.MATCH_PARENT);
 		params.weight = 1;
-		page_title_layout.addView(buildPageTitleButton(n, page.title), params);
+		page_title_layout.addView(buildPageTitleButton(n, page.getTitle()), params);
 		n++;
 	    }
 

@@ -412,7 +412,11 @@ public class Utils
 
 	@Override
 	public long getItemId(int position) {
-	    return position;
+	    if (position < numbers.size() && position >= 0) {
+		return numbers.get(position).longValue();
+	    } else {
+		return position;
+	    }
 	}
 
 	@Override

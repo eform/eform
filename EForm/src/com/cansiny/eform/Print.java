@@ -10,8 +10,6 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -24,12 +22,9 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 
 
@@ -38,9 +33,11 @@ class PrintDialog extends Utils.DialogFragment
     private Print print;
     private Spinner page_from_spinner;
     private Spinner page_to_spinner;
+    private boolean in_progress;
 
     public PrintDialog(Print print) {
 	this.print = print;
+	in_progress = false;
     }
 
     private View buildPagesLayout() {
@@ -170,8 +167,12 @@ class PrintDialog extends Utils.DialogFragment
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		PrintProgressDialog dialog = new PrintProgressDialog(print);
+		in_progress = true;
+		long page_from = page_from_spinner.getSelectedItemId();
+		long page_to = page_to_spinner.getSelectedItemId();
+		PrintProgressDialog dialog = new PrintProgressDialog(print, page_from, page_to);
 		dialog.show(getFragmentManager(), "PrintProgressDialog");
+		dismiss();
 	    }
 	});
     }
@@ -179,7 +180,10 @@ class PrintDialog extends Utils.DialogFragment
     @Override
     public void onDismiss(DialogInterface dialog) {
 	super.onDismiss(dialog);
-	print.printStop();
+
+	if (!in_progress) {
+	    print.printStop();
+	}
     }
 }
 
@@ -414,45 +418,39 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 class PrintProgressDialog extends Utils.DialogFragment
 {
     private Print print;
-    private ImageView image;
-    private TextView textview;
+    private long page_from;
+    private long page_to;
+    private TextView contents;
+    private TextView status;
 
-    public PrintProgressDialog(Print print) {
+    public PrintProgressDialog(Print print, long page_from, long page_to) {
 	this.print = print;
+	this.page_from = (page_from < 0) ? 0 : page_from;
+	this.page_to = (page_to > print.getForm().getPageCount())
+		? print.getForm().getPageCount() : page_to;
     }
 
     private View buildLayout() {
 	LinearLayout linear = new LinearLayout(getActivity());
-//	linear.setMinimumWidth((int) Utils.convertDpToPixel(600));
 	linear.setOrientation(LinearLayout.VERTICAL);
 
+	contents = new TextView(getActivity());
+	contents.setText("正在打印");
+	contents.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	contents.setGravity(Gravity.CENTER_HORIZONTAL);
+	contents.setPadding(0, 20, 0, 20);
+	linear.addView(contents, new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT));
 
-	image = new ImageView(getActivity());
-	image.setBackgroundResource(R.color.yellow);
-	Bitmap bitmap = print.getForm().getActiveFormPage().getBitmap();
-	if (bitmap.getHeight() > bitmap.getWidth()) {
-	    bitmap = Bitmap.createBitmap(bitmap, 0, 0,
-		    bitmap.getWidth(), bitmap.getWidth());
-	}
-	if (bitmap.getWidth() > 600)
-	    bitmap = Bitmap.createScaledBitmap(bitmap, 600, 400, true);
-	image.setImageBitmap(bitmap);
-	image.setMaxHeight(400);
-	image.setScaleType(ImageView.ScaleType.FIT_XY);
-//	image.setImageMatrix(new Matrix());
-	LogActivity.writeLog("宽度： %d，高度: %d", bitmap.getWidth(), bitmap.getHeight());
-	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-//		ViewGroup.LayoutParams.MATCH_PARENT, 
-//		600,
-//		ViewGroup.LayoutParams.WRAP_CONTENT);
-		bitmap.getWidth(), bitmap.getHeight());
-//		bitmap.getWidth() > bitmap.getHeight() ? bitmap.getHeight() : bitmap.getWidth());
-	linear.addView(image, params);
-
-	textview = new TextView(getActivity());
-	textview.setText("请插入第一页");
-	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-	linear.addView(textview);
+	status = new TextView(getActivity());
+	status.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	status.setTextColor(getResources().getColor(R.color.red));
+	status.setGravity(Gravity.CENTER_HORIZONTAL);
+	status.setPadding(0, 0, 0, 10);
+	linear.addView(status, new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT));
 
 	return linear;
     }
@@ -463,9 +461,10 @@ class PrintProgressDialog extends Utils.DialogFragment
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-	builder.setTitle("正在打印");
+	builder.setTitle("打印进度，共 " + (page_to - page_from + 1) + " 页");
 	builder.setView(buildLayout());
-	builder.setPositiveButton("停 止", null);
+	builder.setNegativeButton("停 止", null);
+	builder.setPositiveButton("暂 停", null);
 
 	return builder.create();
     }
@@ -475,6 +474,23 @@ class PrintProgressDialog extends Utils.DialogFragment
 	super.onStart();
 
 	setCancelable(false);
+
+	for (int i = (int) page_from; i <= page_to; i++) {
+	    contents.setText("正在打印第 " + i + " 页："
+		    + print.getForm().getPage(i - 1).getTitle() + " ...");
+	    try {
+		Thread.sleep(1000);
+	    } catch (InterruptedException e) {
+		e.printStackTrace();
+	    }
+	}
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+	super.onDismiss(dialog);
+
+	print.printStop();
     }
 }
 
