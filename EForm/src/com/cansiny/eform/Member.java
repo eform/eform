@@ -33,7 +33,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -624,11 +623,30 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	builder.setCustomTitle(customTitleView());
 
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.VERTICAL);
+
 	listview = new ListView(getActivity());
 	listview.setOnItemClickListener(this);
 	listview.setOnItemLongClickListener(this);
+	linear.addView(listview);
 
-	builder.setView(listview);
+	View view = new View(getActivity());
+	view.setBackgroundResource(R.color.silver);
+	linear.addView(view, new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT, 1));
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("点击打开选择的凭条；" +
+		"长按可以删除选择的凭条；" +
+		"点击描述文字或后面的图标可以编辑描述信息；");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	textview.setPadding(10, 10, 10, 5);
+	textview.setLineSpacing(1, 1.2f);
+	textview.setTextColor(getActivity().getResources().getColor(R.color.black));
+	linear.addView(textview);
+
+	builder.setView(linear);
 
 	return builder.create();
     }
@@ -641,12 +659,12 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	adapter.loadFromDB();
 	listview.setAdapter(adapter);
 
-	total_textview.setText("共 " + adapter.getCount() + " 张凭证");
+	total_textview.setText("共 " + adapter.getVoucherCount() + " 张凭证");
 
 	if(adapter.getCount() > 8) {
 	    View item = adapter.getView(0, null, listview);
 	    item.measure(0, 0);
-	    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    (int) (8.5 * item.getMeasuredHeight()));
 	    listview.setLayoutParams(params);
@@ -662,8 +680,11 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    return;
 
 	View item = adapter.getView(0, null, listview);
-	item.measure(0, 0);
-	int distance = (int) (2.2 * item.getMeasuredHeight());
+	int distance = 0;
+	if (item != null) {
+	    item.measure(0, 0);
+	    distance = (int) (2.2 * item.getMeasuredHeight());
+	}
 
 	int tagval = ((Integer) view.getTag()).intValue();
 	switch(tagval) {
@@ -681,6 +702,9 @@ class MemberVouchersDialog extends Utils.DialogFragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long rowid) {
 	Voucher voucher = (Voucher) parent.getItemAtPosition(position);
+	if (voucher == null)
+	    return;
+
 	voucher.updateAccessTime(getActivity());
 
 	dismiss();
@@ -695,6 +719,8 @@ class MemberVouchersDialog extends Utils.DialogFragment
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long rowid) {
 	final Voucher voucher = (Voucher) parent.getItemAtPosition(position);
+	if (voucher == null)
+	    return false;
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 	builder.setTitle("删除凭条");
@@ -710,13 +736,13 @@ class MemberVouchersDialog extends Utils.DialogFragment
 		    if(adapter.getCount() <= 8) {
 			View item = adapter.getView(0, null, listview);
 			if (item != null) {
-			    FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+			    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 				    ViewGroup.LayoutParams.MATCH_PARENT,
 				    ViewGroup.LayoutParams.WRAP_CONTENT);
 			    listview.setLayoutParams(params);
 			}
 		    }
-		    total_textview.setText("共 " + adapter.getCount() + " 张凭证");
+		    total_textview.setText("共 " + adapter.getVoucherCount() + " 张凭证");
 		    adapter.notifyDataSetChanged();
 		}
 	    }
@@ -746,6 +772,13 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	@Override
 	public int getCount() {
+	    if (vouchers == null || vouchers.size() == 0)
+		return 1;
+	    else
+		return vouchers.size();
+	}
+
+	public int getVoucherCount() {
 	    return (vouchers != null) ? vouchers.size() : 0;
 	}
 
@@ -765,16 +798,23 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    if (vouchers == null || position < 0 || position >= vouchers.size())
-		return null;
+	    if (vouchers == null || position < 0 || position >= vouchers.size()) {
+		TextView textview = new TextView(parent.getContext());
+		textview.setText("没有保存的凭条信息！");
+		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+		textview.setPadding(10, 10, 10, 10);
+		textview.setTextColor(parent.getResources().getColor(R.color.red));
+		return textview;
+	    }
 
 	    Voucher voucher = vouchers.get(position);
+	    Context context = parent.getContext();
 
-	    LinearLayout linear = new LinearLayout(getActivity());
+	    LinearLayout linear = new LinearLayout(context);
 	    linear.setPadding(10, 6, 8, 2);
 	    linear.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
 
-	    ImageView image = new ImageView(getActivity());
+	    ImageView image = new ImageView(context);
 	    image.setImageResource(voucher.getFormImage());
 	    image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -784,17 +824,17 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    params.gravity = Gravity.CENTER_VERTICAL;
 	    linear.addView(image, params);
 
-	    TableLayout table = new TableLayout(getActivity());
+	    TableLayout table = new TableLayout(context);
 	    table.setColumnStretchable(1, true);
 	    params = new LinearLayout.LayoutParams(
 		    0, ViewGroup.LayoutParams.WRAP_CONTENT);
 	    params.weight = 1;
 	    linear.addView(table, params);
 
-	    TableRow row = new TableRow(getActivity());
+	    TableRow row = new TableRow(context);
 	    table.addView(row);
 
-	    TextView textview = new TextView(getActivity());
+	    TextView textview = new TextView(context);
 	    textview.setText(voucher.getFormLabel().replace("\n", ""));
 	    textview.setSingleLine();
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
@@ -802,10 +842,10 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    row_params.span = 2;
 	    row.addView(textview, row_params);
 
-	    row = new TableRow(getActivity());
+	    row = new TableRow(context);
 	    table.addView(row);
 
-	    textview = new TextView(getActivity());
+	    textview = new TextView(context);
 	    textview.setTag(position);
 	    textview.setText(voucher.getComment());
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
@@ -830,7 +870,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    });
 	    row.addView(textview);
 
-	    textview = new TextView(getActivity());
+	    textview = new TextView(context);
 	    SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
 	    textview.setText(format.format(voucher.getAtime()));
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);

@@ -10,6 +10,8 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -22,9 +24,12 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TableLayout.LayoutParams;
 import android.widget.TextView;
 
 
@@ -152,34 +157,6 @@ class PrintDialog extends Utils.DialogFragment
 	    }
 	});
 
-//	View view = dialog.findViewById(R.id.coord_adjust_textview);
-//	view.setOnClickListener(new OnClickListener() {
-//	    @Override
-//	    public void onClick(View view) {
-//		View edittext = dialog.findViewById(R.id.coord_adjust_x_edittext);
-//		edittext.setEnabled(!edittext.isEnabled());
-//		edittext.requestFocus();
-//		edittext = dialog.findViewById(R.id.coord_adjust_y_edittext);
-//		edittext.setEnabled(!edittext.isEnabled());
-//
-//		if (edittext.isEnabled()) {
-//		    ((TextView) view).setTextColor(getResources().getColor(R.color.darkred));
-//		} else {
-//		    ((TextView) view).setTextColor(getResources().getColor(R.color.darkgray));
-//		}
-//	    }
-//	});
-//
-//	Button button = (Button) dialog.findViewById(R.id.tips_button);
-//	button.setOnClickListener(new OnClickListener() {
-//	    @Override
-//	    public void onClick(View view) {
-//		showToastLong("有时，同样的凭条因为切纸原因导致左边和上边的留白存在差异，" +
-//			"可以通过调整打印坐标来克服这个问题。\n\n如横向偏移小于0，" +
-//			"表示所有打印元素往左边偏移指定的距离，大于0则表示整体向右边偏移指定的距离，纵向亦然。");
-//	    }
-//	});
-
 	Button button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
@@ -189,33 +166,14 @@ class PrintDialog extends Utils.DialogFragment
 	    }
 	});
 
-//	Button button = dialog.getButton(Dialog.BUTTON_POSITIVE);
-//	button.setOnClickListener(new View.OnClickListener() {
-//	    @Override
-//	    public void onClick(View view) {
-//		if (voucher == null || voucher.getRowid() < 0) {
-//		    LogActivity.writeLog("不能更新凭条，voucher成员没有正确设置(程序错误)");
-//		    return;
-//		}
-//
-//		String comment = comment_edittext.getText().toString();
-//		if (comment.length() == 0) {
-//		    comment_edittext.setHint("描述信息不能为空");
-//		    comment_edittext.setHintTextColor(getResources().getColor(R.color.red));
-//		    return;
-//		}
-//		voucher.setComment(comment);
-//
-//		hideIme(view);
-//
-//		if (voucher.update(getActivity())) {
-//		    Utils.showToast("凭条信息更新成功！", R.drawable.smile);
-//		} else {
-//		    Utils.showToast("凭条信息更新失败！", R.drawable.cry);
-//		}
-//		dismiss();
-//	    }
-//	});
+	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View view) {
+		PrintProgressDialog dialog = new PrintProgressDialog(print);
+		dialog.show(getFragmentManager(), "PrintProgressDialog");
+	    }
+	});
     }
 
     @Override
@@ -241,11 +199,27 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 	builder.setTitle("页面设置");
 
-	ListView listview = new ListView(getActivity());
-	builder.setView(listview);
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.VERTICAL);
 
+	ListView listview = new ListView(getActivity());
 	PageSetupAdapter adapter = new PageSetupAdapter(print.getForm());
 	listview.setAdapter(adapter);
+	linear.addView(listview);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("有时同样的凭条因为切纸原因导致左边和上边的留白存在差异，" +
+		"可以通过调整页边距来克服这个问题。\n如左边距小于0，" +
+		"表示所有打印元素往左边偏移指定的距离，大于0则表示整体向右边偏移指定的距离，" +
+		"上边距则用于调整上下偏移。\n" +
+		"偏移单位为毫米。");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	textview.setPadding(10, 10, 10, 5);
+	textview.setLineSpacing(1, 1.2f);
+	textview.setTextColor(getActivity().getResources().getColor(R.color.black));
+	linear.addView(textview);
+
+	builder.setView(linear);
 
 	return builder.create();
     }
@@ -277,7 +251,7 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 
 	@Override
 	public int getCount() {
-	    return form.getPageCount() + 1;
+	    return form.getPageCount();
 	}
 
 	@Override
@@ -370,27 +344,9 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 	    return linear;
 	}
 
-	private View commentTextview(Context context) {
-	    TextView textview = new TextView(context);
-	    textview.setText("有时同样的凭条因为切纸原因导致左边和上边的留白存在差异，" +
-			"可以通过调整页边距来克服这个问题。\n如左边距小于0，" +
-			"表示所有打印元素往左边偏移指定的距离，大于0则表示整体向右边偏移指定的距离，纵向亦然。\n" +
-			"偏移单位为毫米。");
-	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-	    textview.setPadding(10, 10, 10, 5);
-	    textview.setLineSpacing(1, 1.2f);
-	    textview.setTextColor(context.getResources().getColor(R.color.black));
-
-	    return textview;
-	}
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 	    Context context = parent.getContext();
-
-	    if (position >= form.getPageCount()) {
-		return commentTextview(context);
-	    }
 
 	    Form.FormPage page = form.getPage(position);
 	    if (page == null)
@@ -400,11 +356,12 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 	    linear.setGravity(Gravity.CENTER_VERTICAL);
 
 	    TextView textview = new TextView(context);
-	    textview.setText("" + (position + 1) + "." + page.getTitle());
-	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	    textview.setText("页" + (position + 1) + "." + page.getTitle());
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	    textview.setPadding(10, 0, 10, 0);
 	    textview.setGravity(Gravity.CENTER_VERTICAL);
-	    textview.setTextColor(context.getResources().getColor(R.color.darkred));
+	    textview.setTextColor(context.getResources().getColor(R.color.blue));
+	    textview.setBackgroundResource(R.color.silver);
 	    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 		    ViewGroup.LayoutParams.WRAP_CONTENT,
 		    ViewGroup.LayoutParams.MATCH_PARENT);
@@ -454,6 +411,73 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 }
 
 
+class PrintProgressDialog extends Utils.DialogFragment
+{
+    private Print print;
+    private ImageView image;
+    private TextView textview;
+
+    public PrintProgressDialog(Print print) {
+	this.print = print;
+    }
+
+    private View buildLayout() {
+	LinearLayout linear = new LinearLayout(getActivity());
+//	linear.setMinimumWidth((int) Utils.convertDpToPixel(600));
+	linear.setOrientation(LinearLayout.VERTICAL);
+
+
+	image = new ImageView(getActivity());
+	image.setBackgroundResource(R.color.yellow);
+	Bitmap bitmap = print.getForm().getActiveFormPage().getBitmap();
+	if (bitmap.getHeight() > bitmap.getWidth()) {
+	    bitmap = Bitmap.createBitmap(bitmap, 0, 0,
+		    bitmap.getWidth(), bitmap.getWidth());
+	}
+	if (bitmap.getWidth() > 600)
+	    bitmap = Bitmap.createScaledBitmap(bitmap, 600, 400, true);
+	image.setImageBitmap(bitmap);
+	image.setMaxHeight(400);
+	image.setScaleType(ImageView.ScaleType.FIT_XY);
+//	image.setImageMatrix(new Matrix());
+	LogActivity.writeLog("宽度： %d，高度: %d", bitmap.getWidth(), bitmap.getHeight());
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+//		ViewGroup.LayoutParams.MATCH_PARENT, 
+//		600,
+//		ViewGroup.LayoutParams.WRAP_CONTENT);
+		bitmap.getWidth(), bitmap.getHeight());
+//		bitmap.getWidth() > bitmap.getHeight() ? bitmap.getHeight() : bitmap.getWidth());
+	linear.addView(image, params);
+
+	textview = new TextView(getActivity());
+	textview.setText("请插入第一页");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	linear.addView(textview);
+
+	return linear;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setTitle("正在打印");
+	builder.setView(buildLayout());
+	builder.setPositiveButton("停 止", null);
+
+	return builder.create();
+    }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	setCancelable(false);
+    }
+}
+
 public class Print
 {
     private Form form;
@@ -476,7 +500,6 @@ public class Print
 	    LogActivity.writeLog("没有需要打印的凭条");
 	    return false;
 	}
-
 	new PrintDialog(this).show(manager, "PrintDialog");
 
 	if (listener != null) {

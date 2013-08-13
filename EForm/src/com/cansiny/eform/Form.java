@@ -15,6 +15,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.text.Editable;
 import android.util.Xml;
@@ -621,7 +623,7 @@ public abstract class Form extends DefaultHandler
 	    this.layout = layout;
 	    bundle = new Bundle();
 
-	    setSmoothScrollingEnabled(true);
+	    setDrawingCacheEnabled(true);
 	}
 
 	private FormPage(Context context) {
@@ -906,6 +908,21 @@ public abstract class Form extends DefaultHandler
 	    if (listener != null) {
 		listener.onFormPageScrolled(Form.this, this);
 	    }
+	}
+
+	public Bitmap getBitmap() {
+	    if (getChildCount() == 0) {
+		loadViewValues();
+	    }
+	    View frame = getChildAt(0);
+	    if (frame != null) {
+		Bitmap bitmap = Bitmap.createBitmap(frame.getWidth(),
+			frame.getHeight(), Bitmap.Config.ARGB_8888);
+		Canvas canvas = new Canvas(bitmap);
+		frame.draw(canvas);
+		return bitmap;
+	    }
+	    return null;
 	}
     }
 

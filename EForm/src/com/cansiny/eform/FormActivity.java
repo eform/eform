@@ -505,7 +505,7 @@ public class FormActivity extends Activity implements
 	    LogActivity.writeLog(e);
 	}
 
-	int retval = form.verify(true, false);
+	int retval = form.verify(true, true);
 	if (retval > 0) {
 	    String message = "还剩 " + retval + " 个未填写项，是否继续打印？";
 	    PrintConfirmDialog dialog = new PrintConfirmDialog(form, message);
