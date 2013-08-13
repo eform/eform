@@ -498,6 +498,7 @@ public class Print
 {
     private Form form;
     private PrintListener listener;
+    private Printer printer;
 
     public Print(Form form) {
 	this.form = form;
@@ -509,6 +510,10 @@ public class Print
 
     public void setPrintListener(PrintListener listener) {
 	this.listener = listener;
+    }
+
+    public void setPrinter(Printer printer) {
+	this.printer = printer;
     }
 
     public boolean print(FragmentManager manager) {
@@ -541,4 +546,45 @@ public class Print
 	public void onPrintStart(Print print);
 	public void onPrintStop(Print print);
     }
+}
+
+
+abstract class Printer
+{
+    static public final int PRINT_WIDTH_NORMAL = 0;
+    static public final int PRINT_WIDTH_HALF = 1;
+
+    abstract public boolean open();
+    abstract public void close();
+    abstract public boolean move(int x, int y);
+    abstract public boolean write(byte[] bytes);
+
+    public class PrintParam
+    {
+	public int spacing;
+	public int width;
+    }
+}
+
+class PrinterPLQ20K extends Printer
+{
+    @Override
+    public boolean open() {
+	return false;
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public boolean move(int x, int y) {
+	return false;
+    }
+
+    @Override
+    public boolean write(byte[] bytes) {
+	return false;
+    }
+
 }
