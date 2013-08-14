@@ -5,6 +5,10 @@
  */
 package com.cansiny.eform;
 
+import java.io.IOException;
+
+import com.cansiny.eform.Administrator.AdministratorLoginDialogListener;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -20,18 +24,99 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+class ShutdownDialog extends Utils.DialogFragment implements AdministratorLoginDialogListener
+{
+    private boolean is_shutdown;
+    private boolean is_reboot;
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+	builder.setTitle("关闭设备");
+	builder.setMessage("\n确定要关闭设备吗？\n");
+	builder.setNegativeButton("取 消", null);
+	builder.setNeutralButton("重启设备", new DialogInterface.OnClickListener() {
+	    @Override
+	    public void onClick(DialogInterface dialog, int which) {
+		Administrator admin = Administrator.getAdministrator();
+		if (!admin.isLogin()) {
+		    showToast("需要管理员权限，请先登录...");
+		    is_reboot = true;
+		    admin.setLoginDialogListener(ShutdownDialog.this);
+		    admin.login(getFragmentManager());
+		} else {
+		    try {
+			Process su = Runtime.getRuntime().exec("/system/xbin/su");
+			String command = "reboot";
+			Utils.showToastLong("正在重启设备，请稍候 ...");
+			su.getOutputStream().write(command.getBytes());
+		    } catch (IOException e) {
+			LogActivity.writeLog(e);
+		    }
+		}
+	    }
+	});
+	builder.setPositiveButton("关闭设备", new DialogInterface.OnClickListener() {
+	    @Override
+	    public void onClick(DialogInterface dialog, int which) {
+		Administrator admin = Administrator.getAdministrator();
+		if (!admin.isLogin()) {
+		    showToast("需要管理员权限，请先登录...");
+		    is_shutdown = true;
+		    admin.login(getFragmentManager());
+		} else {
+		    LogActivity.writeLog("关闭系统...");
+		    Utils.showToastLong("正在关闭设备，请稍候 ...");
+		    /* TODO: Shutdown device */
+		}
+	    }
+	});
+
+	return builder.create();
+    }
+
+    @Override
+    public void onAdministratorLoginDialogDisapper(Administrator admin) {
+	admin.setLoginDialogListener(null);
+
+	if (admin.isLogin()) {
+	    dismiss();
+
+	    if (is_shutdown) {
+		LogActivity.writeLog("关闭系统...");
+		Utils.showToastLong("正在关闭设备，请稍候 ...");
+		/* TODO: Shutdown device */
+		return;
+	    }
+
+	    if (is_reboot) {
+		try {
+		    Utils.showToastLong("正在重启设备，请稍候 ...");
+		    Process proc = Runtime.getRuntime().exec("/system/xbin/su");
+		    proc.getOutputStream().write("reboot".getBytes());
+		} catch (IOException e) {
+		    LogActivity.writeLog(e);
+		}
+	    }
+	}
+    }
+}
+
 
 public class HomeMenu extends Utils.DialogFragment
 	implements OnClickListener, Administrator.AdministratorLoginDialogListener
 {
     static private final int BUTTON_TAG_MEMBER = 1;
-    static private final int BUTTON_TAG_UPGRADE = 2;
-    static private final int BUTTON_TAG_SETTINGS = 3;
-    static private final int BUTTON_TAG_CONTACT = 4;
+    static private final int BUTTON_TAG_SETTINGS = 2;
+    static private final int BUTTON_TAG_CONTACT = 3;
+    static private final int BUTTON_TAG_SHUTDOWN = 4;
 
     private int  outtime = 15;
     private long starttime;
-    private LinearLayout buttonBox;
+    private LinearLayout button_box;
 
     private Handler  handler = new Handler();
     private Runnable runable = new Runnable() {
@@ -52,34 +137,35 @@ public class HomeMenu extends Utils.DialogFragment
 
 	HomeMenuItem items[] = {
 		new HomeMenuItem(R.drawable.member, "会员登录", BUTTON_TAG_MEMBER),
-		new HomeMenuItem(R.drawable.upgrade, "系统升级", BUTTON_TAG_UPGRADE),
 		new HomeMenuItem(R.drawable.settings, "系统设置", BUTTON_TAG_SETTINGS),
 		new HomeMenuItem(R.drawable.contact, "联系方式", BUTTON_TAG_CONTACT),
+		new HomeMenuItem(R.drawable.shutdown, "关闭设备", BUTTON_TAG_SHUTDOWN),
 	};
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-	buttonBox = new LinearLayout(getActivity());
-	buttonBox.setOrientation(LinearLayout.HORIZONTAL);
-	buttonBox.setBackgroundResource(R.color.white);
+	button_box = new LinearLayout(getActivity());
+	button_box.setOrientation(LinearLayout.HORIZONTAL);
+	button_box.setBackgroundResource(R.color.white);
+	button_box.setGravity(Gravity.CENTER_HORIZONTAL);
 
 	for (int i = 0; i < items.length; i++) {
-	    buttonBox.addView(items[i].get());
+	    button_box.addView(items[i].get());
 	}
-	builder.setView(buttonBox);
+	builder.setView(button_box);
 	return builder.create();
     }
-		
+
     @Override
     public void onStart() {
 	super.onStart();
 
 	FrameLayout.LayoutParams params =
-		(FrameLayout.LayoutParams) buttonBox.getLayoutParams();
+		(FrameLayout.LayoutParams) button_box.getLayoutParams();
 	params.gravity = Gravity.CENTER_HORIZONTAL;
 	params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
 
-	View view = buttonBox;
+	View view = button_box;
 	do {
 	    ViewParent parent = view.getParent();
 	    if (parent != null) {
@@ -95,7 +181,7 @@ public class HomeMenu extends Utils.DialogFragment
 	starttime = System.currentTimeMillis();
 	handler.postDelayed(runable, 0);
     }
-		
+
     @Override
     public void onDismiss(DialogInterface dialog) {
 	super.onDismiss(dialog);
@@ -113,15 +199,9 @@ public class HomeMenu extends Utils.DialogFragment
 	    Member member = Member.getMember();
 	    member.login(getFragmentManager());
 	    break;
-	case BUTTON_TAG_UPGRADE:
-	    if (!admin.isLogin()) {
-		admin.login(getFragmentManager());
-		return;
-	    }
-	    break;
 	case BUTTON_TAG_SETTINGS:
 	    if (!admin.isLogin()) {
-		Utils.showToast("请先登录...");
+		Utils.showToast("需要管理员权限，请先登录...");
 		handler.removeCallbacks(runable);
 		admin.setLoginDialogListener(this);
 		admin.login(getFragmentManager());
@@ -135,6 +215,10 @@ public class HomeMenu extends Utils.DialogFragment
 	    dismiss();
 	    ContactDialog dialog = new ContactDialog();
 	    dialog.show(getFragmentManager(), "ContactDialog");
+	    break;
+	case BUTTON_TAG_SHUTDOWN:
+	    ShutdownDialog shutdown = new ShutdownDialog();
+	    shutdown.show(getFragmentManager(), "ShutdownDialog");
 	    break;
 	}
     }

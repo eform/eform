@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -195,6 +196,29 @@ public class HomeActivity extends Activity
 
 	Member member = Member.getMember();
 	member.logout();
+    }
+
+    @Override
+    public void onBackPressed() {
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+	if (event.getKeyCode() == KeyEvent.KEYCODE_POWER) {
+	    LogActivity.writeLog("Power button 按下");
+	    event.startTracking();
+	    return true;
+	}
+	return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_POWER) {
+	    LogActivity.writeLog("Power button 长按");
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
     }
 
     @SuppressLint("SetJavaScriptEnabled")

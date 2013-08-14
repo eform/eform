@@ -116,7 +116,7 @@ public final class HomeInfo
 	}
     }
 
-	
+
     public class HomeItem
     {
 	public String klass;

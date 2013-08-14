@@ -66,6 +66,9 @@ class PreferencesDialog extends Utils.DialogFragment
 	LayoutInflater inflater = getActivity().getLayoutInflater();
 	builder.setView(inflater.inflate(R.layout.dialog_prefs, null));
 
+	Preferences prefs = Preferences.getPreferences();
+	prefs.beginTransaction();
+
 	return builder.create();
     }
 
@@ -119,9 +122,6 @@ class PreferencesDialog extends Utils.DialogFragment
 	}
 
 	onTabChanged(TAB_TAG_GENERIC);
-
-	Preferences prefs = Preferences.getPreferences();
-	prefs.beginTransaction();
     }
 
     @Override
@@ -253,6 +253,10 @@ class PreferencesDialog extends Utils.DialogFragment
 	    view2 = dialog.findViewById(R.id.aftermarket_contact_table);
 	    view2.setVisibility(View.GONE);
 	    break;
+	case R.id.logview_button:
+	    Intent intent = new Intent(getActivity(), LogActivity.class);
+	    startActivity(intent);
+	    break;
 
 	case R.id.member_password_button:
 	    onMemberPasswordButtonClick();
@@ -276,6 +280,8 @@ class PreferencesDialog extends Utils.DialogFragment
 	    break;
 	case R.id.admin_password_button:
 	    admin.setPassword(getFragmentManager());
+	    break;
+	case R.id.upgrade_button:
 	    break;
 	case R.id.system_settings_button:
 	    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
@@ -329,6 +335,7 @@ class PreferencesDialog extends Utils.DialogFragment
 		R.id.aftermarket_contact_button,
 		R.id.aftermarket_contact_set_button,
 		R.id.aftermarket_contact_cancel_button,
+		R.id.logview_button,
 	};
 	for (int id : ids) {
 	    Button button = (Button) dialog.findViewById(id);
@@ -356,7 +363,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	final Utils.SerialDeviceAdapter adapter = new Utils.SerialDeviceAdapter();
 	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_spinner);
 	spinner.setAdapter(adapter);
-	String devpath = prefs.getMagcardDevpath();
+	String devpath = prefs.getMagcardDevice();
 	if (devpath != null) {
 	    for (int i = 0; i < adapter.getCount(); i++) {
 		if (devpath.equals(adapter.getItemDevpath(i))) {
@@ -369,11 +376,11 @@ class PreferencesDialog extends Utils.DialogFragment
 	    @Override
 	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		String devpath = adapter.getItemDevpath(position);
-		prefs.setMagcardDevpath(devpath);
+		prefs.setMagcardDevice(devpath);
 	    }
 	    @Override
 	    public void onNothingSelected(AdapterView<?> parent) {
-		prefs.setMagcardDevpath(null);
+		prefs.setMagcardDevice(null);
 	    }
 	});
     }
@@ -413,6 +420,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	int[] ids = {
 		R.id.admin_logout_button,
 		R.id.admin_password_button,
+		R.id.upgrade_button,
 		R.id.system_settings_button
 	};
 	for (int id : ids) {
@@ -687,7 +695,6 @@ public class Preferences
     public void applyTransaction() {
 	if (editor != null) {
 	    editor.apply();
-	    editor = null;
 	}
     }
 
@@ -698,10 +705,54 @@ public class Preferences
 	}
     }
 
-    public void setAdministratorAutoLogout(boolean value) {
-	if (editor != null) {
-	    editor.putBoolean("AutoLogout", value);
+    private void putObject(String key, Object value) {
+	boolean in_transaction = true;
+
+	if (editor == null) {
+	    beginTransaction();
+	    in_transaction = false;
 	}
+
+	if (value == null) {
+	    editor.remove(key);
+	} else {
+	    if (value instanceof Integer) {
+		editor.putInt(key, (Integer) value);
+	    } else if (value instanceof Long) {
+		editor.putLong(key, (Long) value);
+	    } else if (value instanceof Float) {
+		editor.putFloat(key, (Float) value);
+	    } else if (value instanceof String) {
+		editor.putString(key, (String) value);
+	    } else if (value instanceof Boolean) {
+		editor.putBoolean(key, (Boolean) value);
+	    } else {
+		LogActivity.writeLog("首选项键 %s 的值类型 %s 不能支持，请检查",
+			key, value.getClass().getName());
+	    }
+	}
+
+	if (in_transaction == false) {
+	    endTransaction();
+	}
+    }
+
+    private void removeKey(String key) {
+	boolean in_transaction = true;
+
+	if (editor == null) {
+	    beginTransaction();
+	    in_transaction = false;
+	}
+	editor.remove(key);
+
+	if (in_transaction == false) {
+	    endTransaction();
+	}
+    }
+
+    public void setAdministratorAutoLogout(boolean value) {
+	putObject("AutoLogout", value);
     }
 
     public boolean getAdministratorAutoLogout() {
@@ -709,11 +760,10 @@ public class Preferences
     }
 
     public void setAdministratorAutoLogoutTime(int minutes) {
-	if (editor != null) {
-	    if (minutes > 0)
-		editor.putInt("AutoLogoutTime", minutes);
-	    else
-		editor.remove("AutoLogoutTime");
+	if (minutes > 0) {
+	    putObject("AutoLogoutTime", minutes);
+	} else {
+	    removeKey("AutoLogoutTime");
 	}
     }
 
@@ -721,23 +771,16 @@ public class Preferences
 	return prefs.getInt("AutoLogoutTime", 10);
     }
 
-    public void setMagcardDevpath(String path) {
-	if (editor != null) {
-	    if (path != null)
-		editor.putString("MagcardDevpath", path);
-	    else
-		editor.remove("MagcardDevpath");
-	}
+    public void setMagcardDevice(String device) {
+	putObject("MagcardDevice", device);
     }
 
-    public String getMagcardDevpath() {
-	return prefs.getString("MagcardDevpath", "/dev/ttyS0");
+    public String getMagcardDevice() {
+	return prefs.getString("MagcardDevice", "USB");
     }
 
     public void setAftermarketName(String name) {
-	if (editor != null) {
-	    editor.putString("AftermarketName", name);
-	}
+	putObject("AftermarketName", name);
     }
 
     public String getAftermarketName() {
@@ -745,9 +788,7 @@ public class Preferences
     }
 
     public void setAftermarketPhone(String phone) {
-	if (editor != null) {
-	    editor.putString("AftermarketPhone", phone);
-	}
+	putObject("AftermarketPhone", phone);
     }
 
     public String getAftermarketPhone() {
@@ -756,14 +797,7 @@ public class Preferences
 
     public void setPageLeftMargin(Form form, int page_no, int value) {
 	String key = form.getClass().getName() + "." + page_no + ".left";
-
-	if (editor != null) {
-	    editor.putInt(key, value);
-	} else {
-	    beginTransaction();
-	    editor.putInt(key, value);
-	    endTransaction();
-	}
+	putObject(key, value);
     }
 
     public int getPageLeftMargin(Form form, int page_no) {
@@ -773,14 +807,7 @@ public class Preferences
 
     public void setPageTopMargin(Form form, int page_no, int value) {
 	String key = form.getClass().getName() + "." + page_no + ".top";
-
-	if (editor != null) {
-	    editor.putInt(key, value);
-	} else {
-	    beginTransaction();
-	    editor.putInt(key, value);
-	    endTransaction();
-	}
+	putObject(key, value);
     }
 
     public int getPageTopMargin(Form form, int page_no) {
@@ -792,4 +819,15 @@ public class Preferences
 	return prefs.getString("PrinterClass", "com.cansiny.eform.PrinterLog");
     }
 
+    public void setPrinterClass(String klass) {
+	putObject("PrinterClass", klass);
+    }
+
+    public String getPrinterDevice() {
+	return prefs.getString("PrinterDevice", "USB");
+    }
+
+    public void setPrinterDevice(String device) {
+	putObject("PrinterDevice", device);
+    }
 }

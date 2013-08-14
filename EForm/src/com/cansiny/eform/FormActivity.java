@@ -565,6 +565,7 @@ public class FormActivity extends Activity implements
     public void onPrintStart(Print print) {
 	timeout_remains = TIMEOUT_VALUE;
 	print_in_progress = true;
+	setTimeoutTipVisible(false);
     }
 
     @Override

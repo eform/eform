@@ -5,6 +5,12 @@
  */
 package com.cansiny.eform;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -15,6 +21,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.util.Xml;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -226,15 +233,15 @@ class PrintPageSetupDialog extends Utils.DialogFragment
 
 	builder.setView(linear);
 
+	Preferences prefs = Preferences.getPreferences();
+	prefs.beginTransaction();
+
 	return builder.create();
     }
 
     @Override
     public void onStart() {
 	super.onStart();
-
-	Preferences prefs = Preferences.getPreferences();
-	prefs.beginTransaction();
     }
 
     @Override
@@ -531,11 +538,9 @@ class PrintProgressDialog extends Utils.DialogFragment
 	    public void onClick(View view) {
 		if (print_task != null) {
 		    if (print_task.isPaused()) {
-			showToast("继续打印，点击“暂停”按钮暂停打印");
 			print_task.resume();
 			((Button) view).setText("暂 停");
 		    } else {
-			showToast("暂停打印，点击“继续”按钮继续打印");
 			print_task.pause();
 			((Button) view).setText("继 续");
 		    }
@@ -576,6 +581,7 @@ class PrintProgressDialog extends Utils.DialogFragment
 	protected Long doInBackground(Integer... args) {
 	    for (int i = args[0]; i <= args[1]; i++) {
 		this.publishProgress(i - 1);
+
 		try {
 		    Thread.sleep(3000);
 		} catch (InterruptedException e) {
@@ -622,6 +628,17 @@ class PrintProgressDialog extends Utils.DialogFragment
 		cancel(true);
 		return;
 	    }
+
+	    try {
+		InputStream is = getActivity().openFileInput("");
+		Xml.parse(is, Xml.Encoding.UTF_8, new PrintParserHandler());
+	    } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    } catch (SAXException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	    }
 	}
 
 	protected void onPostExecute(Long result) {
@@ -642,16 +659,23 @@ class PrintProgressDialog extends Utils.DialogFragment
 
 	public void pause() {
 	    paused = true;
+	    showToast("暂停打印，点击“继续”按钮继续打印");
 	    setStatus("暂停打印，点击“继续”按钮继续打印...", true);
 	}
 
 	public void resume() {
 	    paused = false;
+	    showToast("继续打印，点击“暂停”按钮暂停打印");
 	}
 
 	public boolean isPaused() {
 	    return paused;
 	}
+    }
+
+    private class PrintParserHandler extends DefaultHandler
+    {
+	
     }
 }
 

@@ -49,15 +49,14 @@ public class SerialPort
 	if (!device.canRead() || !device.canWrite()) {
 	    try {
 		/* Missing read/write permission, trying to change file mode */
-		Process su;
-		su = Runtime.getRuntime().exec("/system/bin/su");
+		Process su = Runtime.getRuntime().exec("/system/xbin/su");
 		String cmd = "chmod 666 " + device.getAbsolutePath() + "\n" + "exit\n";
 		su.getOutputStream().write(cmd.getBytes());
 		if ((su.waitFor() != 0) || !device.canRead() || !device.canWrite()) {
 		    throw new SecurityException();
 		}
 	    } catch (Exception e) {
-		e.printStackTrace();
+		LogActivity.writeLog(e);
 		throw new SecurityException();
 	    }
 	}

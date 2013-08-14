@@ -14,7 +14,13 @@ public abstract class Printer
 	try {
 	    Preferences prefs = Preferences.getPreferences();
 	    String printer_class = prefs.getPrinterClass();
-	    return (Printer) Class.forName(printer_class).newInstance();
+	    Object object = Class.forName(printer_class).newInstance();
+	    if (object instanceof Printer) {
+		return (Printer) object;
+	    } else {
+		LogActivity.writeLog("打印机类型配置错误，请检查");
+		return null;
+	    }
 	} catch (Exception e) {
 	    LogActivity.writeLog(e);
 	    return null;
