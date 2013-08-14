@@ -8,8 +8,6 @@ package com.cansiny.eform;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import com.cansiny.eform.Utils.DeviceAdapter;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;

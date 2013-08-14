@@ -85,6 +85,7 @@ public abstract class Magcard extends Utils.DialogFragment
     private Runnable runnable;
     private MagcardTask task;
     private MagcardListener listener;
+    static private int error_count = 0;
 
     private View buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
@@ -182,6 +183,7 @@ public abstract class Magcard extends Utils.DialogFragment
 	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
+		cancel();
 		if (task != null) {
 		    task.cancel(true);
 		}
@@ -248,9 +250,14 @@ public abstract class Magcard extends Utils.DialogFragment
 		if (listener != null) {
 		    listener.onMagcardRead(Magcard.this, cardno);
 		}
+		Magcard.error_count = 0;
 	    } else {
-		Utils.showToast("读取卡号失败，请重试！\n" +
-			"如多次失败，请联系管理员检查设备配置", R.drawable.cry);
+		if (++Magcard.error_count >= 3) {
+		    Utils.showToast("已经连续 " + Magcard.error_count + " 次刷卡失败，"
+			    + "请联系管理员检查设备配置", R.drawable.cry);
+		} else {
+		    Utils.showToast("读取卡号失败，请重试！", R.drawable.cry);
+		}
 	    }
 	    dismiss();
 	}
@@ -300,7 +307,10 @@ class MagcardSerial extends Magcard
 
     @Override
     protected String read() {
-	// TODO Auto-generated method stub
+	if (path == null) {
+	    LogActivity.writeLog("不能得到刷卡器设备路径");
+	    return null;
+	}
 	return null;
     }
 
