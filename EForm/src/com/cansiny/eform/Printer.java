@@ -1,3 +1,8 @@
+/* EForm - Electronic Form System
+ *
+ * Copyright (C) 2013 Wu Xiaohu. All rights reserved.
+ * Copyright (C) 2013 Cansiny Trade Co.,Ltd. All rights reserved.
+ */
 package com.cansiny.eform;
 
 import java.io.UnsupportedEncodingException;
@@ -11,20 +16,28 @@ public abstract class Printer
     static public final int PRINT_WIDTH_HALF = 1;
 
     static public Printer getPrinter() {
-	try {
-	    Preferences prefs = Preferences.getPreferences();
-	    String printer_class = prefs.getPrinterClass();
-	    Object object = Class.forName(printer_class).newInstance();
-	    if (object instanceof Printer) {
-		return (Printer) object;
-	    } else {
-		LogActivity.writeLog("打印机类型配置错误，请检查");
-		return null;
-	    }
-	} catch (Exception e) {
-	    LogActivity.writeLog(e);
+	Preferences prefs = Preferences.getPreferences();
+
+	String driver = prefs.getDeviceDriver("Printer");
+	if (driver == null || driver.length() == 0) {
+	    LogActivity.writeLog("打印机驱动未指定");
 	    return null;
 	}
+	Printer printer = null;
+
+	if (driver.equalsIgnoreCase("virtual")) {
+	    printer = new PrinterVirtual();
+	} else if (driver.equalsIgnoreCase("usb")) {
+	    printer = new PrinterUSB(prefs.getDeviceNameOrVid("Printer"),
+		    prefs.getDevicePathOrPid("Printer"));
+	} else if (driver.equalsIgnoreCase("serial") ||
+		driver.equalsIgnoreCase("usbserial")) {
+	    printer = new PrinterSerial(prefs.getDevicePathOrPid("Printer"));
+	} else {
+	    LogActivity.writeLog("不能识别的打印机驱动: %s", driver);
+	    return null;
+	}
+	return printer;
     }
 
     abstract public boolean open();
@@ -40,9 +53,9 @@ public abstract class Printer
 }
 
 
-class PrinterLog extends Printer
+class PrinterVirtual extends Printer
 {
-    private static final String TAG = "PrinterLog";
+    private static final String TAG = "VirtualPrinter";
 
     @Override
     public boolean open() {
@@ -68,10 +81,22 @@ class PrinterLog extends Printer
 }
 
 
-class PrinterPLQ20K extends Printer
+class PrinterUSB extends Printer
 {
+    private int vid;
+    private int pid;
+
+    public PrinterUSB(String vid, String pid) throws NumberFormatException {
+	this.vid = Integer.decode(vid);
+	this.pid = Integer.decode(pid);
+    }
+
     @Override
     public boolean open() {
+	if (vid == 0 || pid == 0) {
+	    LogActivity.writeLog("不能得到打印机厂商ID或产品ID");
+	    return false;
+	}
 	return false;
     }
 
@@ -99,4 +124,37 @@ class PrinterPLQ20K extends Printer
 	return false;
     }
 
+}
+
+class PrinterSerial extends Printer
+{
+    private String path;
+
+    public PrinterSerial(String path) {
+	this.path = path;
+    }
+
+    @Override
+    public boolean open() {
+	// TODO Auto-generated method stub
+	return false;
+    }
+
+    @Override
+    public void close() {
+	// TODO Auto-generated method stub
+	
+    }
+
+    @Override
+    public boolean move(int x, int y) {
+	// TODO Auto-generated method stub
+	return false;
+    }
+
+    @Override
+    public boolean write(String text, PrintParam param) {
+	// TODO Auto-generated method stub
+	return false;
+    }
 }

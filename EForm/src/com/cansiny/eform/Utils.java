@@ -301,7 +301,6 @@ public class Utils
 	    for (String device : results) {
 		String[] array = device.split(" ");
 		if (!array[1].equals("g_serial")) {
-		    LogActivity.writeLog(device);
 		    devices.add(new Device(array[1], array[0], array[2]));
 		}
 	    }
@@ -309,6 +308,10 @@ public class Utils
 
 	public void addUSBDevice(String vid, String pid) {
 	    devices.add(0, new Device("usb", vid, pid));
+	}
+
+	public void addVirtialDevice() {
+	    devices.add(0, new Device("virtual", "cansiny", "virtial_"));
 	}
 
 	@Override
@@ -345,7 +348,9 @@ public class Utils
 	    if (device != null) {
 		String driver = device.getDriver();
 		String name;
-		if (driver.equalsIgnoreCase("serial")) {
+		if (driver.equalsIgnoreCase("virtual")) {
+		    name = "虚拟接口，仅供测试";
+		} else if (driver.equalsIgnoreCase("serial")) {
 		    name = "标准串口 " + device.getNameOrVid();
 		} else if (driver.equalsIgnoreCase("usbserial")) {
 		    name = "USB转串口 " + device.getNameOrVid();
@@ -356,6 +361,7 @@ public class Utils
 		}
 		textview.setText(name);
 		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+		textview.setTextColor(parent.getResources().getColor(R.color.blue));
 	    }
 	    linear.addView(textview);
 
@@ -408,7 +414,7 @@ public class Utils
 
     static public class IntegerAdapter extends BaseAdapter
     {
-	private ArrayList<Integer> numbers;
+	protected ArrayList<Integer> numbers;
 
 	public IntegerAdapter(int min, int max) {
 	    numbers = new ArrayList<Integer>();
@@ -449,6 +455,62 @@ public class Utils
 	    LinearLayout linear = new LinearLayout(parent.getContext());
 	    linear.setOrientation(LinearLayout.HORIZONTAL);
 	    linear.setPadding(10, 5, 10, 5);
+	    linear.setGravity(Gravity.RIGHT);
+
+	    TextView textview = new TextView(parent.getContext());
+	    textview.setText(String.valueOf(value));
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    textview.setTextColor(parent.getResources().getColor(R.color.blue));
+	    linear.addView(textview);
+
+	    return linear;
+	}
+    }
+
+    static public class BaudrateAdapter extends BaseAdapter
+    {
+	protected ArrayList<Integer> baudrates;
+
+	public BaudrateAdapter() {
+	    baudrates = new ArrayList<Integer>();
+
+	    baudrates.add(1200);
+	    baudrates.add(9600);
+	    baudrates.add(115200);
+	}
+
+	@Override
+	public int getCount() {
+	    return baudrates.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+	    if (position < baudrates.size() && position >= 0) {
+		return baudrates.get(position);
+	    } else {
+		return null;
+	    }
+	}
+
+	@Override
+	public long getItemId(int position) {
+	    if (position < baudrates.size() && position >= 0) {
+		return baudrates.get(position).longValue();
+	    } else {
+		return position;
+	    }
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+	    int value = 0;
+	    if (position < baudrates.size())
+		value = baudrates.get(position);
+
+	    LinearLayout linear = new LinearLayout(parent.getContext());
+	    linear.setOrientation(LinearLayout.HORIZONTAL);
+	    linear.setPadding(10, 10, 10, 0);
 	    linear.setGravity(Gravity.RIGHT);
 
 	    TextView textview = new TextView(parent.getContext());

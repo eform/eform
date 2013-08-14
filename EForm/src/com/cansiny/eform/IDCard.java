@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-public abstract class Magcard extends Utils.DialogFragment
+public abstract class IDCard extends Utils.DialogFragment
 {
     static public final String USB_VID = "0x0001";
     static public final String USB_PID = "0x0002";
@@ -48,34 +48,34 @@ public abstract class Magcard extends Utils.DialogFragment
 	return builder.toString();
     }
 
-    static public Magcard getMagcard() {
+    static public IDCard getIDCard() {
 	Preferences prefs = Preferences.getPreferences();
 
-	String driver = prefs.getDeviceDriver("Magcard");
+	String driver = prefs.getDeviceDriver("IDCard");
 	if (driver == null || driver.length() == 0) {
-	    LogActivity.writeLog("磁条卡读卡器驱动未指定");
+	    LogActivity.writeLog("身份证读卡器驱动未指定");
 	    return null;
 	}
-	Magcard magcard = null;
+	IDCard IDCard = null;
 
 	if (driver.equalsIgnoreCase("virtual")) {
-	    magcard = new MagcardVirtual();
+	    IDCard = new IDCardVirtual();
 	} else if (driver.equalsIgnoreCase("usb")) {
 	    try {
-		magcard = new MagcardUSB(prefs.getDeviceNameOrVid("Magcard"),
-			prefs.getDevicePathOrPid("Magcard"));
+		IDCard = new IDCardUSB(prefs.getDeviceNameOrVid("IDCard"),
+			prefs.getDevicePathOrPid("IDCard"));
 	    } catch (Exception e) {
 		LogActivity.writeLog(e);
 		return null;
 	    }
 	} else if (driver.equalsIgnoreCase("serial") ||
 		driver.equalsIgnoreCase("usbserial")) {
-	    magcard = new MagcardSerial(prefs.getDevicePathOrPid("Magcard"));
+	    IDCard = new IDCardSerial(prefs.getDevicePathOrPid("IDCard"));
 	} else {
-	    LogActivity.writeLog("不能识别的磁条卡读卡驱动: %s", driver);
+	    LogActivity.writeLog("不能识别的身份证读卡驱动: %s", driver);
 	    return null;
 	}
-	return magcard;
+	return IDCard;
     }
 
     private int  totaltime = 30;
@@ -83,8 +83,7 @@ public abstract class Magcard extends Utils.DialogFragment
     private TextView timeview;
     private Handler handler;
     private Runnable runnable;
-    private MagcardTask task;
-    private MagcardListener listener;
+    private IDCardTask task;
 
     private View buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
@@ -92,7 +91,7 @@ public abstract class Magcard extends Utils.DialogFragment
 	layout.setBackgroundResource(R.color.white);
 
 	ImageView image = new ImageView(getActivity());
-	image.setImageResource(R.drawable.swipe_card);
+	image.setImageResource(R.drawable.read_idcard);
 	image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(300, 200);
 	params.gravity = Gravity.CENTER_HORIZONTAL;
@@ -135,7 +134,7 @@ public abstract class Magcard extends Utils.DialogFragment
     		ViewGroup.LayoutParams.MATCH_PARENT));
 
 	view = new TextView(getActivity());
-	view.setText("读取的卡号仅用来填写本凭条相关字段。");
+	view.setText("读取的身份证信息仅用来填写本凭条相关字段。");
 	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
     	params = new LinearLayout.LayoutParams(
     		ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -177,7 +176,7 @@ public abstract class Magcard extends Utils.DialogFragment
 	super.onCreateDialog(savedInstanceState);
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle("请刷磁条卡或存折");
+	builder.setTitle("请将身份证放在感应区域");
 	builder.setView(buildLayout());
 	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
 	    @Override
@@ -210,63 +209,63 @@ public abstract class Magcard extends Utils.DialogFragment
     abstract protected String read();
     abstract protected void cancel();
 
-    public void setListener(MagcardListener listener) {
-	this.listener = listener;
-    }
-
-    public void read(FragmentManager manager) {
-	task = new MagcardTask(manager);
+    public void read(FragmentManager manager, TextView textview) {
+	task = new IDCardTask(manager, textview);
 	task.execute();
     }
 
-    public interface MagcardListener
-    {
-	public void onMagcardRead(Magcard magcard, String cardno);
-    }
-
-    public class MagcardTask extends AsyncTask<Void, Void, String>
+    public class IDCardTask extends AsyncTask<Void, Void, CharSequence>
     {
 	private FragmentManager manager;
+	private TextView textview;
 
-	public MagcardTask(FragmentManager manager) {
+	public IDCardTask(FragmentManager manager, TextView textview) {
 	    this.manager = manager;
+	    this.textview = textview;
 	}
 
 	@Override
-	protected String doInBackground(Void... args) {
+	protected CharSequence doInBackground(Void... args) {
 	    return read();
 	}
 
 	@Override
 	protected void onPreExecute() {
-	    show(manager, "Magcard");
+	    show(manager, "IDCard");
 	}
 
 	@Override
-	protected void onPostExecute(String cardno) {
+	protected void onPostExecute(CharSequence cardno) {
 	    if (cardno != null) {
-		if (listener != null) {
-		    listener.onMagcardRead(Magcard.this, cardno);
+		if (!(textview instanceof TextView)) {
+		    LogActivity.writeLog("IDCardTask 参数必须是 TextView 实例");
+		} else {
+		    textview.setText(cardno);
 		}
 	    } else {
-		Utils.showToast("读取卡号失败，请重试！\n" +
-			"如多次失败，请联系管理员检查设备配置", R.drawable.cry);
+		Utils.showToast("读取卡号失败，请重试！", R.drawable.cry);
 	    }
 	    dismiss();
 	}
 	
 	@Override
-	protected void onCancelled(String cardno) {
+	protected void onCancelled(CharSequence cardno) {
 	    Utils.showToast("操作被取消 ...");
 	    dismiss();
 	}
     }
 
+    public class IDCardInfo
+    {
+	public String name;
+	public boolean sex;
+	public String nation;
+    }
 }
 
-class MagcardVirtual extends Magcard
+class IDCardVirtual extends IDCard
 {
-    public MagcardVirtual() {
+    public IDCardVirtual() {
     }
 
     @Override
@@ -290,11 +289,11 @@ class MagcardVirtual extends Magcard
     }
 }
 
-class MagcardSerial extends Magcard
+class IDCardSerial extends IDCard
 {
     private String path;
 
-    public MagcardSerial(String path) {
+    public IDCardSerial(String path) {
 	this.path = path;
     }
 
@@ -310,12 +309,12 @@ class MagcardSerial extends Magcard
     }
 }
 
-class MagcardUSB extends Magcard
+class IDCardUSB extends IDCard
 {
     private int vid = 0;
     private int pid = 0;
 
-    public MagcardUSB(String vid, String pid) throws NumberFormatException {
+    public IDCardUSB(String vid, String pid) throws NumberFormatException {
 	this.vid = Integer.decode(vid);
 	this.pid = Integer.decode(pid);
     }

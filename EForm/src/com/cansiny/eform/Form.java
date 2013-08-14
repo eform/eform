@@ -53,6 +53,7 @@ public abstract class Form extends DefaultHandler
     protected ArrayList<Integer> cardno_edittexts;
     protected ArrayList<Integer> verify_edittexts;
     private FormListener listener;
+    private TextView last_swipecard_textview;
 
     public Form(Activity activity, String label) {
 	this.activity = activity;
@@ -122,12 +123,28 @@ public abstract class Form extends DefaultHandler
     }
 
     protected void swipeMagcard(TextView textview) {
-	Magcard.getMagcard().read(activity.getFragmentManager(), textview);
+	Magcard magcard = Magcard.getMagcard();
+	if (magcard != null) {
+	    last_swipecard_textview = textview;
+	    magcard.setListener(new Magcard.MagcardListener() {
+		@Override
+		public void onMagcardRead(Magcard magcard, String cardno) {
+		    last_swipecard_textview.setText(cardno);
+		}
+	    });
+	    magcard.read(activity.getFragmentManager());
+	} else {
+	    Utils.showToast("不能刷卡，请联系管理员检查设备配置", R.drawable.cry);
+	}
     }
 
     protected void readIdCard() {
-	IDCardReader reader = new IDCardReader();
-	reader.show(activity.getFragmentManager(), "ReadIdcardDialog");
+	IDCard idcard = IDCard.getIDCard();
+	if (idcard != null) {
+	    idcard.read(activity.getFragmentManager(), null);
+	} else {
+	    Utils.showToast("不能读身份证，请联系管理员检查设备配置", R.drawable.cry);
+	}
     }
 
     public int getPageCount() {

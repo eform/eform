@@ -8,6 +8,8 @@ package com.cansiny.eform;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import com.cansiny.eform.Utils.DeviceAdapter;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -35,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabWidget;
@@ -354,41 +357,93 @@ class PreferencesDialog extends Utils.DialogFragment
 	view.setVisibility(View.GONE);
     }
 
-    private void onDeviceTabActived() {
+    private void setupDeviceDriver(final String device_name, Spinner spinner) {
 	final Preferences prefs = Preferences.getPreferences();
-	AlertDialog dialog = (AlertDialog) getDialog();
 
-	final Utils.DeviceAdapter adapter = new Utils.DeviceAdapter();
-
-	String vid = prefs.getMagcardDeviceNameOrVid();
-	String pid = prefs.getMagcardDevicePathOrPid();
-	adapter.addUSBDevice(vid, pid);
-
-	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_spinner);
-	spinner.setAdapter(adapter);
-
-	String devpath = prefs.getMagcardDevicePathOrPid();
-	if (devpath != null) {
+	String index = prefs.getDevicePathOrPid(device_name);
+	if (index != null) {
+	    SpinnerAdapter adapter = spinner.getAdapter();
 	    for (int i = 0; i < adapter.getCount(); i++) {
-		if (devpath.equals(adapter.getItemPathOrPid(i))) {
+		if (index.equals(((Utils.DeviceAdapter) adapter).getItemPathOrPid(i))) {
 		    spinner.setSelection(i);
 		    break;
 		}
 	    }
 	}
+
 	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    @Override
 	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		Utils.DeviceAdapter.Device device = (Utils.DeviceAdapter.Device) parent.getItemAtPosition(position);
-		prefs.setMagcardDeviceDriver(device.getDriver());
-		prefs.setMagcardDeviceNameOrVid(device.getNameOrVid());
-		prefs.setMagcardDevicePathOrPid(device.getPathOrPid());
+		prefs.setDeviceDriver(device_name, device.getDriver());
+		prefs.setDeviceNameOrVid(device_name, device.getNameOrVid());
+		prefs.setDevicePathOrPid(device_name, device.getPathOrPid());
 	    }
 	    @Override
 	    public void onNothingSelected(AdapterView<?> parent) {
-		prefs.setMagcardDeviceDriver(null);
+		prefs.setDeviceDriver(device_name, null);
 	    }
 	});
+    }
+
+    private void setupDeviceBaudrate(final String device_name, Spinner spinner) {
+	final Preferences prefs = Preferences.getPreferences();
+
+	int index = prefs.getDeviceBaudrate(device_name);
+	SpinnerAdapter adapter = spinner.getAdapter();
+	for (int i = 0; i < adapter.getCount(); i++) {
+	    if (index == ((Integer) adapter.getItem(i)).intValue()) {
+		spinner.setSelection(i);
+		break;
+	    }
+	}
+
+	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+	    @Override
+	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+		int baudrate = ((Integer) parent.getItemAtPosition(position)).intValue();
+		prefs.setDeviceBaudrate(device_name, baudrate);
+	    }
+	    @Override
+	    public void onNothingSelected(AdapterView<?> parent) {
+		prefs.setDeviceDriver(device_name, null);
+	    }
+	});
+    }
+
+    private void onDeviceTabActived() {
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	Utils.DeviceAdapter driver_adapter = new Utils.DeviceAdapter();
+	driver_adapter.addUSBDevice(Magcard.USB_VID, Magcard.USB_PID);
+	if (BuildConfig.DEBUG) {
+	    driver_adapter.addVirtialDevice();
+	}
+	Utils.BaudrateAdapter baudrate_adapter = new Utils.BaudrateAdapter();
+
+	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_driver_spinner);
+	spinner.setAdapter(driver_adapter);
+	setupDeviceDriver("Magcard", spinner);
+
+	spinner = (Spinner) dialog.findViewById(R.id.magcard_baudrate_spinner);
+	spinner.setAdapter(baudrate_adapter);
+	setupDeviceBaudrate("Magcard", spinner);
+
+	spinner = (Spinner) dialog.findViewById(R.id.printer_driver_spinner);
+	spinner.setAdapter(driver_adapter);
+	setupDeviceDriver("Printer", spinner);
+
+	spinner = (Spinner) dialog.findViewById(R.id.printer_baudrate_spinner);
+	spinner.setAdapter(baudrate_adapter);
+	setupDeviceBaudrate("Printer", spinner);
+
+	spinner = (Spinner) dialog.findViewById(R.id.idcard_driver_spinner);
+	spinner.setAdapter(driver_adapter);
+	setupDeviceDriver("IDCard", spinner);
+
+	spinner = (Spinner) dialog.findViewById(R.id.idcard_baudrate_spinner);
+	spinner.setAdapter(baudrate_adapter);
+	setupDeviceBaudrate("IDCard", spinner);
     }
 
     private void onMemberTabActived() {
@@ -777,28 +832,36 @@ public class Preferences
 	return prefs.getInt("AutoLogoutTime", 10);
     }
 
-    public void setMagcardDeviceDriver(String device) {
-	putObject("MagcardDeviceDriver", device);
+    public void setDeviceDriver(String device, String driver) {
+	putObject(device + ".Driver", driver);
     }
 
-    public String getMagcardDeviceDriver() {
-	return prefs.getString("MagcardDeviceDriver", "virtual");
+    public String getDeviceDriver(String device) {
+	return prefs.getString(device + ".Driver", "virtual");
     }
 
-    public String getMagcardDeviceNameOrVid() {
-	return prefs.getString("MagcardDeviceNameOrVid", "0x0303");
+    public void setDeviceNameOrVid(String device, String name_or_vid) {
+	putObject(device + ".DeviceNameOrVid", name_or_vid);
     }
 
-    public void setMagcardDeviceNameOrVid(String name_or_vid) {
-	putObject("MagcardDeviceNameOrVid", name_or_vid);
+    public String getDeviceNameOrVid(String device) {
+	return prefs.getString(device + ".DeviceNameOrVid", null);
     }
 
-    public String getMagcardDevicePathOrPid() {
-	return prefs.getString("MagcardDevicePathOrPid", "0x0304");
+    public void setDevicePathOrPid(String device, String path_or_pid) {
+	putObject(device + ".DevicePathOrPid", path_or_pid);
     }
 
-    public void setMagcardDevicePathOrPid(String path_or_pid) {
-	putObject("MagcardDevicePathOrPid", path_or_pid);
+    public String getDevicePathOrPid(String device) {
+	return prefs.getString(device + ".DevicePathOrPid", null);
+    }
+
+    public void setDeviceBaudrate(String device, int baudrate) {
+	putObject(device + ".Baudrate", baudrate);
+    }
+
+    public int getDeviceBaudrate(String device) {
+	return prefs.getInt(device + ".Baudrate", 9600);
     }
 
     public void setAftermarketName(String name) {
@@ -835,21 +898,5 @@ public class Preferences
     public int getPageTopMargin(Form form, int page_no) {
 	String key = form.getClass().getName() + "." + page_no + ".top";
 	return prefs.getInt(key, 0);
-    }
-
-    public String getPrinterClass() {
-	return prefs.getString("PrinterClass", "com.cansiny.eform.PrinterLog");
-    }
-
-    public void setPrinterClass(String klass) {
-	putObject("PrinterClass", klass);
-    }
-
-    public String getPrinterDevice() {
-	return prefs.getString("PrinterDevice", "USB");
-    }
-
-    public void setPrinterDevice(String device) {
-	putObject("PrinterDevice", device);
     }
 }

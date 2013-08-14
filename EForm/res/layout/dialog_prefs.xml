@@ -326,21 +326,103 @@
           <TableRow
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_gravity="center_vertical" >
+              android:gravity="bottom" >
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="刷卡器设备："
+                android:layout_marginBottom="2dp"
+                android:text="刷卡器驱动："
                 android:textSize="18sp" />
 
             <Spinner
-                android:id="@+id/magcard_spinner"
+                android:id="@+id/magcard_driver_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:spinnerStyle="@android:style/Widget.Spinner.DropDown"
-                android:gravity="bottom" />
+		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+		android:layout_marginLeft="20dp"
+                android:layout_marginBottom="2dp"
+                android:text="波特率："
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/magcard_baudrate_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+          </TableRow>
+
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="bottom" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:text="打印机驱动："
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/printer_driver_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+		android:layout_marginLeft="20dp"
+                android:layout_marginBottom="2dp"
+                android:text="波特率："
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/printer_baudrate_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+          </TableRow>
+
+          <TableRow
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="bottom" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:text="身份证驱动："
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/idcard_driver_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+		android:layout_marginLeft="20dp"
+                android:layout_marginBottom="2dp"
+                android:text="波特率："
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/idcard_baudrate_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
           </TableRow>
 
         </TableLayout>
