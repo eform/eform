@@ -122,8 +122,7 @@ public abstract class Form extends DefaultHandler
     }
 
     protected void swipeMagcard(TextView textview) {
-	MagcardReader reader = new MagcardReader();
-	reader.readCardno(activity, textview);
+	Magcard.getMagcard().read(activity.getFragmentManager(), textview);
     }
 
     protected void readIdCard() {
@@ -196,7 +195,7 @@ public abstract class Form extends DefaultHandler
 		    String cardno = page.getString(key);
 		    view.setTag(R.id.FormCardnoViewTagKey, cardno);
 		    if (!view.hasFocus()) {
-			((TextView) view).setText(MagcardReader.formatCardno(cardno));
+			((TextView) view).setText(Magcard.formatCardno(cardno));
 		    }
 		}
 	    }
@@ -391,7 +390,7 @@ public abstract class Form extends DefaultHandler
 		if (textview != null) {
 		    Object cardno = textview.getTag(R.id.FormCardnoViewTagKey);
 		    if (cardno != null) {
-			textview.setText(MagcardReader.formatCardno((CharSequence) cardno));
+			textview.setText(Magcard.formatCardno((CharSequence) cardno));
 		    }
 		}
 	    }
@@ -443,7 +442,7 @@ public abstract class Form extends DefaultHandler
 		    if (hasfocus)
 			textview.setText((CharSequence) cardno);
 		    else
-			textview.setText(MagcardReader.formatCardno((CharSequence) cardno));
+			textview.setText(Magcard.formatCardno((CharSequence) cardno));
 		}
 		break;
 	    }

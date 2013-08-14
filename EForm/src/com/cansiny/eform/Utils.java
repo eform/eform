@@ -287,22 +287,28 @@ public class Utils
     }
 
 
-    static public class SerialDeviceAdapter extends BaseAdapter
+    static public class DeviceAdapter extends BaseAdapter
     {
-	private ArrayList<SerialDevice> devices;
+	private ArrayList<Device> devices;
 
-	public SerialDeviceAdapter() {
-	    devices = new ArrayList<SerialDevice>();
+	public DeviceAdapter() {
+	    devices = new ArrayList<Device>();
 
 	    SerialPort.SerialPortFinder finder = new SerialPort.SerialPortFinder();
 	    String[] results = finder.getAllDevices();
 	    Arrays.sort(results);
+
 	    for (String device : results) {
 		String[] array = device.split(" ");
 		if (!array[1].equals("g_serial")) {
-		    devices.add(new SerialDevice(array[2], array[0], array[1]));
+		    LogActivity.writeLog(device);
+		    devices.add(new Device(array[1], array[0], array[2]));
 		}
 	    }
+	}
+
+	public void addUSBDevice(String vid, String pid) {
+	    devices.add(0, new Device("usb", vid, pid));
 	}
 
 	@Override
@@ -326,7 +332,7 @@ public class Utils
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    SerialDevice device = null;
+	    Device device = null;
 	    if (position < devices.size())
 		device = devices.get(position);
 
@@ -339,12 +345,15 @@ public class Utils
 	    if (device != null) {
 		String driver = device.getDriver();
 		String name;
-		if (driver.equalsIgnoreCase("serial"))
-		    name = "标准串口 " + device.getName();
-		else if (driver.equalsIgnoreCase("usbserial"))
-		    name = "USB串口 " + device.getName();
-		else
-		    name = device.getName();
+		if (driver.equalsIgnoreCase("serial")) {
+		    name = "标准串口 " + device.getNameOrVid();
+		} else if (driver.equalsIgnoreCase("usbserial")) {
+		    name = "USB转串口 " + device.getNameOrVid();
+		} else if (driver.equalsIgnoreCase("usb")) {
+		    name = "标准USB接口 " + device.getPathOrPid();
+		} else {
+		    name = device.getNameOrVid();
+		}
 		textview.setText(name);
 		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    }
@@ -353,32 +362,44 @@ public class Utils
 	    return linear;
 	}
 
-	public String getItemDevpath(int position) {
+	public String getItemNameOrVid(int position) {
 	    if (position < devices.size() && position >= 0) {
-		SerialDevice device = devices.get(position);
-		return device.devpath;
+		Device device = devices.get(position);
+		return device.name_or_vid;
 	    }
 	    return null;
 	}
 
-	public class SerialDevice
+	public String getItemPathOrPid(int position) {
+	    if (position < devices.size() && position >= 0) {
+		Device device = devices.get(position);
+		return device.path_or_pid;
+	    }
+	    return null;
+	}
+
+	public class Device
 	{
-	    private String devpath;
-	    private String name;
 	    private String driver;
-	    public SerialDevice(String devpath, String name, String driver) {
-		this.devpath = devpath;
-		this.name = name;
+	    private String name_or_vid;
+	    private String path_or_pid;
+
+	    public Device(String driver, String name_or_vid, String path_or_pid) {
 		this.driver = driver;
+		this.name_or_vid = name_or_vid;
+		this.path_or_pid = path_or_pid;
 	    }
-	    public String getDevpath() {
-		return devpath;
-	    }
-	    public String getName() {
-		return name;
-	    }
+
 	    public String getDriver() {
 		return driver;
+	    }
+
+	    public String getNameOrVid() {
+		return name_or_vid;
+	    }
+
+	    public String getPathOrPid() {
+		return path_or_pid;
 	    }
 	}
 

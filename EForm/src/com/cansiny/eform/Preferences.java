@@ -8,8 +8,6 @@ package com.cansiny.eform;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import com.cansiny.eform.Member.MemberProfile;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -360,13 +358,19 @@ class PreferencesDialog extends Utils.DialogFragment
 	final Preferences prefs = Preferences.getPreferences();
 	AlertDialog dialog = (AlertDialog) getDialog();
 
-	final Utils.SerialDeviceAdapter adapter = new Utils.SerialDeviceAdapter();
+	final Utils.DeviceAdapter adapter = new Utils.DeviceAdapter();
+
+	String vid = prefs.getMagcardDeviceNameOrVid();
+	String pid = prefs.getMagcardDevicePathOrPid();
+	adapter.addUSBDevice(vid, pid);
+
 	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_spinner);
 	spinner.setAdapter(adapter);
-	String devpath = prefs.getMagcardDevice();
+
+	String devpath = prefs.getMagcardDevicePathOrPid();
 	if (devpath != null) {
 	    for (int i = 0; i < adapter.getCount(); i++) {
-		if (devpath.equals(adapter.getItemDevpath(i))) {
+		if (devpath.equals(adapter.getItemPathOrPid(i))) {
 		    spinner.setSelection(i);
 		    break;
 		}
@@ -375,12 +379,14 @@ class PreferencesDialog extends Utils.DialogFragment
 	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    @Override
 	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		String devpath = adapter.getItemDevpath(position);
-		prefs.setMagcardDevice(devpath);
+		Utils.DeviceAdapter.Device device = (Utils.DeviceAdapter.Device) parent.getItemAtPosition(position);
+		prefs.setMagcardDeviceDriver(device.getDriver());
+		prefs.setMagcardDeviceNameOrVid(device.getNameOrVid());
+		prefs.setMagcardDevicePathOrPid(device.getPathOrPid());
 	    }
 	    @Override
 	    public void onNothingSelected(AdapterView<?> parent) {
-		prefs.setMagcardDevice(null);
+		prefs.setMagcardDeviceDriver(null);
 	    }
 	});
     }
@@ -590,7 +596,7 @@ class MemberListDialog extends Utils.DialogFragment
 	    if (members == null || position >= members.size())
 		return position;
 
-	    MemberProfile profile = members.get(position);
+	    Member.MemberProfile profile = members.get(position);
 	    return profile.rowid;
 	}
 
@@ -599,7 +605,7 @@ class MemberListDialog extends Utils.DialogFragment
 	    if (members == null || position >= members.size())
 		return null;
 
-	    MemberProfile profile = members.get(position);
+	    Member.MemberProfile profile = members.get(position);
 	    LinearLayout.LayoutParams params;
 
 	    LinearLayout linear = new LinearLayout(parent.getContext());
@@ -771,12 +777,28 @@ public class Preferences
 	return prefs.getInt("AutoLogoutTime", 10);
     }
 
-    public void setMagcardDevice(String device) {
-	putObject("MagcardDevice", device);
+    public void setMagcardDeviceDriver(String device) {
+	putObject("MagcardDeviceDriver", device);
     }
 
-    public String getMagcardDevice() {
-	return prefs.getString("MagcardDevice", "USB");
+    public String getMagcardDeviceDriver() {
+	return prefs.getString("MagcardDeviceDriver", "virtual");
+    }
+
+    public String getMagcardDeviceNameOrVid() {
+	return prefs.getString("MagcardDeviceNameOrVid", "0x0303");
+    }
+
+    public void setMagcardDeviceNameOrVid(String name_or_vid) {
+	putObject("MagcardDeviceNameOrVid", name_or_vid);
+    }
+
+    public String getMagcardDevicePathOrPid() {
+	return prefs.getString("MagcardDevicePathOrPid", "0x0304");
+    }
+
+    public void setMagcardDevicePathOrPid(String path_or_pid) {
+	putObject("MagcardDevicePathOrPid", path_or_pid);
     }
 
     public void setAftermarketName(String name) {
