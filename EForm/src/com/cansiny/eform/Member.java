@@ -10,6 +10,9 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import com.cansiny.eform.IDCard.IDCardInfo;
+import com.cansiny.eform.IDCard.IDCardListener;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -42,8 +45,11 @@ import android.widget.TextView;
 
 
 class MemberLoginDialog extends Utils.DialogFragment
-	implements Administrator.AdministratorLoginDialogListener
+	implements Administrator.AdministratorLoginDialogListener, IDCardListener
 {
+    private static final int TAG_IDNO_TEXTVIEW = 1;
+    private static final int TAG_IDCARD_BUTTON = 2;
+
     private EditText userid_edittext;
     private EditText password_edittext;
 
@@ -57,6 +63,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 	table.addView(row);
 
 	TextView textview = new TextView(getActivity());
+	textview.setTag(TAG_IDNO_TEXTVIEW);
 	textview.setText("证件号码：");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	textview.setOnClickListener(this);
@@ -67,6 +74,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 	userid_edittext.setInputType(InputType.TYPE_CLASS_PHONE);
 	userid_edittext.setFilters(new InputFilter[] {new InputFilter.LengthFilter(18)});
 	userid_edittext.setMinEms(10);
+	userid_edittext.setTextColor(getResources().getColor(R.color.black));
 	userid_edittext.setHintTextColor(getResources().getColor(R.color.silver));
 	userid_edittext.setEnabled(false);
 	row.addView(userid_edittext);
@@ -74,10 +82,12 @@ class MemberLoginDialog extends Utils.DialogFragment
 	addClearButton(row);
 
 	Button button = new Button(getActivity());
+	button.setTag(TAG_IDCARD_BUTTON);
 	button.setText("读身份证");
 	button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	button.setTextColor(getResources().getColor(R.color.purple));
 	button.setBackgroundResource(R.drawable.button);
+	button.setOnClickListener(this);
 	params = new TableRow.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -196,8 +206,21 @@ class MemberLoginDialog extends Utils.DialogFragment
     @Override
     public void onClick(View view) {
 	super.onClick(view);
-	if (view.getClass().equals(TextView.class)) {
-	    userid_edittext.setEnabled(true);
+
+	if (view.getTag() == null)
+	    return;
+
+	if (view.getTag() instanceof Integer) {
+	    switch(((Integer) view.getTag()).intValue()) {
+	    case TAG_IDNO_TEXTVIEW:
+		userid_edittext.setEnabled(true);
+		break;
+	    case TAG_IDCARD_BUTTON:
+		IDCard idcard = IDCard.getIDCard();
+		idcard.setListener(this);
+		idcard.read(getFragmentManager());
+		break;
+	    }
 	}
     }
 
@@ -210,6 +233,11 @@ class MemberLoginDialog extends Utils.DialogFragment
 	    MemberRegisterDialog dialog = new MemberRegisterDialog();
 	    dialog.show(getFragmentManager(), "MemberRegisterDialog");
 	}
+    }
+
+    @Override
+    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+	userid_edittext.setText(info.idno);
     }
 
 }
@@ -277,7 +305,7 @@ class MemberRegisterDialog extends Utils.DialogFragment
 }
 
 
-class MemberProfileDialog extends Utils.DialogFragment
+class MemberProfileDialog extends Utils.DialogFragment implements IDCardListener
 {
     private EditText userid_edittext;
     private EditText username_edittext;
@@ -339,11 +367,12 @@ class MemberProfileDialog extends Utils.DialogFragment
 	    company_edittext.setText(profile.company);
 	    phone_edittext.setText(profile.phone);
 
-	    dialog.findViewById(R.id.idcard_read_button).setVisibility(View.GONE);
+	    View button = dialog.findViewById(R.id.idcard_read_button);
+	    button.setVisibility(View.GONE);
+	} else {
+	    View button = dialog.findViewById(R.id.idcard_read_button);
+	    button.setOnClickListener(this);
 	}
-
-	View view = dialog.findViewById(R.id.idcard_read_button);
-	view.setOnClickListener(this);
 
 	int[] ids = {
 		R.id.password_clear,
@@ -352,17 +381,13 @@ class MemberProfileDialog extends Utils.DialogFragment
 		R.id.phone_clear
 	};
 	for (int id : ids) {
-	    view = dialog.findViewById(id);
+	    View view = dialog.findViewById(id);
 	    view.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
 	    view.setOnClickListener(this);
 	}
 
 	if (profile == null)
 	    password_edittext.requestFocus();
-
-	/* TODO: remove below 2 lines when idcard is ready */
-	userid_edittext.setEnabled(true);
-	username_edittext.setEnabled(true);
 
 	Button button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
 	button.setOnClickListener(new View.OnClickListener() {
@@ -469,13 +494,22 @@ class MemberProfileDialog extends Utils.DialogFragment
 
 	switch (view.getId()) {
 	case R.id.idcard_read_button:
+	    IDCard idcard = IDCard.getIDCard();
+	    idcard.setListener(this);
+	    idcard.read(getFragmentManager());
 	    break;
 	}
+    }
+
+    @Override
+    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+	userid_edittext.setText(info.idno);
+	username_edittext.setText(info.name);
     }
 }
 
 
-class MemberDeleteDialog extends Utils.DialogFragment
+class MemberDeleteDialog extends Utils.DialogFragment implements IDCardListener
 {
     private LinearLayout buildLayout() {
 	LinearLayout linear = new LinearLayout(getActivity());
@@ -547,18 +581,33 @@ class MemberDeleteDialog extends Utils.DialogFragment
 	button.setOnClickListener(new View.OnClickListener() {
 	    @Override
 	    public void onClick(View view) {
-		dismiss();
-
-		/* TODO: read member idcard before delete it */
-
-		Member member = Member.getMember();
-		if (member.delete(getActivity())) {
-		    Utils.showToast("会员注销成功！");
-		} else {
-		    Utils.showToast("注销会员失败！", R.drawable.cry);
-		}
+		showToast("请提供会员的身份证件！");
+		IDCard idcard = IDCard.getIDCard();
+		idcard.setListener(MemberDeleteDialog.this);
+		idcard.read(getFragmentManager());
 	    }
 	});
+    }
+
+    @Override
+    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+	Member member = Member.getMember();
+
+	if (!member.isLogin() || member.getProfile() == null) {
+	    dismiss();
+	    return;
+	}
+
+	if (member.getProfile().userid.equals(info.idno)) {
+	    if (member.delete(getActivity())) {
+		Utils.showToast("会员注销成功！");
+	    } else {
+		Utils.showToast("注销会员失败！", R.drawable.cry);
+	    }
+	    dismiss();
+	} else {
+	    showToastLong("必须提供会员注册时使用的的身份证才能注销！", R.drawable.cry);
+	}
     }
 }
 

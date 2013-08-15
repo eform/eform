@@ -7,6 +7,10 @@ package com.cansiny.eform;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+
+import com.cansiny.eform.IDCard.IDCardInfo;
+import com.cansiny.eform.IDCard.IDCardListener;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -42,7 +46,7 @@ import android.widget.TextView;
 
 
 class PreferencesDialog extends Utils.DialogFragment
-    implements OnCheckedChangeListener, OnTabChangeListener
+    implements OnCheckedChangeListener, OnTabChangeListener, IDCardListener
 {
     static final private String TAB_TAG_GENERIC = "Generic";
     static final private String TAB_TAG_DEVICE  = "Device";
@@ -151,19 +155,26 @@ class PreferencesDialog extends Utils.DialogFragment
     }
 
     private void onMemberPasswordButtonClick() {
+	showToast("请提供会员注册时的身份证件");
+	IDCard idcard = IDCard.getIDCard();
+	idcard.setListener(this);
+	idcard.read(getFragmentManager());
+    }
+
+    @Override
+    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
 	AlertDialog dialog = (AlertDialog) getDialog();
 
-	TextView userid_view = (TextView) dialog.findViewById(R.id.member_userid_textview);
+	View userid_view = dialog.findViewById(R.id.member_userid_textview);
 	View table = dialog.findViewById(R.id.member_password_table);
 
-	String userid = "1111";
-	member_password_rowid = EFormSQLite.Member.getid(getActivity(), userid);
+	member_password_rowid = EFormSQLite.Member.getid(getActivity(), info.idno);
 	if (member_password_rowid >= 0) {
-	    userid_view.setText(userid);
+	    ((TextView) userid_view).setText(info.idno);
 	    table.setVisibility(View.VISIBLE);
 	} else {
-	    showToast("没有证件号码为“" + userid + "”的会员！");
-	    userid_view.setText("");
+	    showToast("没有证件号码为“" + info.idno + "”的会员！");
+	    ((TextView) userid_view).setText("");
 	    table.setVisibility(View.GONE);
 	}
     }
@@ -216,6 +227,8 @@ class PreferencesDialog extends Utils.DialogFragment
 	    view.setVisibility(View.GONE);
 	    showToast("密码修改成功！", R.drawable.smile);
 	    member_password_rowid = -1;
+	} else {
+	    showToast("密码修改失败！", R.drawable.cry);
 	}
     }
 
