@@ -7,7 +7,7 @@ package com.cansiny.eform;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-
+import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -26,9 +26,6 @@ import android.widget.TextView;
 
 public abstract class Magcard extends Utils.DialogFragment
 {
-    static public final String USB_VID = "0x0001";
-    static public final String USB_PID = "0x0002";
-
     static final private int LEAVE_START = 4;
     static final private int LEAVE_END   = 3;
 
@@ -61,13 +58,9 @@ public abstract class Magcard extends Utils.DialogFragment
 	if (driver.equalsIgnoreCase("virtual")) {
 	    magcard = new MagcardVirtual();
 	} else if (driver.equalsIgnoreCase("usb")) {
-	    try {
-		magcard = new MagcardUSB(prefs.getDeviceNameOrVid("Magcard"),
-			prefs.getDevicePathOrPid("Magcard"));
-	    } catch (Exception e) {
-		LogActivity.writeLog(e);
-		return null;
-	    }
+	    magcard = MagcardUSB.getUSBMagcard(
+		    prefs.getDeviceNameOrVid("Magcard"),
+		    prefs.getDevicePathOrPid("Magcard"));
 	} else if (driver.equalsIgnoreCase("serial") ||
 		driver.equalsIgnoreCase("usbserial")) {
 	    magcard = new MagcardSerial(prefs.getDevicePathOrPid("Magcard"));
@@ -76,6 +69,10 @@ public abstract class Magcard extends Utils.DialogFragment
 	    return null;
 	}
 	return magcard;
+    }
+
+    static public ArrayList<String> getVidPids() {
+	return MagcardUSB.getUSBVidPids();
     }
 
     private int  totaltime = 30;
@@ -320,23 +317,47 @@ class MagcardSerial extends Magcard
     }
 }
 
-class MagcardUSB extends Magcard
+abstract class MagcardUSB extends Magcard
 {
-    private int vid = 0;
-    private int pid = 0;
+    public static MagcardUSB getUSBMagcard(String vid, String pid) {
+	try {
+	    int ivid = Integer.decode(vid);
+	    int ipid = Integer.decode(pid);
 
-    public MagcardUSB(String vid, String pid) throws NumberFormatException {
-	this.vid = Integer.decode(vid);
-	this.pid = Integer.decode(pid);
-    }
-
-    @Override
-    protected String read() {
-	if (vid == 0 || pid == 0) {
-	    LogActivity.writeLog("不能得到读卡器厂商ID和产品ID");
+	    if (ivid == MagcardUSBWBT1000.VID && ipid == MagcardUSBWBT1000.PID) {
+		return new MagcardUSBWBT1000();
+	    } else {
+		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序", vid, pid);
+		return null;
+	    }
+	} catch (NumberFormatException e) {
+	    LogActivity.writeLog(e);
 	    return null;
 	}
-	// TODO Auto-generated method stub
+    }
+
+    public static ArrayList<String> getUSBVidPids() {
+	ArrayList<String> array = new ArrayList<String>();
+
+	String vid = String.format("0x%04X", MagcardUSBWBT1000.VID);
+	String pid = String.format("0x%04X", MagcardUSBWBT1000.PID);
+	array.add(vid + " " + pid);
+
+	return array;
+    }
+
+}
+
+class MagcardUSBWBT1000 extends MagcardUSB
+{
+    public static final int VID = 0x0001;
+    public static final int PID = 0x0002;
+
+    public MagcardUSBWBT1000() {
+    }
+    
+    @Override
+    protected String read() {
 	return null;
     }
 

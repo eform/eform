@@ -361,7 +361,6 @@ public class Utils
 		}
 		textview.setText(name);
 		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
-		textview.setTextColor(parent.getResources().getColor(R.color.blue));
 	    }
 	    linear.addView(textview);
 
@@ -516,7 +515,6 @@ public class Utils
 	    TextView textview = new TextView(parent.getContext());
 	    textview.setText(String.valueOf(value));
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
-	    textview.setTextColor(parent.getResources().getColor(R.color.blue));
 	    linear.addView(textview);
 
 	    return linear;

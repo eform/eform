@@ -7,7 +7,6 @@ package com.cansiny.eform;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -413,7 +412,11 @@ class PreferencesDialog extends Utils.DialogFragment
 	AlertDialog dialog = (AlertDialog) getDialog();
 
 	Utils.DeviceAdapter driver_adapter = new Utils.DeviceAdapter();
-	driver_adapter.addUSBDevice(Magcard.USB_VID, Magcard.USB_PID);
+	ArrayList<String> array = Magcard.getVidPids();
+	for (String vidpid : array) {
+	    String[] fields = vidpid.split(" ");
+	    driver_adapter.addUSBDevice(fields[0], fields[1]);
+	}
 	if (BuildConfig.DEBUG) {
 	    driver_adapter.addVirtialDevice();
 	}
