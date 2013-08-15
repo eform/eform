@@ -5,8 +5,8 @@
  */
 package com.cansiny.eform;
 
-import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -26,19 +26,16 @@ import android.widget.TextView;
 
 public abstract class IDCard extends Utils.DialogFragment
 {
-    static public final String USB_VID = "0x0001";
-    static public final String USB_PID = "0x0002";
+    static final private int LEAVE_START = 3;
+    static final private int LEAVE_END   = 4;
 
-    static final private int LEAVE_START = 4;
-    static final private int LEAVE_END   = 3;
-
-    static public String formatCardno(CharSequence cardno) {
+    static public String formatIdno(CharSequence idno) {
 	StringBuilder builder = new StringBuilder();
-	int length = cardno.length();
+	int length = idno.length();
 
 	for (int i = 0; i < length; i++) {
 	    if (i < LEAVE_START || i >= length - LEAVE_END)
-		builder.append(cardno.charAt(i));
+		builder.append(idno.charAt(i));
 	    else
 		builder.append('*');
 
@@ -53,29 +50,26 @@ public abstract class IDCard extends Utils.DialogFragment
 
 	String driver = prefs.getDeviceDriver("IDCard");
 	if (driver == null || driver.length() == 0) {
-	    LogActivity.writeLog("身份证读卡器驱动未指定");
+	    LogActivity.writeLog("身份证阅读器驱动未指定");
 	    return null;
 	}
-	IDCard IDCard = null;
 
 	if (driver.equalsIgnoreCase("virtual")) {
-	    IDCard = new IDCardVirtual();
-	} else if (driver.equalsIgnoreCase("usb")) {
-	    try {
-		IDCard = new IDCardUSB(prefs.getDeviceNameOrVid("IDCard"),
-			prefs.getDevicePathOrPid("IDCard"));
-	    } catch (Exception e) {
-		LogActivity.writeLog(e);
-		return null;
-	    }
-	} else if (driver.equalsIgnoreCase("serial") ||
-		driver.equalsIgnoreCase("usbserial")) {
-	    IDCard = new IDCardSerial(prefs.getDevicePathOrPid("IDCard"));
-	} else {
-	    LogActivity.writeLog("不能识别的身份证读卡驱动: %s", driver);
-	    return null;
+	    return new IDCardVirtual();
 	}
-	return IDCard;
+	if (driver.equalsIgnoreCase("usb")) {
+	    return IDCardUSB.getUSBIDCard(prefs.getDeviceNameOrVid("IDCard"),
+		    prefs.getDevicePathOrPid("IDCard"));
+	}
+	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
+	    return new IDCardSerial(prefs.getDevicePathOrPid("IDCard"));
+	}
+	LogActivity.writeLog("不能识别的身份证阅读器驱动: %s", driver);
+	return null;
+    }
+
+    static public ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
+	return IDCardUSB.listUSBDevices();
     }
 
     private int  totaltime = 30;
@@ -84,6 +78,8 @@ public abstract class IDCard extends Utils.DialogFragment
     private Handler handler;
     private Runnable runnable;
     private IDCardTask task;
+    private IDCardListener listener;
+    static private int error_count = 0;
 
     private View buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
@@ -181,6 +177,7 @@ public abstract class IDCard extends Utils.DialogFragment
 	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
+		cancel();
 		if (task != null) {
 		    task.cancel(true);
 		}
@@ -206,26 +203,50 @@ public abstract class IDCard extends Utils.DialogFragment
 	handler.removeCallbacks(runnable);
     }
 
-    abstract protected String read();
+    abstract protected IDCardInfo read();
     abstract protected void cancel();
 
-    public void read(FragmentManager manager, TextView textview) {
-	task = new IDCardTask(manager, textview);
+    public void setListener(IDCardListener listener) {
+	this.listener = listener;
+    }
+
+    public void read(FragmentManager manager) {
+	task = new IDCardTask(manager);
 	task.execute();
     }
 
-    public class IDCardTask extends AsyncTask<Void, Void, CharSequence>
+    static public class IDCardInfo
+    {
+	public String name;
+	public byte gender;
+	public String idno;
+	public String grant_dept;
+	public String due_year;
+	public String due_month;
+	public String due_day;
+	public String born_year;
+	public String born_month;
+	public String born_day;
+	public String address;
+	public String nation;
+	public String nationality;
+    }
+
+    public interface IDCardListener
+    {
+	public void onIDCardRead(IDCard IDCard, IDCardInfo info);
+    }
+
+    public class IDCardTask extends AsyncTask<Void, Void, IDCardInfo>
     {
 	private FragmentManager manager;
-	private TextView textview;
 
-	public IDCardTask(FragmentManager manager, TextView textview) {
+	public IDCardTask(FragmentManager manager) {
 	    this.manager = manager;
-	    this.textview = textview;
 	}
 
 	@Override
-	protected CharSequence doInBackground(Void... args) {
+	protected IDCardInfo doInBackground(Void... args) {
 	    return read();
 	}
 
@@ -235,32 +256,30 @@ public abstract class IDCard extends Utils.DialogFragment
 	}
 
 	@Override
-	protected void onPostExecute(CharSequence cardno) {
-	    if (cardno != null) {
-		if (!(textview instanceof TextView)) {
-		    LogActivity.writeLog("IDCardTask 参数必须是 TextView 实例");
-		} else {
-		    textview.setText(cardno);
+	protected void onPostExecute(IDCardInfo info) {
+	    if (info != null) {
+		if (listener != null) {
+		    listener.onIDCardRead(IDCard.this, info);
 		}
+		IDCard.error_count = 0;
 	    } else {
-		Utils.showToast("读取卡号失败，请重试！", R.drawable.cry);
+		if (++IDCard.error_count >= 3) {
+		    Utils.showToast("已经连续 " + IDCard.error_count + " 次读身份证失败，"
+			    + "请联系管理员检查设备配置", R.drawable.cry);
+		} else {
+		    Utils.showToast("读取身份证信息失败，请重试！", R.drawable.cry);
+		}
 	    }
 	    dismiss();
 	}
 	
 	@Override
-	protected void onCancelled(CharSequence cardno) {
+	protected void onCancelled(IDCardInfo info) {
 	    Utils.showToast("操作被取消 ...");
 	    dismiss();
 	}
     }
 
-    public class IDCardInfo
-    {
-	public String name;
-	public boolean sex;
-	public String nation;
-    }
 }
 
 class IDCardVirtual extends IDCard
@@ -269,15 +288,30 @@ class IDCardVirtual extends IDCard
     }
 
     @Override
-    protected String read() {
+    protected IDCardInfo read() {
 	try {
 	    Thread.sleep(3000);
 	} catch (InterruptedException e) {
 	    LogActivity.writeLog(e);
 	}
+
 	SecureRandom random = new SecureRandom();
 	if (random.nextBoolean()) {
-	    return new BigInteger(130, random).toString(10).substring(0, 19);
+	    IDCardInfo info = new IDCardInfo();
+	    info.name = "吴小虎";
+	    info.gender = 1;
+	    info.address = "安徽省庐阳区濉溪路万豪广场";
+	    info.born_year = "1980";
+	    info.born_month = "5";
+	    info.born_day = "30";
+	    info.due_year = "2020";
+	    info.due_month = "12";
+	    info.due_day = "20";
+	    info.idno = "429005198005300614";
+	    info.grant_dept = "湖北省公安局";
+	    info.nation = "汉";
+	    info.nationality = "中国";
+	    return info;
 	} else {
 	    return null;
 	}
@@ -298,8 +332,11 @@ class IDCardSerial extends IDCard
     }
 
     @Override
-    protected String read() {
-	// TODO Auto-generated method stub
+    protected IDCardInfo read() {
+	if (path == null) {
+	    LogActivity.writeLog("不能得到身份证阅读器设备路径");
+	    return null;
+	}
 	return null;
     }
 
@@ -309,23 +346,48 @@ class IDCardSerial extends IDCard
     }
 }
 
-class IDCardUSB extends IDCard
+abstract class IDCardUSB extends IDCard
 {
-    private int vid = 0;
-    private int pid = 0;
+    public static IDCardUSB getUSBIDCard(String vid, String pid) {
+	try {
+	    int ivid = Integer.decode(vid);
+	    int ipid = Integer.decode(pid);
 
-    public IDCardUSB(String vid, String pid) throws NumberFormatException {
-	this.vid = Integer.decode(vid);
-	this.pid = Integer.decode(pid);
-    }
-
-    @Override
-    protected String read() {
-	if (vid == 0 || pid == 0) {
-	    LogActivity.writeLog("不能得到读卡器厂商ID和产品ID");
+	    if (ivid == IDCardUSBGTICR100.VID && ipid == IDCardUSBGTICR100.PID) {
+		return new IDCardUSBGTICR100();
+	    } else {
+		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序", vid, pid);
+		return null;
+	    }
+	} catch (NumberFormatException e) {
+	    LogActivity.writeLog(e);
 	    return null;
 	}
-	// TODO Auto-generated method stub
+    }
+
+    public static ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
+	ArrayList<Utils.DeviceAdapter.Device> array =
+		new ArrayList<Utils.DeviceAdapter.Device>();
+
+	array.add(new Utils.DeviceAdapter.Device("usb",
+		String.format("0x%04X", IDCardUSBGTICR100.VID),
+		String.format("0x%04X", IDCardUSBGTICR100.PID)));
+
+	return array;
+    }
+
+}
+
+class IDCardUSBGTICR100 extends IDCardUSB
+{
+    public static final int VID = 0x2001;
+    public static final int PID = 0x2002;
+
+    public IDCardUSBGTICR100() {
+    }
+    
+    @Override
+    protected IDCardInfo read() {
 	return null;
     }
 

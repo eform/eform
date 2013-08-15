@@ -204,6 +204,7 @@
             android:layout_marginRight="0dp"
             android:ems="10"
             android:inputType="number"
+            android:maxLength="22"
             android:textColor="@color/blue"
 	    android:hint="提示：可以刷卡来填写本项内容 -->>"
             android:textColorHint="#888888" />
@@ -463,6 +464,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
+            android:maxLength="18"
             android:inputType="phone"
             android:textColor="@color/blue" />
 
@@ -546,7 +548,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="3"
+            android:gravity="center_horizontal"
+            android:ems="4"
+            android:maxLength="4"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -555,8 +559,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
             android:text="年"
             android:textColor="@color/black"
             android:textSize="18sp" />
@@ -566,7 +570,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="2"
+            android:gravity="center_horizontal"
+            android:ems="3"
+            android:maxLength="2"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -575,8 +581,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
             android:text="月"
             android:textColor="@color/black"
             android:textSize="18sp" />
@@ -586,7 +592,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="2"
+            android:gravity="center_horizontal"
+            android:ems="3"
+            android:maxLength="2"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -595,8 +603,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:paddingLeft="2dp"
             android:text="日"
             android:textColor="@color/black"
             android:textSize="18sp" />
@@ -680,7 +687,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="text"
-            android:ems="2"
+            android:ems="3"
             android:textColor="@color/blue" />
 
       </LinearLayout>
@@ -710,7 +717,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="3"
+            android:gravity="center_horizontal"
+            android:ems="4"
+            android:maxLength="4"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -719,8 +728,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
             android:text="年"
             android:textColor="@color/black"
             android:textSize="18sp" />
@@ -730,7 +739,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="2"
+            android:gravity="center_horizontal"
+            android:ems="3"
+            android:maxLength="2"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -739,8 +750,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
             android:text="月"
             android:textColor="@color/black"
             android:textSize="18sp" />
@@ -750,7 +761,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="2"
+            android:gravity="center_horizontal"
+            android:ems="3"
+            android:maxLength="2"
 	    android:singleLine="true"
             android:inputType="number"
             android:textColor="@color/blue" />
@@ -759,8 +772,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:paddingLeft="2dp"
             android:text="日"
             android:textColor="@color/black"
             android:textSize="18sp" />

@@ -383,7 +383,7 @@ public class Utils
 	    return null;
 	}
 
-	public class Device
+	static public class Device
 	{
 	    private String driver;
 	    private String name_or_vid;

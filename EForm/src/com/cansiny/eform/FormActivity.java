@@ -449,12 +449,18 @@ public class FormActivity extends Activity implements
 
 
     public void onScrollUpButtonClick(View view) {
+	timeout_remains = TIMEOUT_VALUE;
+	setTimeoutTipVisible(false);
+
 	if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
 	    form.scrollPageUp();
 	}
     }
 
     public void onScrollDownButtonClick(View view) {
+	timeout_remains = TIMEOUT_VALUE;
+	setTimeoutTipVisible(false);
+
 	if (page_switcher.getStatus() == AsyncTask.Status.FINISHED) {
 	    form.scrollPageDown();
 	}
@@ -479,6 +485,9 @@ public class FormActivity extends Activity implements
     }
 
     public void onVerifyButtonClick(View view) {
+	timeout_remains = TIMEOUT_VALUE;
+	setTimeoutTipVisible(false);
+
 	/* prevent click too fast */
 	long time = System.currentTimeMillis() / 1000;
 	if (time - last_verify_time < 3)
@@ -496,6 +505,9 @@ public class FormActivity extends Activity implements
     }
 
     public void onPrintButtonClick(View view) {
+	timeout_remains = TIMEOUT_VALUE;
+	setTimeoutTipVisible(false);
+
 	try {
 	    File cachedir = getCacheDir();
 	    String fname = voucher.getFormClass() + ".xml";
@@ -523,6 +535,9 @@ public class FormActivity extends Activity implements
     }
 
     public void onMemberSaveButtonClick(View view) {
+	timeout_remains = TIMEOUT_VALUE;
+	setTimeoutTipVisible(false);
+
 	Member member = Member.getMember();
 	if (!member.isLogin()) {
 	    LogActivity.writeLog("会员还未登录???");

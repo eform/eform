@@ -411,19 +411,18 @@ class PreferencesDialog extends Utils.DialogFragment
     private void onDeviceTabActived() {
 	AlertDialog dialog = (AlertDialog) getDialog();
 
-	Utils.DeviceAdapter driver_adapter = new Utils.DeviceAdapter();
-	ArrayList<String> array = Magcard.getVidPids();
-	for (String vidpid : array) {
-	    String[] fields = vidpid.split(" ");
-	    driver_adapter.addUSBDevice(fields[0], fields[1]);
-	}
-	if (BuildConfig.DEBUG) {
-	    driver_adapter.addVirtialDevice();
-	}
 	Utils.BaudrateAdapter baudrate_adapter = new Utils.BaudrateAdapter();
 
 	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_driver_spinner);
-	spinner.setAdapter(driver_adapter);
+	Utils.DeviceAdapter adapter = new Utils.DeviceAdapter();
+	ArrayList<Utils.DeviceAdapter.Device> array = Magcard.listUSBDevices();
+	for (Utils.DeviceAdapter.Device device : array) {
+	    adapter.addUSBDevice(device.getNameOrVid(), device.getPathOrPid());
+	}
+	if (BuildConfig.DEBUG) {
+	    adapter.addVirtialDevice();
+	}
+	spinner.setAdapter(adapter);
 	setupDeviceDriver("Magcard", spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.magcard_baudrate_spinner);
@@ -431,7 +430,15 @@ class PreferencesDialog extends Utils.DialogFragment
 	setupDeviceBaudrate("Magcard", spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.printer_driver_spinner);
-	spinner.setAdapter(driver_adapter);
+	adapter = new Utils.DeviceAdapter();
+	array = Printer.listUSBDevices();
+	for (Utils.DeviceAdapter.Device device : array) {
+	    adapter.addUSBDevice(device.getNameOrVid(), device.getPathOrPid());
+	}
+	if (BuildConfig.DEBUG) {
+	    adapter.addVirtialDevice();
+	}
+	spinner.setAdapter(adapter);
 	setupDeviceDriver("Printer", spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.printer_baudrate_spinner);
@@ -439,7 +446,15 @@ class PreferencesDialog extends Utils.DialogFragment
 	setupDeviceBaudrate("Printer", spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.idcard_driver_spinner);
-	spinner.setAdapter(driver_adapter);
+	adapter = new Utils.DeviceAdapter();
+	array = IDCard.listUSBDevices();
+	for (Utils.DeviceAdapter.Device device : array) {
+	    adapter.addUSBDevice(device.getNameOrVid(), device.getPathOrPid());
+	}
+	if (BuildConfig.DEBUG) {
+	    adapter.addVirtialDevice();
+	}
+	spinner.setAdapter(adapter);
 	setupDeviceDriver("IDCard", spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.idcard_baudrate_spinner);

@@ -12,6 +12,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.cansiny.eform.IDCard.IDCardListener;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
@@ -41,7 +43,8 @@ import android.widget.TextView;
 
 
 public abstract class Form extends DefaultHandler
-    implements OnClickListener, OnFocusChangeListener, OnTouchListener, Utils.GenericTextWatcher.TextWatcherListener
+    implements OnClickListener, OnFocusChangeListener, OnTouchListener,
+    Utils.GenericTextWatcher.TextWatcherListener, IDCardListener
 {
     static final private String TAG_KEY_WARNING = "Warning";
     static final private String TAG_CLEAR_BUTTON = "edittext_clear_button";
@@ -54,6 +57,7 @@ public abstract class Form extends DefaultHandler
     protected ArrayList<Integer> verify_edittexts;
     private FormListener listener;
     private TextView last_swipecard_textview;
+    protected Button last_idcard_button;
 
     public Form(Activity activity, String label) {
 	this.activity = activity;
@@ -138,13 +142,19 @@ public abstract class Form extends DefaultHandler
 	}
     }
 
-    protected void readIdCard() {
+    protected void readIdCard(Button button) {
 	IDCard idcard = IDCard.getIDCard();
 	if (idcard != null) {
-	    idcard.read(activity.getFragmentManager(), null);
+	    last_idcard_button = button;
+	    idcard.setListener(this);
+	    idcard.read(activity.getFragmentManager());
 	} else {
-	    Utils.showToast("不能读身份证，请联系管理员检查设备配置", R.drawable.cry);
+	    Utils.showToast("不能读身份证信息，请联系管理员检查设备配置", R.drawable.cry);
 	}
+    }
+
+    @Override
+    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
     }
 
     public int getPageCount() {

@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -118,13 +119,13 @@ public class FormCIB01 extends Form
 	    break;
 
 	case R.id.p1_oldcard_swipe_button:
-	    EditText edit_text = findEditText(R.id.p1_oldcard_no_edittext);
-	    swipeMagcard(edit_text);
-	    edit_text.requestFocus();
+	    EditText edittext = findEditText(R.id.p1_oldcard_no_edittext);
+	    swipeMagcard(edittext);
+	    edittext.requestFocus();
 	    break;
 
 	case R.id.p1_idcard_button:
-	    readIdCard();
+	    readIdCard((Button) view);
 	    break;
 
 	case R.id.p1_male_checkbox:
@@ -208,7 +209,7 @@ public class FormCIB01 extends Form
 	    break;
 
 	case R.id.p1_agent_idcard_button:
-	    readIdCard();
+	    readIdCard((Button) view);
 	    break;
 
 	case R.id.p2_atm_transfer_open_checkbox:
@@ -675,6 +676,40 @@ public class FormCIB01 extends Form
     @Override
     public boolean print() {
 	return true;
+    }
+
+    @Override
+    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
+	switch(last_idcard_button.getId()) {
+	case R.id.p1_idcard_button:
+	    findEditText(R.id.p1_name_edittext).setText(info.name);
+	    if (info.gender == 1) {
+		findCheckBox(R.id.p1_male_checkbox).setChecked(true);
+		findCheckBox(R.id.p1_famale_checkbox).setChecked(false);
+	    } else {
+		findCheckBox(R.id.p1_male_checkbox).setChecked(false);
+		findCheckBox(R.id.p1_famale_checkbox).setChecked(true);
+	    }
+	    findCheckBox(R.id.p1_idtype_idcard_checkbox).setChecked(true);
+	    findCheckBox(R.id.p1_idtype_other_checkbox).setChecked(false);
+	    findEditText(R.id.p1_idno_edittext).setText(info.idno);
+	    findEditText(R.id.p1_issue_depart_edittext).setText(info.grant_dept);
+	    findEditText(R.id.p1_enddate_year_edittext).setText(info.due_year);
+	    findEditText(R.id.p1_enddate_month_edittext).setText(info.due_month);
+	    findEditText(R.id.p1_enddate_day_edittext).setText(info.due_day);
+	    findEditText(R.id.p1_address_edittext).setText(info.address);
+	    findEditText(R.id.p1_nation_edittext).setText(info.nation);
+	    findEditText(R.id.p1_birtyday_year_edittext).setText(info.born_year);
+	    findEditText(R.id.p1_birtyday_month_edittext).setText(info.born_month);
+	    findEditText(R.id.p1_birtyday_day_edittext).setText(info.born_day);
+	    findCheckBox(R.id.p1_resident_checkbox).setChecked(true);
+	    findCheckBox(R.id.p1_inresident_checkbox).setChecked(false);
+	    findCheckBox(R.id.p1_nationality_china_checkbox).setChecked(true);
+	    findCheckBox(R.id.p1_nationality_other_checkbox).setChecked(false);
+	    break;
+	case R.id.p1_agent_idcard_button:
+	    break;
+	}
     }
 
 }

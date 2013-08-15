@@ -6,6 +6,7 @@
 package com.cansiny.eform;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import android.util.Log;
 
@@ -23,21 +24,23 @@ public abstract class Printer
 	    LogActivity.writeLog("打印机驱动未指定");
 	    return null;
 	}
-	Printer printer = null;
 
 	if (driver.equalsIgnoreCase("virtual")) {
-	    printer = new PrinterVirtual();
-	} else if (driver.equalsIgnoreCase("usb")) {
-	    printer = new PrinterUSB(prefs.getDeviceNameOrVid("Printer"),
-		    prefs.getDevicePathOrPid("Printer"));
-	} else if (driver.equalsIgnoreCase("serial") ||
-		driver.equalsIgnoreCase("usbserial")) {
-	    printer = new PrinterSerial(prefs.getDevicePathOrPid("Printer"));
-	} else {
-	    LogActivity.writeLog("不能识别的打印机驱动: %s", driver);
-	    return null;
+	    return new PrinterVirtual();
 	}
-	return printer;
+	if (driver.equalsIgnoreCase("usb")) {
+	    return PrinterUSB.getUSBPrinter(prefs.getDeviceNameOrVid("Printer"),
+		    prefs.getDevicePathOrPid("Printer"));
+	}
+	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
+	    return new PrinterSerial(prefs.getDevicePathOrPid("Printer"));
+	}
+	LogActivity.writeLog("不能识别的打印机驱动: %s", driver);
+	return null;
+    }
+
+    static public ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
+	return PrinterUSB.listUSBDevices();
     }
 
     abstract public boolean open();
@@ -80,52 +83,6 @@ class PrinterVirtual extends Printer
     
 }
 
-
-class PrinterUSB extends Printer
-{
-    private int vid;
-    private int pid;
-
-    public PrinterUSB(String vid, String pid) throws NumberFormatException {
-	this.vid = Integer.decode(vid);
-	this.pid = Integer.decode(pid);
-    }
-
-    @Override
-    public boolean open() {
-	if (vid == 0 || pid == 0) {
-	    LogActivity.writeLog("不能得到打印机厂商ID或产品ID");
-	    return false;
-	}
-	return false;
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public boolean move(int x, int y) {
-	return false;
-    }
-
-    @Override
-    public boolean write(String text, PrintParam param) {
-	if (text == null) {
-	    LogActivity.writeLog("没有要打印的数据");
-	    return false;
-	}
-	try {
-	    byte[] bytes = text.getBytes("GB2312");
-	} catch (UnsupportedEncodingException e) {
-	    LogActivity.writeLog(e);
-	    return false;
-	}
-	return false;
-    }
-
-}
-
 class PrinterSerial extends Printer
 {
     private String path;
@@ -157,4 +114,73 @@ class PrinterSerial extends Printer
 	// TODO Auto-generated method stub
 	return false;
     }
+}
+
+abstract class PrinterUSB extends Printer
+{
+    public static PrinterUSB getUSBPrinter(String vid, String pid) {
+	try {
+	    int ivid = Integer.decode(vid);
+	    int ipid = Integer.decode(pid);
+
+	    if (ivid == PrinterUSBLQ90KP.VID && ipid == PrinterUSBLQ90KP.PID) {
+		return new PrinterUSBLQ90KP();
+	    }
+	    LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序", vid, pid);
+	    return null;
+	} catch (NumberFormatException e) {
+	    LogActivity.writeLog(e);
+	    return null;
+	}
+    }
+
+    public static ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
+	ArrayList<Utils.DeviceAdapter.Device> array =
+		new ArrayList<Utils.DeviceAdapter.Device>();
+
+	array.add(new Utils.DeviceAdapter.Device("usb",
+		String.format("0x%04X", PrinterUSBLQ90KP.VID),
+		String.format("0x%04X", PrinterUSBLQ90KP.PID)));
+
+	return array;
+    }
+}
+
+class PrinterUSBLQ90KP extends PrinterUSB
+{
+    public static final int VID = 0x3001;
+    public static final int PID = 0x3002;
+
+    public PrinterUSBLQ90KP() {
+    }
+
+    @Override
+    public boolean open() {
+	return false;
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public boolean move(int x, int y) {
+	return false;
+    }
+
+    @Override
+    public boolean write(String text, PrintParam param) {
+	if (text == null) {
+	    LogActivity.writeLog("没有要打印的数据");
+	    return false;
+	}
+	try {
+	    byte[] bytes = text.getBytes("GB2312");
+	} catch (UnsupportedEncodingException e) {
+	    LogActivity.writeLog(e);
+	    return false;
+	}
+	return false;
+    }
+
 }
