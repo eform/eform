@@ -1,0 +1,21 @@
+To enable USB host API support you should add a file named
+android.hardware.usb.host.xml and containing the following lines:
+
+<permissions>
+  <feature name="android.hardware.usb.host"/>
+</permissions>
+
+into folder
+
+/system/etc/permissions
+
+in that folder find file named handheld_core_hardware.xml or
+tablet_core_hardware.xml 
+
+and add
+
+<feature name="android.hardware.usb.host" />
+
+into  <permissions> section
+
+Reboot your device. Usb host api should work.
