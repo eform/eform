@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright © 2013 Hefei Cansiny Co.,Ltd. -->
+
+<resources>
+  <!-- vendor and product ID for WBT-1372 VER 2.1 -->
+  <usb-device vendor-id="5824" product-id="1770" />
+
+  <!-- vendor and product ID for Epson LP 90KP Printer -->
+
+  <!-- vendor and product ID for -->
+
+</resources>
