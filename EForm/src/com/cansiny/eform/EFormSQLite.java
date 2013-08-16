@@ -451,22 +451,48 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	static public boolean update(Context context, long rowid, String password,
 		String company, String phone, String admin_passwd) {
-	    String sha_password = null;
+	    String new_password = null;
+	    String old_password = null;
+
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
 
 	    if (password != null && password.length() > 0) {
 		if (password.length() != 6) {
-		    Utils.showToast("密码长度必须是6位");
+		    LogActivity.writeLog("更新会员信息失败，密码长度必须是6位");
 		    return false;
 		}
 		if (admin_passwd == null || admin_passwd.length() != 6) {
 		    LogActivity.writeLog("更新会员密码需要管理员密码");
 		    return false;
 		}
-		sha_password = SHAPassword(password);
-	    }
+		new_password = password;
 
-	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
-	    SQLiteDatabase database = sqlite.getWritableDatabase();
+		SQLiteDatabase database = sqlite.getReadableDatabase();
+		Cursor cursor = database.query(Account.TABLE_NAME,
+			new String[] { Account.COLUMN_PASSWORD },
+			"userid=?", new String[] { String.valueOf(rowid) },
+			null, null, null);
+		if (cursor == null || cursor.getCount() == 0) {
+		    LogActivity.writeLog("更新会员信息失败，不能获取会员原密码");
+		    sqlite.close();
+		    return false;
+		}
+		cursor.moveToFirst();
+		old_password = AESDecryptPassword(MD5Hash(admin_passwd), cursor.getString(0));
+		cursor.close();
+
+		if (old_password == null) {
+		    LogActivity.writeLog("更新会员信息失败，不能解密会员原密码");
+		    sqlite.close();
+		    return false;
+		}
+
+		/* don't update password if old and new password is same */
+		if (old_password.equals(new_password)) {
+		    new_password = null;
+		    old_password = null;
+		}
+	    }
 
 	    ContentValues values = new ContentValues();
 
@@ -476,36 +502,89 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    if (phone != null) {
 		values.put(COLUMN_PHONE, phone);
 	    }
-	    if (sha_password != null) {
-		values.put(COLUMN_PASSWORD, sha_password);
+	    if (new_password != null) {
+		values.put(COLUMN_PASSWORD, SHAPassword(new_password));
+	    }
+	    if (values.size() == 0) {
+		LogActivity.writeLog("更新会员信息失败，没有需要更新的信息");
+		sqlite.close();
+		return false;
 	    }
 
 	    boolean retval = false;
+	    SQLiteDatabase database = sqlite.getWritableDatabase();
 	    database.beginTransaction();
 	    try {
-		int rows = database.update(TABLE_NAME, values, "_id=?",
-			new String[] { String.valueOf(rowid) });
-		if (rows == 1) {
-		    if (sha_password != null) {
-			byte[] md5hash = MD5Hash(admin_passwd);
-			String member_passwd = AESEncryptPassword(md5hash, password);
+		do {
+		    // update member table first
+		    int rows = database.update(TABLE_NAME, values, "_id=?",
+			    new String[] { String.valueOf(rowid) });
+		    if (rows != 1) {
+			LogActivity.writeLog("更新会员信息失败，不能更新会员信息");
+			break;
+		    }
+		    /* member password not update, so no other update is need */
+		    if (new_password == null) {
+			database.setTransactionSuccessful();
+			retval = true;
+			break;
+		    }
 
-			values.clear();
-			values.put(Account.COLUMN_PASSWORD, member_passwd);
+		    // update account table if member password was modified
+		    String member_passwd = AESEncryptPassword(MD5Hash(admin_passwd), new_password);
+		    if (member_passwd == null) {
+			LogActivity.writeLog("更新会员信息失败，加密会员密码失败");
+			break;
+		    }
+		    values.clear();
+		    values.put(Account.COLUMN_PASSWORD, member_passwd);
+		    rows = database.update(Account.TABLE_NAME, values, "userid=?",
+			    new String[] { String.valueOf(rowid) });
+		    if (rows != 1) {
+			LogActivity.writeLog("更新会员信息失败，更新会员密码失败");
+			break;
+		    }
 
-			rows = database.update(Account.TABLE_NAME, values, "userid=?",
-				new String[] { String.valueOf(rowid) });
-			if (rows == 1) {
-			    database.setTransactionSuccessful();
-			    retval = true;
+		    // update voucher table to uses new password encrypt
+		    Cursor cursor = database.query(Voucher.TABLE_NAME,
+			    new String[] { Voucher.COLUMN_ID, Voucher.COLUMN_CONTENTS },
+			    "userid=?", new String[] { String.valueOf(rowid) },
+			    null, null, null);
+		    if (cursor == null) {
+			LogActivity.writeLog("更新会员信息失败，更新会员存储信息失败，查询返回空");
+			break;
+		    }
+		    int update_rows = 0;
+		    while (cursor.moveToNext()) {
+			byte[] contents = cursor.getBlob(1);
+			if (contents == null) {
+			    LogActivity.writeLog("更新会员信息失败，不能得到会员保存的信息");
+			    break;
 			}
-		    } else {
+			byte[] cleartext = AESDecrypt(MD5Hash(old_password), contents);
+			if (cleartext == null) {
+			    LogActivity.writeLog("更新会员信息失败，解密会员存储信息失败");
+			    break;
+			}
+			byte[] ciphetext = AESEncrypt(MD5Hash(new_password), cleartext);
+			if (ciphetext == null) {
+			    LogActivity.writeLog("更新会员信息失败，加密会员存储信息失败");
+			    break;
+			}
+			values.clear();
+			values.put(Voucher.COLUMN_CONTENTS, ciphetext);
+			if (database.update(Voucher.TABLE_NAME, values, "_id=?",
+				new String[] { String.valueOf(cursor.getLong(0)) }) != 1) {
+			    LogActivity.writeLog("更新会员信息失败，更新会员存储信息失败");
+			    break;
+			}
+			update_rows++;
+		    }
+		    if (update_rows == cursor.getCount()) {
 			database.setTransactionSuccessful();
 			retval = true;
 		    }
-		} else {
-		    LogActivity.writeLog("没有更新任何任何会员的信息");
-		}
+		} while (false);
 	    } finally {
 		database.endTransaction();
 		sqlite.close();
@@ -676,7 +755,8 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    if (contents != null && contents.length() > 0) {
 		try {
 		    byte[] utf8_contents = contents.getBytes("utf-8");
-		    values.put(COLUMN_CONTENTS, AESEncrypt(MD5Hash(member_password), utf8_contents));
+		    values.put(COLUMN_CONTENTS,
+			    AESEncrypt(MD5Hash(member_password), utf8_contents));
 		} catch (UnsupportedEncodingException e) {
 		    LogActivity.writeLog(e);
 		    return false;

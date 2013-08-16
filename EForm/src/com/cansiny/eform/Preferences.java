@@ -8,9 +8,6 @@ package com.cansiny.eform;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import com.cansiny.eform.IDCard.IDCardInfo;
-import com.cansiny.eform.IDCard.IDCardListener;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -46,7 +43,7 @@ import android.widget.TextView;
 
 
 class PreferencesDialog extends Utils.DialogFragment
-    implements OnCheckedChangeListener, OnTabChangeListener, IDCardListener
+    implements OnCheckedChangeListener, OnTabChangeListener, IDCard.IDCardListener
 {
     static final private String TAB_TAG_GENERIC = "Generic";
     static final private String TAB_TAG_DEVICE  = "Device";
@@ -162,7 +159,7 @@ class PreferencesDialog extends Utils.DialogFragment
     }
 
     @Override
-    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
 	AlertDialog dialog = (AlertDialog) getDialog();
 
 	View userid_view = dialog.findViewById(R.id.member_userid_textview);
@@ -170,6 +167,11 @@ class PreferencesDialog extends Utils.DialogFragment
 
 	member_password_rowid = EFormSQLite.Member.getid(getActivity(), info.idno);
 	if (member_password_rowid >= 0) {
+	    View edit = dialog.findViewById(R.id.member_password_edittext);
+	    ((TextView) edit).setText("");
+	    edit = dialog.findViewById(R.id.member_password2_edittext);
+	    ((TextView) edit).setText("");
+
 	    ((TextView) userid_view).setText(info.idno);
 	    table.setVisibility(View.VISIBLE);
 	} else {
@@ -193,39 +195,48 @@ class PreferencesDialog extends Utils.DialogFragment
 	    view.setVisibility(View.GONE);
 	}
 
-	TextView edit = (TextView) dialog.findViewById(R.id.member_password_edittext);
-	if (edit.length() != 6) {
-	    edit.setText("");
-	    edit.setHint("密码必须是6位");
-	    edit.setHintTextColor(getResources().getColor(R.color.red));
-	    edit.requestFocus();
+	TextView password_edit = (TextView) dialog.findViewById(R.id.member_password_edittext);
+	if (password_edit.length() != 6) {
+	    password_edit.setText("");
+	    password_edit.setHint("密码必须是6位");
+	    password_edit.setHintTextColor(getResources().getColor(R.color.red));
+	    password_edit.requestFocus();
 	    return;
 	}
-	String password = edit.getText().toString();
+	TextView password2_edit = (TextView) dialog.findViewById(R.id.member_password2_edittext);
+	if (password2_edit.length() != 6) {
+	    password2_edit.setText("");
+	    password2_edit.setHint("密码必须是6位");
+	    password2_edit.setHintTextColor(getResources().getColor(R.color.red));
+	    password2_edit.requestFocus();
+	    return;
+	}
 
-	edit = (TextView) dialog.findViewById(R.id.member_password2_edittext);
-	if (edit.length() != 6) {
-	    edit.setText("");
-	    edit.setHint("密码必须是6位");
-	    edit.setHintTextColor(getResources().getColor(R.color.red));
-	    edit.requestFocus();
-	    return;
-	}
-	String password2 = edit.getText().toString();
+	String password = password_edit.getText().toString();
+	String password2 = password2_edit.getText().toString();
 
 	if (!password.equals(password2)) {
-	    edit.setText("");
-	    edit.setHint("确认密码不一致");
-	    edit.setHintTextColor(getResources().getColor(R.color.red));
-	    edit.requestFocus();
+	    password2_edit.setText("");
+	    password2_edit.setHint("确认密码不一致");
+	    password2_edit.setHintTextColor(getResources().getColor(R.color.red));
+	    password2_edit.requestFocus();
 	    return;
 	}
 
 	if (EFormSQLite.Member.update(getActivity(), member_password_rowid,
 		password, null, null, admin_passwd)) {
+	    showToast("密码修改成功！", R.drawable.smile);
+
 	    View view = dialog.findViewById(R.id.member_password_table);
 	    view.setVisibility(View.GONE);
-	    showToast("密码修改成功！", R.drawable.smile);
+
+	    Member member = Member.getMember();
+	    if (member.isLogin()) {
+		Member.MemberProfile profile = member.getProfile();
+		if (profile.rowid == member_password_rowid) {
+		    profile.password = password;
+		}
+	    }
 	    member_password_rowid = -1;
 	} else {
 	    showToast("密码修改失败！", R.drawable.cry);
@@ -276,6 +287,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	    onMemberPasswordSetButtonClick();
 	    break;
 	case R.id.member_password_cancel_button:
+	    member_password_rowid = -1;
 	    view2 = dialog.findViewById(R.id.member_password_table);
 	    view2.setVisibility(View.GONE);
 	    break;

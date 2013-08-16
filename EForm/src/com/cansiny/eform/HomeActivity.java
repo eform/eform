@@ -13,6 +13,7 @@ import com.cansiny.eform.Member.MemberListener;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
@@ -36,6 +37,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -452,7 +454,17 @@ public class HomeActivity extends Activity
 		member.logout();
 	    }
 	});
-	builder.create().show();
+	Dialog dialog = builder.create();
+	dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+	    @Override
+	    public void onShow(DialogInterface dialog) {
+		Button button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_NEGATIVE);
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+		button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_POSITIVE);
+		button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	    }
+	});
+	dialog.show();
     }
 
 

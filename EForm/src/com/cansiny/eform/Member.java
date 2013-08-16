@@ -10,9 +10,6 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import com.cansiny.eform.IDCard.IDCardInfo;
-import com.cansiny.eform.IDCard.IDCardListener;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -45,7 +42,7 @@ import android.widget.TextView;
 
 
 class MemberLoginDialog extends Utils.DialogFragment
-	implements Administrator.AdministratorLoginDialogListener, IDCardListener
+	implements Administrator.AdministratorLoginDialogListener, IDCard.IDCardListener
 {
     private static final int TAG_IDNO_TEXTVIEW = 1;
     private static final int TAG_IDCARD_BUTTON = 2;
@@ -236,7 +233,7 @@ class MemberLoginDialog extends Utils.DialogFragment
     }
 
     @Override
-    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
 	userid_edittext.setText(info.idno);
     }
 
@@ -305,7 +302,7 @@ class MemberRegisterDialog extends Utils.DialogFragment
 }
 
 
-class MemberProfileDialog extends Utils.DialogFragment implements IDCardListener
+class MemberProfileDialog extends Utils.DialogFragment implements IDCard.IDCardListener
 {
     private EditText userid_edittext;
     private EditText username_edittext;
@@ -502,14 +499,14 @@ class MemberProfileDialog extends Utils.DialogFragment implements IDCardListener
     }
 
     @Override
-    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
 	userid_edittext.setText(info.idno);
 	username_edittext.setText(info.name);
     }
 }
 
 
-class MemberDeleteDialog extends Utils.DialogFragment implements IDCardListener
+class MemberDeleteDialog extends Utils.DialogFragment implements IDCard.IDCardListener
 {
     private LinearLayout buildLayout() {
 	LinearLayout linear = new LinearLayout(getActivity());
@@ -590,7 +587,7 @@ class MemberDeleteDialog extends Utils.DialogFragment implements IDCardListener
     }
 
     @Override
-    public void onIDCardRead(IDCard IDCard, IDCardInfo info) {
+    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
 	Member member = Member.getMember();
 
 	if (!member.isLogin() || member.getProfile() == null) {
