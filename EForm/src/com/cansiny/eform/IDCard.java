@@ -6,8 +6,6 @@
 package com.cansiny.eform;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -58,18 +56,27 @@ public abstract class IDCard extends Utils.DialogFragment
 	    return new IDCardVirtual();
 	}
 	if (driver.equalsIgnoreCase("usb")) {
-	    return IDCardUSB.getUSBIDCard(prefs.getDeviceNameOrVid("IDCard"),
-		    prefs.getDevicePathOrPid("IDCard"));
+	    try {
+		int vid = Integer.decode(prefs.getDeviceNameOrVid("IDCard"));
+		int pid = Integer.decode(prefs.getDevicePathOrPid("IDCard"));
+
+		if (vid == IDCardUSBGTICR100.VID && pid == IDCardUSBGTICR100.PID) {
+		    return new IDCardUSBGTICR100();
+		}
+		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序",
+			prefs.getDeviceNameOrVid("IDCard"),
+			prefs.getDevicePathOrPid("IDCard"));
+		return null;
+	    } catch (NumberFormatException e) {
+		LogActivity.writeLog(e);
+		return null;
+	    }
 	}
 	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
 	    return new IDCardSerial(prefs.getDevicePathOrPid("IDCard"));
 	}
 	LogActivity.writeLog("不能识别的身份证阅读器驱动: %s", driver);
 	return null;
-    }
-
-    static public ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
-	return IDCardUSB.listUSBDevices();
     }
 
     private int  totaltime = 30;
@@ -346,39 +353,7 @@ class IDCardSerial extends IDCard
     }
 }
 
-abstract class IDCardUSB extends IDCard
-{
-    public static IDCardUSB getUSBIDCard(String vid, String pid) {
-	try {
-	    int ivid = Integer.decode(vid);
-	    int ipid = Integer.decode(pid);
-
-	    if (ivid == IDCardUSBGTICR100.VID && ipid == IDCardUSBGTICR100.PID) {
-		return new IDCardUSBGTICR100();
-	    } else {
-		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序", vid, pid);
-		return null;
-	    }
-	} catch (NumberFormatException e) {
-	    LogActivity.writeLog(e);
-	    return null;
-	}
-    }
-
-    public static ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
-	ArrayList<Utils.DeviceAdapter.Device> array =
-		new ArrayList<Utils.DeviceAdapter.Device>();
-
-	array.add(new Utils.DeviceAdapter.Device("usb",
-		String.format("0x%04X", IDCardUSBGTICR100.VID),
-		String.format("0x%04X", IDCardUSBGTICR100.PID)));
-
-	return array;
-    }
-
-}
-
-class IDCardUSBGTICR100 extends IDCardUSB
+class IDCardUSBGTICR100 extends IDCard
 {
     public static final int VID = 0x2001;
     public static final int PID = 0x2002;

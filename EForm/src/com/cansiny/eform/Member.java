@@ -161,9 +161,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 	    @Override
 	    public void onClick(View view) {
 		hideIme(view);
-		showToastLong("您可以通过下面步骤找回密码：\n\n" +
-			"    1、带上注册会员时使用的身份证件；\n" +
-			"    2、联系管理员设置新密码；", R.drawable.tips);
+		showToast("请带上注册会员时使用的身份证件，联系管理员以设置新密码；", R.drawable.tips);
 	    }
 	});
 
@@ -192,9 +190,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 		    dismiss();
 		    Utils.showToast("登录成功!", R.drawable.smile);
 		} else {
-		    showToastLong("证件号码或密码错，请重试! \n\n" +
-			    "如忘记密码，请选择“忘记密码”，根据提示找回密码。\n" +
-			    "如不是会员，请选择“注册会员”，根据提示注册会员。\n", R.drawable.cry);
+		    showToast("证件号码或密码错误，请重试!", R.drawable.cry);
 		}
 	    }
 	});
@@ -214,8 +210,12 @@ class MemberLoginDialog extends Utils.DialogFragment
 		break;
 	    case TAG_IDCARD_BUTTON:
 		IDCard idcard = IDCard.getIDCard();
-		idcard.setListener(this);
-		idcard.read(getFragmentManager());
+		if (idcard == null) {
+		    showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
+		} else {
+		    idcard.setListener(this);
+		    idcard.read(getFragmentManager());
+		}
 		break;
 	    }
 	}
@@ -492,8 +492,12 @@ class MemberProfileDialog extends Utils.DialogFragment implements IDCard.IDCardL
 	switch (view.getId()) {
 	case R.id.idcard_read_button:
 	    IDCard idcard = IDCard.getIDCard();
-	    idcard.setListener(this);
-	    idcard.read(getFragmentManager());
+	    if (idcard == null) {
+		showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
+	    } else {
+		idcard.setListener(this);
+		idcard.read(getFragmentManager());
+	    }
 	    break;
 	}
     }
@@ -580,8 +584,12 @@ class MemberDeleteDialog extends Utils.DialogFragment implements IDCard.IDCardLi
 	    public void onClick(View view) {
 		showToast("请提供会员的身份证件！");
 		IDCard idcard = IDCard.getIDCard();
-		idcard.setListener(MemberDeleteDialog.this);
-		idcard.read(getFragmentManager());
+		if (idcard == null) {
+		    showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
+		} else {
+		    idcard.setListener(MemberDeleteDialog.this);
+		    idcard.read(getFragmentManager());
+		}
 	    }
 	});
     }

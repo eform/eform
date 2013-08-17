@@ -14,15 +14,25 @@
 # limitations under the License. 
 #
 LOCAL_PATH := $(call my-dir)
+LOCAL_PATH_SAVE := $(LOCAL_PATH)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE    := serialPort
-LOCAL_SRC_FILES := SerialPort.c
-LOCAL_LDLIBS := -llog
-TARGET_PLATFORM := android-14
-include $(BUILD_SHARED_LIBRARY)
+subdirs := $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk, serial))
+include $(subdirs)
 
 include $(CLEAR_VARS)
+LOCAL_PATH := $(LOCAL_PATH_SAVE)
 subdirs := $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk, \
 	libusbx-1.0.16))
 include $(subdirs)
+
+include $(CLEAR_VARS)
+LOCAL_PATH       := $(LOCAL_PATH_SAVE)
+LOCAL_MODULE     := wbt1372_test
+LOCAL_SRC_FILES  := wbt1372_test.c
+LOCAL_C_INCLUDES += libusbx-1.0.16/libusb
+LOCAL_CFLAGS     += -Wall
+LOCAL_LDLIBS     := -llog -L../libs/armeabi -lusbx
+TARGET_PLATFORM  := android-14
+include $(BUILD_EXECUTABLE)
+

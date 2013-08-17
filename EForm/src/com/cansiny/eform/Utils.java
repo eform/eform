@@ -8,6 +8,8 @@ package com.cansiny.eform;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
 
 import android.app.AlertDialog;
@@ -15,6 +17,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -169,7 +173,6 @@ public class Utils
 	}
     }
 
-
     static public class DialogFragment extends android.app.DialogFragment
     	implements OnClickListener
 
@@ -286,6 +289,25 @@ public class Utils
 
     }
 
+    static public UsbDevice findUsbDevice(int vid, int pid) {
+	Context context = EFormApplication.getContext();
+	UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+	HashMap<String, UsbDevice> devices = manager.getDeviceList();
+	Iterator<UsbDevice> iterator = devices.values().iterator();
+	while (iterator.hasNext()) {
+	    UsbDevice device = iterator.next();
+	    if (device.getVendorId() == vid && device.getProductId() == pid) {
+		if (!manager.hasPermission(device)) {
+		    LogActivity.writeLog("没有操作USB设备的权限");
+		    return null;
+		}
+		return device;
+	    }
+	}
+	LogActivity.writeLog("找不到vid为%s，pid为%s的设备", String.format("0x%04X", vid),
+		String.format("0x%04X", pid));
+	return null;
+    }
 
     static public class DeviceAdapter extends BaseAdapter
     {
@@ -293,6 +315,21 @@ public class Utils
 
 	public DeviceAdapter() {
 	    devices = new ArrayList<Device>();
+
+	    if (BuildConfig.DEBUG) {
+		devices.add(0, new Device("virtual", "cansiny", "virtial_"));
+	    }
+
+	    Context context = EFormApplication.getContext();
+	    UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+
+	    HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
+	    Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
+	    while(deviceIterator.hasNext()) {
+		UsbDevice device = deviceIterator.next();
+		devices.add(new Device("usb", String.format("0x%04X", device.getVendorId()),
+			String.format("0x%04X", device.getProductId())));
+	    }
 
 	    SerialPort.SerialPortFinder finder = new SerialPort.SerialPortFinder();
 	    String[] results = finder.getAllDevices();
@@ -304,14 +341,6 @@ public class Utils
 		    devices.add(new Device(array[1], array[0], array[2]));
 		}
 	    }
-	}
-
-	public void addUSBDevice(String vid, String pid) {
-	    devices.add(0, new Device("usb", vid, pid));
-	}
-
-	public void addVirtialDevice() {
-	    devices.add(0, new Device("virtual", "cansiny", "virtial_"));
 	}
 
 	@Override
@@ -353,9 +382,9 @@ public class Utils
 		} else if (driver.equalsIgnoreCase("serial")) {
 		    name = "标准串口 " + device.getNameOrVid();
 		} else if (driver.equalsIgnoreCase("usbserial")) {
-		    name = "USB转串口 " + device.getNameOrVid();
+		    name = "USB串口 " + device.getNameOrVid();
 		} else if (driver.equalsIgnoreCase("usb")) {
-		    name = "标准USB接口 " + device.getPathOrPid();
+		    name = "USB接口 " + device.getNameOrVid() + " " + device.getPathOrPid();
 		} else {
 		    name = device.getNameOrVid();
 		}

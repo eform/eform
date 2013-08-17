@@ -146,8 +146,8 @@ public class HomeActivity extends Activity
 	slogan_lasttime = System.currentTimeMillis();
 	handler.postDelayed(runable, 0);
 
-	Member member = Member.getMember();
-	member.login(this, "222", "222222");
+//	Member member = Member.getMember();
+//	member.login(this, "222", "222222");
     }
 
     @Override
@@ -202,6 +202,9 @@ public class HomeActivity extends Activity
 
     @Override
     public void onBackPressed() {
+	if (BuildConfig.DEBUG) {
+	    super.onBackPressed();
+	}
     }
 
     @Override
@@ -386,9 +389,12 @@ public class HomeActivity extends Activity
 	case ITEM_ACTIVITY_REQUEST_CODE:
 	    switch(resultCode) {
 	    case RESULT_CANCELED:
-		int reason = intent.getIntExtra(FormActivity.INTENT_RESULT_ERRREASON, 0);
-		if (reason != 0)
-		    showErrorFlagment(reason);
+		if (intent != null) {
+		    int reason = intent.getIntExtra(FormActivity.INTENT_RESULT_ERRREASON, 0);
+		    if (reason != 0) {
+			showErrorFlagment(reason);
+		    }
+		}
 		break;
 	    case RESULT_OK:
 		break;

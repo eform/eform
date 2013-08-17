@@ -6,12 +6,20 @@
 package com.cansiny.eform;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbRequest;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,18 +66,27 @@ public abstract class Magcard extends Utils.DialogFragment
 	    return new MagcardVirtual();
 	}
 	if (driver.equalsIgnoreCase("usb")) {
-	    return MagcardUSB.getUSBMagcard(prefs.getDeviceNameOrVid("Magcard"),
-		    prefs.getDevicePathOrPid("Magcard"));
+	    try {
+		int vid = Integer.decode(prefs.getDeviceNameOrVid("Magcard"));
+		int pid = Integer.decode(prefs.getDevicePathOrPid("Magcard"));
+
+		if (vid == MagcardUSBWBT1372.VID && pid == MagcardUSBWBT1372.PID) {
+		    return new MagcardUSBWBT1372();
+		}
+		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的磁条卡驱动程序",
+			prefs.getDeviceNameOrVid("Magcard"),
+			prefs.getDevicePathOrPid("Magcard"));
+		return null;
+	    } catch (NumberFormatException e) {
+		LogActivity.writeLog(e);
+		return null;
+	    }
 	}
 	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
 	    return new MagcardSerial(prefs.getDevicePathOrPid("Magcard"));
 	}
 	LogActivity.writeLog("不能识别的磁条卡驱动: %s", driver);
 	return null;
-    }
-
-    static public ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
-	return MagcardUSB.listUSBDevices();
     }
 
     private int  totaltime = 30;
@@ -203,7 +220,9 @@ public abstract class Magcard extends Utils.DialogFragment
 	handler.removeCallbacks(runnable);
     }
 
+    abstract protected boolean open();
     abstract protected String read();
+    abstract protected void close();
     abstract protected void cancel();
 
     public void setListener(MagcardListener listener) {
@@ -235,11 +254,21 @@ public abstract class Magcard extends Utils.DialogFragment
 
 	@Override
 	protected void onPreExecute() {
+	    if (!open()) {
+		Utils.showToast("打开刷卡设备失败", R.drawable.cry);
+		cancel(true);
+		return;
+	    }
 	    show(manager, "Magcard");
 	}
 
 	@Override
 	protected void onPostExecute(String cardno) {
+	    if (isVisible()) {
+		dismiss();
+	    }
+	    close();
+
 	    if (cardno != null) {
 		if (listener != null) {
 		    listener.onMagcardRead(Magcard.this, cardno);
@@ -253,13 +282,15 @@ public abstract class Magcard extends Utils.DialogFragment
 		    Utils.showToast("读取卡号失败，请重试！", R.drawable.cry);
 		}
 	    }
-	    dismiss();
 	}
 	
 	@Override
 	protected void onCancelled(String cardno) {
-	    Utils.showToast("操作被取消 ...");
-	    dismiss();
+	    if (isVisible()) {
+		Utils.showToast("操作被取消 ...");
+		dismiss();
+	    }
+	    close();
 	}
     }
 
@@ -271,9 +302,14 @@ class MagcardVirtual extends Magcard
     }
 
     @Override
+    protected boolean open() {
+	return true;
+    }
+
+    @Override
     protected String read() {
 	try {
-	    Thread.sleep(3000);
+	    Thread.sleep(2000);
 	} catch (InterruptedException e) {
 	    LogActivity.writeLog(e);
 	}
@@ -289,6 +325,10 @@ class MagcardVirtual extends Magcard
     protected void cancel() {
 	LogActivity.writeLog("操作被取消");
     }
+
+    @Override
+    protected void close() {
+    }
 }
 
 class MagcardSerial extends Magcard
@@ -297,6 +337,11 @@ class MagcardSerial extends Magcard
 
     public MagcardSerial(String path) {
 	this.path = path;
+    }
+
+    @Override
+    protected boolean open() {
+	return false;
     }
 
     @Override
@@ -310,51 +355,94 @@ class MagcardSerial extends Magcard
 
     @Override
     protected void cancel() {
-	// TODO Auto-generated method stub
+    }
+
+    @Override
+    protected void close() {
     }
 }
 
-abstract class MagcardUSB extends Magcard
+class MagcardUSBWBT1372 extends Magcard
 {
-    public static MagcardUSB getUSBMagcard(String vid, String pid) {
-	try {
-	    int ivid = Integer.decode(vid);
-	    int ipid = Integer.decode(pid);
+    public static final int VID = 0x16C0;
+    public static final int PID = 0x06EA;
 
-	    if (ivid == MagcardUSBWBT1000.VID && ipid == MagcardUSBWBT1000.PID) {
-		return new MagcardUSBWBT1000();
+    private UsbInterface intf;
+    private UsbDeviceConnection conn;
+
+    public MagcardUSBWBT1372() {
+	conn = null;
+    }
+
+    @Override
+    protected boolean open() {
+	UsbDevice usb_device = Utils.findUsbDevice(VID, PID);
+	if (usb_device == null)
+	    return false;
+
+	LogActivity.writeLog("numIf: %d", usb_device.getInterfaceCount());
+	for (int i = 0; i < usb_device.getInterfaceCount(); i++) {
+	    UsbInterface uif = usb_device.getInterface(i);
+	    LogActivity.writeLog("接口: %s", uif.toString());
+	    for (int j = 0; j < uif.getEndpointCount(); j++) {
+		UsbEndpoint ep = uif.getEndpoint(j);
+		LogActivity.writeLog("端点：%s", ep.toString());
+		if (ep.getDirection() == UsbConstants.USB_DIR_IN)
+		    LogActivity.writeLog("方向：设备到主机");
+		else
+		    LogActivity.writeLog("方向：主机到设备");
+		LogActivity.writeLog("类型：%d", ep.getType());
 	    }
-	    LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序", vid, pid);
-	    return null;
-	} catch (NumberFormatException e) {
-	    LogActivity.writeLog(e);
-	    return null;
 	}
+
+	intf = usb_device.getInterface(1);
+	if (intf == null) {
+	    LogActivity.writeLog("不能活的USB接口");
+	    return false;
+	}
+
+	Context context = EFormApplication.getContext();
+	UsbManager mg = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+	conn = mg.openDevice(usb_device);
+	if (conn == null) {
+	    LogActivity.writeLog("不能打开设备连接");
+	    return false;
+	}
+	if (!conn.claimInterface(intf, true)) {
+	    LogActivity.writeLog("不能申请设备独占访问");
+	    return false;
+	}
+	return true;
     }
 
-    public static ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
-	ArrayList<Utils.DeviceAdapter.Device> array =
-		new ArrayList<Utils.DeviceAdapter.Device>();
-
-	array.add(new Utils.DeviceAdapter.Device("usb",
-		String.format("0x%04X", MagcardUSBWBT1000.VID),
-		String.format("0x%04X", MagcardUSBWBT1000.PID)));
-
-	return array;
-    }
-}
-
-class MagcardUSBWBT1000 extends MagcardUSB
-{
-    public static final int VID = 0x1001;
-    public static final int PID = 0x1002;
-
-    public MagcardUSBWBT1000() {
-    }
-    
     @Override
     protected String read() {
+	if (conn == null) return null;
+
+	UsbRequest request = new UsbRequest();
+	request.initialize(conn, intf.getEndpoint(0));
+
+	ByteBuffer buffer = ByteBuffer.allocate(60);
+        if (!request.queue(buffer, 18)) {
+            LogActivity.writeLog("排队请求失败");
+            return null;
+        }
+
+        if (conn.requestWait() == request) {
+            byte[] bytes = buffer.array();
+            LogActivity.writeLog("请求返回 %d, %s", bytes.length, new String(bytes));
+            request.close();
+
+        }
 	return null;
+    }
+
+    @Override
+    protected void close() {
+	if (conn != null) {
+	    conn.close();
+	    conn.releaseInterface(intf);
+	}
     }
 
     @Override

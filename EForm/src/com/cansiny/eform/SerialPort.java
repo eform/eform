@@ -30,15 +30,11 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Vector;
-import android.util.Log;
 
 
 public class SerialPort
 {
-    private static final String TAG = "SerialPort";
-
-    /* Do not remove or rename the field mFd: it is used by native
-     * method close(); */
+    // Do not remove or rename the field mFd: it is used by native method close();
     private FileDescriptor mFd;
     private FileInputStream mFileInputStream;
     private FileOutputStream mFileOutputStream;
@@ -63,7 +59,7 @@ public class SerialPort
 
 	mFd = open(device.getAbsolutePath(), baudrate, flags);
 	if (mFd == null) {
-	    Log.e(TAG, "native open returns null");
+	    LogActivity.writeLog("底层打开串口函数返回 null");
 	    throw new IOException();
 	}
 	mFileInputStream  = new FileInputStream(mFd);
@@ -80,9 +76,8 @@ public class SerialPort
     private native static FileDescriptor open(String path, int baudrate, int flags);
     public native void close();
     static {
-	System.loadLibrary("serial_port");
+	System.loadLibrary("serialPort");
     }
-
 
     static public class SerialPortFinder
     {
@@ -101,7 +96,7 @@ public class SerialPort
 		    File[] files = dev.listFiles();
 		    for (int i = 0; i < files.length; i++) {
 			if (files[i].getAbsolutePath().startsWith(mDeviceRoot)) {
-			    Log.d(TAG, "Found new device: " + files[i]);
+//			    LogActivity.writeLog("找到新串口设备: " + files[i]);
 			    mDevices.add(files[i]);
 			}
 		    }
@@ -112,8 +107,6 @@ public class SerialPort
 		return mDriverName;
 	    }
         }
-
-        private static final String TAG = "SerialPort";
 
         private Vector<Driver> mDrivers = null;
 
@@ -128,7 +121,7 @@ public class SerialPort
 		    String drivername = l.substring(0, 0x15).trim();
 		    String[] w = l.split(" +");
 		    if ((w.length >= 5) && (w[w.length - 1].equals("serial"))) {
-			Log.d(TAG, "Found new driver " + drivername + " on " + w[w.length - 4]);
+//			LogActivity.writeLog("找到串口驱动 " + drivername + " on " + w[w.length - 4]);
 			mDrivers.add(new Driver(drivername, w[w.length-4]));
 		    }
 		}
@@ -149,13 +142,12 @@ public class SerialPort
 			File file = itdev.next();
 			String devicename = file.getName();
 			String devicepath = file.getAbsolutePath();
-			String value = String.format("%s %s %s", devicename,
-						     driver.getName(), devicepath);
+			String value = String.format("%s %s %s", devicename, driver.getName(), devicepath);
 			devices.add(value);
 		    }
 		}
 	    } catch (IOException e) {
-		e.printStackTrace();
+		LogActivity.writeLog(e);
 	    }
 	    return devices.toArray(new String[devices.size()]);
         }
@@ -174,7 +166,7 @@ public class SerialPort
 		    }
 		}
 	    } catch (IOException e) {
-		e.printStackTrace();
+		LogActivity.writeLog(e);
 	    }
 	    return devices.toArray(new String[devices.size()]);
         }
