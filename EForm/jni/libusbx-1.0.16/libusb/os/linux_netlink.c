@@ -42,8 +42,12 @@
 
 #define KERNEL 1
 
+#define SOCK_CLOEXEC  02000000
+#define SOCK_NONBLOCK 04000
+
 static int linux_netlink_socket = -1;
 static pthread_t libusb_linux_event_thread;
+static int start_count = 0;
 
 static void *linux_netlink_event_thread_main(void *arg);
 
@@ -91,7 +95,8 @@ int linux_netlink_stop_event_monitor(void)
 		return LIBUSB_ERROR_OTHER;
 	}
 
-	pthread_cancel(libusb_linux_event_thread);
+	//pthread_cancel(libusb_linux_event_thread);
+	start_count++;
 
 	linux_netlink_socket = -1;
 
@@ -232,6 +237,11 @@ static void *linux_netlink_event_thread_main(void *arg)
 	while (1 == poll(&fds, 1, -1)) {
 		if (POLLIN != fds.revents) {
 			break;
+		}
+
+		if (start_count > 0) {
+		   start_count--;
+		   break;
 		}
 
 		usbi_mutex_static_lock(&linux_hotplug_lock);

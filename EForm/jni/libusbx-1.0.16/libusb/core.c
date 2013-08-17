@@ -2062,16 +2062,16 @@ void usbi_log_v(struct libusb_context *ctx, enum libusb_log_level level,
 #ifdef __ANDROID__
 	int prio;
 	switch (level) {
-	case LOG_LEVEL_INFO:
+	case LIBUSB_LOG_LEVEL_INFO:
 		prio = ANDROID_LOG_INFO;
 		break;
-	case LOG_LEVEL_WARNING:
+	case LIBUSB_LOG_LEVEL_WARNING:
 		prio = ANDROID_LOG_WARN;
 		break;
-	case LOG_LEVEL_ERROR:
+	case LIBUSB_LOG_LEVEL_ERROR:
 		prio = ANDROID_LOG_ERROR;
 		break;
-	case LOG_LEVEL_DEBUG:
+	case LIBUSB_LOG_LEVEL_DEBUG:
 		prio = ANDROID_LOG_DEBUG;
 		break;
 	default:

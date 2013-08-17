@@ -1104,6 +1104,12 @@ printf("completed!\n");
  * give up the events lock if instructed.
  */
 
+#define TIMESPEC_TO_TIMEVAL(tv, ts)                 \
+  do {                                              \
+    (tv)->tv_sec = (ts)->tv_sec;                    \
+    (tv)->tv_usec = (ts)->tv_nsec / 1000;           \
+  } while (0)
+
 int usbi_io_init(struct libusb_context *ctx)
 {
 	int r;
