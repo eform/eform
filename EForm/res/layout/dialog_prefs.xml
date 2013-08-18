@@ -341,16 +341,8 @@
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-		android:layout_marginLeft="20dp"
-                android:layout_marginBottom="2dp"
-                android:text="波特率："
-                android:textSize="18sp" />
-
             <Spinner
-                android:id="@+id/magcard_baudrate_spinner"
+                android:id="@+id/magcard_device_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
@@ -375,16 +367,8 @@
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-		android:layout_marginLeft="20dp"
-                android:layout_marginBottom="2dp"
-                android:text="波特率："
-                android:textSize="18sp" />
-
             <Spinner
-                android:id="@+id/printer_baudrate_spinner"
+                android:id="@+id/printer_device_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
@@ -409,16 +393,8 @@
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-		android:layout_marginLeft="20dp"
-                android:layout_marginBottom="2dp"
-                android:text="波特率："
-                android:textSize="18sp" />
-
             <Spinner
-                android:id="@+id/idcard_baudrate_spinner"
+                android:id="@+id/idcard_device_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />

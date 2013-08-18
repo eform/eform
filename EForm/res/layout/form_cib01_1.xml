@@ -204,7 +204,7 @@
             android:layout_marginRight="0dp"
             android:ems="10"
             android:inputType="number"
-            android:maxLength="22"
+            android:maxLength="30"
             android:textColor="@color/blue"
 	    android:hint="提示：可以刷卡来填写本项内容 -->>"
             android:textColorHint="#888888" />

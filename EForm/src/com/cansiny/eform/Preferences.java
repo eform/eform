@@ -8,6 +8,12 @@ package com.cansiny.eform;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import com.cansiny.eform.Utils.Device;
+import com.cansiny.eform.Utils.IDCardAdapter;
+import com.cansiny.eform.Utils.MagcardAdapter;
+import com.cansiny.eform.Utils.PrinterAdapter;
+import com.cansiny.eform.Utils.ProductAdapter;
+import com.cansiny.eform.Utils.SerialAdapter;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -383,17 +389,67 @@ class PreferencesDialog extends Utils.DialogFragment
 	view.setVisibility(View.GONE);
     }
 
-    private void setupDeviceDriver(final String device_name, Spinner spinner) {
-	final Preferences prefs = Preferences.getPreferences();
+    private void selectDeviceDriver(String device, Spinner spinner) {
+	Preferences prefs = Preferences.getPreferences();
 
-	String name_or_pid = prefs.getDeviceNameOrVid(device_name);
-	String path_or_pid = prefs.getDevicePathOrPid(device_name);
-	if (name_or_pid != null && path_or_pid != null) {
+	String driver = prefs.getDeviceDriver(device);
+	if (driver != null) {
 	    SpinnerAdapter adapter = spinner.getAdapter();
 	    for (int i = 0; i < adapter.getCount(); i++) {
-		Utils.DeviceAdapter adapter2 = (Utils.DeviceAdapter) adapter;
-		if (name_or_pid.equals(adapter2.getItemNameOrVid(i)) &&
-			path_or_pid.equals(adapter2.getItemPathOrPid(i))) {
+		Object product = adapter.getItem(i);
+		if (driver.equals(((ProductAdapter.Product) product).getDriver())) {
+		    spinner.setSelection(i);
+		    break;
+		}
+	    }
+	}
+    }
+
+    private void setupDeviceDriver(final String device, final Spinner spinner) {
+	final Preferences prefs = Preferences.getPreferences();
+
+	selectDeviceDriver(device, spinner);
+
+	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+	    @Override
+	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+		try {
+		    Object product = parent.getItemAtPosition(position);
+		    String driver = ((ProductAdapter.Product) product).getDriver();
+		    Object object = Class.forName(driver).newInstance();
+		    if (!(object instanceof Utils.Device)) {
+			showToast("驱动 " + driver + " 无效，请联系技术支持", R.drawable.cry);
+			selectDeviceDriver(device, spinner);
+			return;
+		    }
+		    if (!((Utils.Device) object).probe()) {
+			showToast("本驱动对本设备不适用，因为缺少相应的硬件设备", R.drawable.cry);
+			selectDeviceDriver(device, spinner);
+			return;
+		    }
+		    prefs.setDeviceDriver(device, driver);
+		    prefs.applyTransaction();
+		} catch (Exception e) {
+		    LogActivity.writeLog(e);
+		}
+	    }
+	    @Override
+	    public void onNothingSelected(AdapterView<?> parent) {
+		prefs.setDeviceDriver(device, null);
+		prefs.applyTransaction();
+	    }
+	});
+    }
+
+    private void setupDevicePath(final String device, Spinner spinner) {
+	final Preferences prefs = Preferences.getPreferences();
+
+	String path = prefs.getDevicePath(device);
+	if (path != null) {
+	    SpinnerAdapter adapter = spinner.getAdapter();
+	    for (int i = 0; i < adapter.getCount(); i++) {
+		Object serial = adapter.getItem(i);
+		if (path.equals(((SerialAdapter.Serial) serial).getPath())) {
 		    spinner.setSelection(i);
 		    break;
 		}
@@ -403,42 +459,13 @@ class PreferencesDialog extends Utils.DialogFragment
 	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    @Override
 	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		Utils.DeviceAdapter.Device device = (Utils.DeviceAdapter.Device) parent.getItemAtPosition(position);
-		prefs.setDeviceDriver(device_name, device.getDriver());
-		prefs.setDeviceNameOrVid(device_name, device.getNameOrVid());
-		prefs.setDevicePathOrPid(device_name, device.getPathOrPid());
+		Object serial = parent.getItemAtPosition(position);
+		prefs.setDevicePath(device, ((SerialAdapter.Serial) serial).getPath());
 		prefs.applyTransaction();
 	    }
 	    @Override
 	    public void onNothingSelected(AdapterView<?> parent) {
-		prefs.setDeviceDriver(device_name, null);
-		prefs.applyTransaction();
-	    }
-	});
-    }
-
-    private void setupDeviceBaudrate(final String device_name, Spinner spinner) {
-	final Preferences prefs = Preferences.getPreferences();
-
-	int index = prefs.getDeviceBaudrate(device_name);
-	SpinnerAdapter adapter = spinner.getAdapter();
-	for (int i = 0; i < adapter.getCount(); i++) {
-	    if (index == ((Integer) adapter.getItem(i)).intValue()) {
-		spinner.setSelection(i);
-		break;
-	    }
-	}
-
-	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-	    @Override
-	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		int baudrate = ((Integer) parent.getItemAtPosition(position)).intValue();
-		prefs.setDeviceBaudrate(device_name, baudrate);
-		prefs.applyTransaction();
-	    }
-	    @Override
-	    public void onNothingSelected(AdapterView<?> parent) {
-		prefs.setDeviceDriver(device_name, null);
+		prefs.setDevicePath(device, null);
 		prefs.applyTransaction();
 	    }
 	});
@@ -447,32 +474,34 @@ class PreferencesDialog extends Utils.DialogFragment
     private void onDeviceTabActived() {
 	AlertDialog dialog = (AlertDialog) getDialog();
 
-	Utils.DeviceAdapter driver_adapter = new Utils.DeviceAdapter();
-	Utils.BaudrateAdapter baudrate_adapter = new Utils.BaudrateAdapter();
+	Utils.SerialAdapter device_adapter = new Utils.SerialAdapter();
 
 	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_driver_spinner);
-	spinner.setAdapter(driver_adapter);
-	setupDeviceDriver("Magcard", spinner);
+	MagcardAdapter magcard_adapter = new MagcardAdapter();
+	spinner.setAdapter(magcard_adapter);
+	setupDeviceDriver(Device.DEVICE_MAGCARD, spinner);
 
-	spinner = (Spinner) dialog.findViewById(R.id.magcard_baudrate_spinner);
-	spinner.setAdapter(baudrate_adapter);
-	setupDeviceBaudrate("Magcard", spinner);
+	spinner = (Spinner) dialog.findViewById(R.id.magcard_device_spinner);
+	spinner.setAdapter(device_adapter);
+	setupDevicePath(Device.DEVICE_MAGCARD, spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.printer_driver_spinner);
-	spinner.setAdapter(driver_adapter);
-	setupDeviceDriver("Printer", spinner);
+	PrinterAdapter printer_adapter = new PrinterAdapter();
+	spinner.setAdapter(printer_adapter);
+	setupDeviceDriver(Device.DEVICE_PRINTER, spinner);
 
-	spinner = (Spinner) dialog.findViewById(R.id.printer_baudrate_spinner);
-	spinner.setAdapter(baudrate_adapter);
-	setupDeviceBaudrate("Printer", spinner);
+	spinner = (Spinner) dialog.findViewById(R.id.printer_device_spinner);
+	spinner.setAdapter(device_adapter);
+	setupDevicePath(Device.DEVICE_PRINTER, spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.idcard_driver_spinner);
-	spinner.setAdapter(driver_adapter);
-	setupDeviceDriver("IDCard", spinner);
+	IDCardAdapter idcard_adapter = new IDCardAdapter();
+	spinner.setAdapter(idcard_adapter);
+	setupDeviceDriver(Device.DEVICE_IDCARD, spinner);
 
-	spinner = (Spinner) dialog.findViewById(R.id.idcard_baudrate_spinner);
-	spinner.setAdapter(baudrate_adapter);
-	setupDeviceBaudrate("IDCard", spinner);
+	spinner = (Spinner) dialog.findViewById(R.id.idcard_device_spinner);
+	spinner.setAdapter(device_adapter);
+	setupDevicePath(Device.DEVICE_IDCARD, spinner);
     }
 
     private void onMemberTabActived() {
@@ -866,31 +895,35 @@ public class Preferences
     }
 
     public String getDeviceDriver(String device) {
-	return prefs.getString(device + ".Driver", "virtual");
+	return prefs.getString(device + ".Driver", null);
     }
 
-    public void setDeviceNameOrVid(String device, String name_or_vid) {
-	putObject(device + ".DeviceNameOrVid", name_or_vid);
+    public Object getDeviceDriverObject(String device) {
+	try {
+	    String driver = getDeviceDriver(device);
+	    if (driver == null) {
+		LogActivity.writeLog("设备%s的驱动没有设置", device);
+		return null;
+	    }
+	    Object object = Class.forName(driver).newInstance();
+	    if (object instanceof Utils.Device) {
+		return object;
+	    } else {
+		LogActivity.writeLog("%s不是一个设备驱动", driver);
+		return null;
+	    }
+	} catch (Exception e) {
+	    LogActivity.writeLog(e);
+	    return null;
+	}
     }
 
-    public String getDeviceNameOrVid(String device) {
-	return prefs.getString(device + ".DeviceNameOrVid", null);
+    public void setDevicePath(String device, String path) {
+	putObject(device + ".Path", path);
     }
 
-    public void setDevicePathOrPid(String device, String path_or_pid) {
-	putObject(device + ".DevicePathOrPid", path_or_pid);
-    }
-
-    public String getDevicePathOrPid(String device) {
-	return prefs.getString(device + ".DevicePathOrPid", null);
-    }
-
-    public void setDeviceBaudrate(String device, int baudrate) {
-	putObject(device + ".Baudrate", baudrate);
-    }
-
-    public int getDeviceBaudrate(String device) {
-	return prefs.getInt(device + ".Baudrate", 9600);
+    public String getDevicePath(String device) {
+	return prefs.getString(device + ".Path", null);
     }
 
     public void setAftermarketName(String name) {

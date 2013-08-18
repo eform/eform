@@ -491,7 +491,6 @@ public abstract class Form extends DefaultHandler
 	    if (textview.getId() == viewid.intValue()) {
 		if (sequence.toString().matches("[0-9]*")) {
 		    textview.setTag(R.id.FormCardnoViewTagKey, sequence);
-		    LogActivity.writeLog("%s", textview.getTag(R.id.FormCardnoViewTagKey));
 		}
 	    }
 	}

@@ -98,15 +98,11 @@ static void usbx_list_devices(libusb_context *context)
       printf("    Size: %d, Type: %d, bcdUSB: %04X, "
 	     "VID: %04x, PID: %04X, bcdDevice: %04X\n"
 	     "    Class: %s\n"
-	     "    SubClass: %s\n"
-	     "    Protocol: %s\n"
 	     "    Max Packet Size of Endpoint 0: %d\n"
 	     "    Number of Configurations: %d\n",
 	     desc.bLength, desc.bDescriptorType, desc.bcdUSB,
 	     desc.idVendor, desc.idProduct, desc.bcdDevice,
 	     usbx_device_class_name(desc.bDeviceClass),
-	     usbx_device_class_name(desc.bDeviceSubClass),
-	     usbx_device_class_name(desc.bDeviceProtocol),
 	     desc.bMaxPacketSize0, desc.bNumConfigurations);
 
       for (j = 0; j < desc.bNumConfigurations; j++)

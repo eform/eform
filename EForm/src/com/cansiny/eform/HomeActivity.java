@@ -156,6 +156,7 @@ public class HomeActivity extends Activity
 
 	Log.d("HomeActivity", "onStart");
 
+	Administrator.getAdministrator().login(this, "222222");
 	Log.d("", Environment.getExternalStorageDirectory().getAbsolutePath());
 
 	Administrator admin = Administrator.getAdministrator();

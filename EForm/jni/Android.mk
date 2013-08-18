@@ -25,22 +25,6 @@ subdirs := $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk, \
 include $(subdirs)
 
 include $(CLEAR_VARS)
-LOCAL_PATH       := $(LOCAL_PATH_SAVE)
-LOCAL_MODULE     := usbxtest
-LOCAL_SRC_FILES  := usbxtest.c
-LOCAL_C_INCLUDES += libusbx-1.0.16/libusb
-LOCAL_CFLAGS     += -Wall
-LOCAL_LDLIBS     := -llog -L../libs/armeabi -lusbx
-TARGET_PLATFORM  := android-14
-include $(BUILD_EXECUTABLE)
-
-include $(CLEAR_VARS)
-LOCAL_PATH       := $(LOCAL_PATH_SAVE)
-LOCAL_MODULE     := wbt1372_test
-LOCAL_SRC_FILES  := wbt1372_test.c
-LOCAL_C_INCLUDES += libusbx-1.0.16/libusb
-LOCAL_CFLAGS     += -Wall
-LOCAL_LDLIBS     := -llog -L../libs/armeabi -lusbx
-TARGET_PLATFORM  := android-14
-include $(BUILD_EXECUTABLE)
-
+LOCAL_PATH := $(LOCAL_PATH_SAVE)
+subdirs := $(addprefix $(LOCAL_PATH)/,$(addsuffix /Android.mk, test))
+include $(subdirs)

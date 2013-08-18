@@ -289,47 +289,32 @@ public class Utils
 
     }
 
-    static public UsbDevice findUsbDevice(int vid, int pid) {
-	Context context = EFormApplication.getContext();
-	UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-	HashMap<String, UsbDevice> devices = manager.getDeviceList();
-	Iterator<UsbDevice> iterator = devices.values().iterator();
-	while (iterator.hasNext()) {
-	    UsbDevice device = iterator.next();
-	    if (device.getVendorId() == vid && device.getProductId() == pid) {
-		if (!manager.hasPermission(device)) {
-		    LogActivity.writeLog("没有操作USB设备的权限");
-		    return null;
-		}
-		return device;
-	    }
-	}
-	LogActivity.writeLog("找不到vid为%s，pid为%s的设备", String.format("0x%04X", vid),
-		String.format("0x%04X", pid));
-	return null;
-    }
+//    static public UsbDevice findUsbDevice(int vid, int pid) {
+//	Context context = EFormApplication.getContext();
+//	UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+//	HashMap<String, UsbDevice> devices = manager.getDeviceList();
+//	Iterator<UsbDevice> iterator = devices.values().iterator();
+//	while (iterator.hasNext()) {
+//	    UsbDevice device = iterator.next();
+//	    if (device.getVendorId() == vid && device.getProductId() == pid) {
+//		if (!manager.hasPermission(device)) {
+//		    LogActivity.writeLog("没有操作USB设备的权限");
+//		    return null;
+//		}
+//		return device;
+//	    }
+//	}
+//	LogActivity.writeLog("找不到vid为%s，pid为%s的设备", String.format("0x%04X", vid),
+//		String.format("0x%04X", pid));
+//	return null;
+//    }
 
-    static public class DeviceAdapter extends BaseAdapter
+    static public class SerialAdapter extends BaseAdapter
     {
-	private ArrayList<Device> devices;
+	private ArrayList<Serial> devices;
 
-	public DeviceAdapter() {
-	    devices = new ArrayList<Device>();
-
-	    if (BuildConfig.DEBUG) {
-		devices.add(0, new Device("virtual", "cansiny", "virtial_"));
-	    }
-
-	    Context context = EFormApplication.getContext();
-	    UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-
-	    HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
-	    Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-	    while(deviceIterator.hasNext()) {
-		UsbDevice device = deviceIterator.next();
-		devices.add(new Device("usb", String.format("0x%04X", device.getVendorId()),
-			String.format("0x%04X", device.getProductId())));
-	    }
+	public SerialAdapter() {
+	    devices = new ArrayList<Serial>();
 
 	    SerialPort.SerialPortFinder finder = new SerialPort.SerialPortFinder();
 	    String[] results = finder.getAllDevices();
@@ -338,7 +323,7 @@ public class Utils
 	    for (String device : results) {
 		String[] array = device.split(" ");
 		if (!array[1].equals("g_serial")) {
-		    devices.add(new Device(array[1], array[0], array[2]));
+		    devices.add(new Serial(array[1], array[0], array[2]));
 		}
 	    }
 	}
@@ -364,9 +349,9 @@ public class Utils
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    Device device = null;
+	    Serial serial = null;
 	    if (position < devices.size())
-		device = devices.get(position);
+		serial = devices.get(position);
 
 	    LinearLayout linear = new LinearLayout(parent.getContext());
 	    linear.setOrientation(LinearLayout.HORIZONTAL);
@@ -374,21 +359,17 @@ public class Utils
 	    linear.setGravity(Gravity.RIGHT);
 
 	    TextView textview = new TextView(parent.getContext());
-	    if (device != null) {
-		String driver = device.getDriver();
-		String name;
-		if (driver.equalsIgnoreCase("virtual")) {
-		    name = "虚拟接口，仅供测试";
-		} else if (driver.equalsIgnoreCase("serial")) {
-		    name = "标准串口 " + device.getNameOrVid();
+	    if (serial != null) {
+		String driver = serial.getDriver();
+		String display;
+		if (driver.equalsIgnoreCase("serial")) {
+		    display = "标准串口 " + serial.getName();
 		} else if (driver.equalsIgnoreCase("usbserial")) {
-		    name = "USB串口 " + device.getNameOrVid();
-		} else if (driver.equalsIgnoreCase("usb")) {
-		    name = "USB接口 " + device.getNameOrVid() + " " + device.getPathOrPid();
+		    display = "USB串口 " + serial.getName();
 		} else {
-		    name = device.getNameOrVid();
+		    display = serial.getName();
 		}
-		textview.setText(name);
+		textview.setText(display);
 		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    }
 	    linear.addView(textview);
@@ -396,49 +377,200 @@ public class Utils
 	    return linear;
 	}
 
-	public String getItemNameOrVid(int position) {
-	    if (position < devices.size() && position >= 0) {
-		Device device = devices.get(position);
-		return device.name_or_vid;
-	    }
-	    return null;
-	}
-
-	public String getItemPathOrPid(int position) {
-	    if (position < devices.size() && position >= 0) {
-		Device device = devices.get(position);
-		return device.path_or_pid;
-	    }
-	    return null;
-	}
-
-	static public class Device
+	static public class Serial
 	{
 	    private String driver;
-	    private String name_or_vid;
-	    private String path_or_pid;
+	    private String name;
+	    private String path;
 
-	    public Device(String driver, String name_or_vid, String path_or_pid) {
+	    public Serial(String driver, String name, String path) {
 		this.driver = driver;
-		this.name_or_vid = name_or_vid;
-		this.path_or_pid = path_or_pid;
+		this.name = name;
+		this.path = path;
 	    }
 
 	    public String getDriver() {
 		return driver;
 	    }
 
-	    public String getNameOrVid() {
-		return name_or_vid;
+	    public String getName() {
+		return name;
 	    }
 
-	    public String getPathOrPid() {
-		return path_or_pid;
+	    public String getPath() {
+		return path;
 	    }
 	}
 
     }
 
+    static abstract public class ProductAdapter extends BaseAdapter
+    {
+	protected ArrayList<Product> products;
+
+	public ProductAdapter() {
+	    products = new ArrayList<Product>();
+	}
+
+	@Override
+	public int getCount() {
+	    return products.size();
+	}
+
+	@Override
+	public Product getItem(int position) {
+	    if (position < products.size() && position >= 0) {
+		return products.get(position);
+	    } else {
+		return null;
+	    }
+	}
+
+	@Override
+	public long getItemId(int position) {
+	    return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+	    Product product = null;
+	    if (position < products.size())
+		product = products.get(position);
+
+	    LinearLayout linear = new LinearLayout(parent.getContext());
+	    linear.setOrientation(LinearLayout.HORIZONTAL);
+	    linear.setPadding(10, 10, 10, 0);
+	    linear.setGravity(Gravity.RIGHT);
+
+	    TextView textview = new TextView(parent.getContext());
+	    if (product != null) {
+		textview.setText(product.getName());
+		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	    }
+	    linear.addView(textview);
+
+	    return linear;
+	}
+
+	static public class Product
+	{
+	    private String name;
+	    private String driver;
+
+	    public Product(String name, String driver) {
+		this.name = name;
+		this.driver = driver;
+	    }
+
+	    public String getName() {
+		return name;
+	    }
+
+	    public String getDriver() {
+		return driver;
+	    }
+	}
+
+    }
+
+    static public class MagcardAdapter extends ProductAdapter
+    {
+	public MagcardAdapter() {
+	    super();
+
+	    if (BuildConfig.DEBUG) {
+		products.add(new Product("模拟设备", "com.cansiny.eform.MagcardVirtual"));
+	    }
+	    products.add(new Product("WBT-1372（USB）", "com.cansiny.eform.MagcardWBT1372"));
+	    products.add(new Product("WBT-1370（串口）", "com.cansiny.eform.MagcardWBT1370"));
+	}
+    }
+
+    static public class IDCardAdapter extends ProductAdapter
+    {
+	public IDCardAdapter() {
+	    super();
+
+	    if (BuildConfig.DEBUG) {
+		products.add(new Product("模拟设备", "com.cansiny.eform.IDCardVirtual"));
+	    }
+	    products.add(new Product("XZX-1200", "com.cansiny.eform.IDCardXXX"));
+	    products.add(new Product("GT100", "com.cansiny.eform.IDCardXXX"));
+	}
+    }
+
+    static public class PrinterAdapter extends ProductAdapter
+    {
+	public PrinterAdapter() {
+	    super();
+
+	    if (BuildConfig.DEBUG) {
+		products.add(new Product("模拟设备", "com.cansiny.eform.PrinterVirtual"));
+	    }
+	}
+    }
+
+    static abstract public class Device
+    {
+	public static final String DEVICE_MAGCARD = "Magcard";
+	public static final String DEVICE_IDCARD = "IDCard";
+	public static final String DEVICE_PRINTER = "Printer";
+
+	static public Magcard getMagcard() {
+	    Preferences prefs = Preferences.getPreferences();
+	    Object object = prefs.getDeviceDriverObject(DEVICE_MAGCARD);
+	    if (object instanceof Magcard) {
+		return (Magcard) object;
+	    } else {
+		LogActivity.writeLog("不能获得刷卡器驱动，可能配置错误");
+		return null;
+	    }
+	}
+
+	static public IDCard getIDCard() {
+	    Preferences prefs = Preferences.getPreferences();
+	    Object object = prefs.getDeviceDriverObject(DEVICE_IDCARD);
+	    if (object instanceof Magcard) {
+		return (IDCard) object;
+	    } else {
+		LogActivity.writeLog("不能获得身份证驱动，可能配置错误");
+		return null;
+	    }
+	}
+
+	static public Printer getPrinter() {
+	    Preferences prefs = Preferences.getPreferences();
+	    Object object = prefs.getDeviceDriverObject(DEVICE_PRINTER);
+	    if (object instanceof Magcard) {
+		return (Printer) object;
+	    } else {
+		LogActivity.writeLog("不能获得打印机驱动，可能配置错误");
+		return null;
+	    }
+	}
+
+	protected UsbDevice getUsbDevice(int vid, int pid) {
+	    Context context = EFormApplication.getContext();
+	    UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+	    HashMap<String, UsbDevice> devices = manager.getDeviceList();
+	    Iterator<UsbDevice> iterator = devices.values().iterator();
+	    while (iterator.hasNext()) {
+		UsbDevice device = iterator.next();
+		if (device.getVendorId() == vid && device.getProductId() == pid) {
+		    if (!manager.hasPermission(device)) {
+			LogActivity.writeLog("没有操作USB设备的权限");
+			return null;
+		    }
+		    return device;
+		}
+	    }
+	    LogActivity.writeLog("找不到设备(VID=%s, PID=%s)",
+		    String.format("0x%04X", vid), String.format("0x%04X", pid));
+	    return null;
+	}
+
+	abstract public boolean probe();
+    }
 
     static public class IntegerAdapter extends BaseAdapter
     {

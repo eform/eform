@@ -44,38 +44,38 @@ public abstract class IDCard extends Utils.DialogFragment
     }
 
     static public IDCard getIDCard() {
-	Preferences prefs = Preferences.getPreferences();
-
-	String driver = prefs.getDeviceDriver("IDCard");
-	if (driver == null || driver.length() == 0) {
-	    LogActivity.writeLog("身份证阅读器驱动未指定");
-	    return null;
-	}
-
-	if (driver.equalsIgnoreCase("virtual")) {
-	    return new IDCardVirtual();
-	}
-	if (driver.equalsIgnoreCase("usb")) {
-	    try {
-		int vid = Integer.decode(prefs.getDeviceNameOrVid("IDCard"));
-		int pid = Integer.decode(prefs.getDevicePathOrPid("IDCard"));
-
-		if (vid == IDCardUSBGTICR100.VID && pid == IDCardUSBGTICR100.PID) {
-		    return new IDCardUSBGTICR100();
-		}
-		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序",
-			prefs.getDeviceNameOrVid("IDCard"),
-			prefs.getDevicePathOrPid("IDCard"));
-		return null;
-	    } catch (NumberFormatException e) {
-		LogActivity.writeLog(e);
-		return null;
-	    }
-	}
-	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
-	    return new IDCardSerial(prefs.getDevicePathOrPid("IDCard"));
-	}
-	LogActivity.writeLog("不能识别的身份证阅读器驱动: %s", driver);
+//	Preferences prefs = Preferences.getPreferences();
+//
+//	String driver = prefs.getDeviceDriver("IDCard");
+//	if (driver == null || driver.length() == 0) {
+//	    LogActivity.writeLog("身份证阅读器驱动未指定");
+//	    return null;
+//	}
+//
+//	if (driver.equalsIgnoreCase("virtual")) {
+//	    return new IDCardVirtual();
+//	}
+//	if (driver.equalsIgnoreCase("usb")) {
+//	    try {
+//		int vid = Integer.decode(prefs.getDeviceNameOrVid("IDCard"));
+//		int pid = Integer.decode(prefs.getDevicePathOrPid("IDCard"));
+//
+//		if (vid == IDCardUSBGTICR100.VID && pid == IDCardUSBGTICR100.PID) {
+//		    return new IDCardUSBGTICR100();
+//		}
+//		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序",
+//			prefs.getDeviceNameOrVid("IDCard"),
+//			prefs.getDevicePathOrPid("IDCard"));
+//		return null;
+//	    } catch (NumberFormatException e) {
+//		LogActivity.writeLog(e);
+//		return null;
+//	    }
+//	}
+//	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
+//	    return new IDCardSerial(prefs.getDevicePathOrPid("IDCard"));
+//	}
+//	LogActivity.writeLog("不能识别的身份证阅读器驱动: %s", driver);
 	return null;
     }
 

@@ -32,71 +32,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-public abstract class Magcard extends Utils.DialogFragment
+class MagcardDialog extends Utils.DialogFragment
 {
-    static final private int LEAVE_START = 4;
-    static final private int LEAVE_END   = 3;
-
-    static public String formatCardno(CharSequence cardno) {
-	StringBuilder builder = new StringBuilder();
-	int length = cardno.length();
-
-	for (int i = 0; i < length; i++) {
-	    if (i < LEAVE_START || i >= length - LEAVE_END)
-		builder.append(cardno.charAt(i));
-	    else
-		builder.append('*');
-
-	    if ((i + 1) % 4 == 0)
-		builder.append(' ');
-	}
-	return builder.toString();
-    }
-
-    static public Magcard getMagcard() {
-	Preferences prefs = Preferences.getPreferences();
-
-	String driver = prefs.getDeviceDriver("Magcard");
-	if (driver == null || driver.length() == 0) {
-	    LogActivity.writeLog("磁条卡读卡器驱动未指定");
-	    return null;
-	}
-
-	if (driver.equalsIgnoreCase("virtual")) {
-	    return new MagcardVirtual();
-	}
-	if (driver.equalsIgnoreCase("usb")) {
-	    try {
-		int vid = Integer.decode(prefs.getDeviceNameOrVid("Magcard"));
-		int pid = Integer.decode(prefs.getDevicePathOrPid("Magcard"));
-
-		if (vid == MagcardUSBWBT1372.VID && pid == MagcardUSBWBT1372.PID) {
-		    return new MagcardUSBWBT1372();
-		}
-		LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的磁条卡驱动程序",
-			prefs.getDeviceNameOrVid("Magcard"),
-			prefs.getDevicePathOrPid("Magcard"));
-		return null;
-	    } catch (NumberFormatException e) {
-		LogActivity.writeLog(e);
-		return null;
-	    }
-	}
-	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
-	    return new MagcardSerial(prefs.getDevicePathOrPid("Magcard"));
-	}
-	LogActivity.writeLog("不能识别的磁条卡驱动: %s", driver);
-	return null;
-    }
-
+    private Magcard magcard;
     private int  totaltime = 30;
     private long starttime;
     private TextView timeview;
     private Handler handler;
     private Runnable runnable;
-    private MagcardTask task;
-    private MagcardListener listener;
-    static private int error_count = 0;
+
+    public MagcardDialog(Magcard magcard) {
+	this.magcard = magcard;
+    }
 
     private View buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
@@ -127,7 +74,6 @@ public abstract class Magcard extends Utils.DialogFragment
     		ViewGroup.LayoutParams.MATCH_PARENT));
 
 	timeview = new TextView(getActivity());
-	timeview.setText("");
 	timeview.setGravity(Gravity.CENTER_VERTICAL);
 	timeview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28);
 	timeview.setTextColor(getResources().getColor(R.color.red));
@@ -171,10 +117,7 @@ public abstract class Magcard extends Utils.DialogFragment
 		long currtime = System.currentTimeMillis();
 		totaltime -= (int) ((currtime - starttime) / 1000);
 		if (totaltime <= 0) {
-		    if (task != null) {
-			task.cancel(true);
-		    }
-		    dismiss();
+		    magcard.cancel();
 		} else {
 		    starttime = currtime;
 		    timeview.setText("" + totaltime);
@@ -194,10 +137,7 @@ public abstract class Magcard extends Utils.DialogFragment
 	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
-		cancel();
-		if (task != null) {
-		    task.cancel(true);
-		}
+		magcard.cancel();
 	    }
 	});
 	return builder.create();
@@ -220,18 +160,56 @@ public abstract class Magcard extends Utils.DialogFragment
 	handler.removeCallbacks(runnable);
     }
 
-    abstract protected boolean open();
-    abstract protected String read();
-    abstract protected void close();
-    abstract protected void cancel();
+}
+
+
+public abstract class Magcard extends Utils.Device
+{
+    static final private int LEAVE_START = 4;
+    static final private int LEAVE_END   = 4;
+
+    static public String formatCardno(CharSequence cardno) {
+	StringBuilder builder = new StringBuilder();
+	int length = cardno.length();
+
+	for (int i = 0; i < length; i++) {
+	    if (i < LEAVE_START || i >= length - LEAVE_END)
+		builder.append(cardno.charAt(i));
+	    else
+		builder.append('*');
+
+	    if ((i + 1) % 4 == 0)
+		builder.append(' ');
+	}
+	return builder.toString();
+    }
+
+    static private int swipe_error_count = 0;
+
+    private MagcardListener listener;
+    protected MagcardTask task;
 
     public void setListener(MagcardListener listener) {
 	this.listener = listener;
     }
 
+    abstract protected boolean open();
+    abstract protected String read();
+    abstract protected void close();
+
+    protected void cancel() {
+	if (task != null && !task.isCancelled()) {
+	    task.cancel(true);
+	}
+    }
+
     public void read(FragmentManager manager) {
-	task = new MagcardTask(manager);
-	task.execute();
+	if (!open()) {
+	    Utils.showToast("打开刷卡设备失败", R.drawable.cry);
+	} else {
+	    task = new MagcardTask(manager);
+	    task.execute();
+	}
     }
 
     public interface MagcardListener
@@ -242,6 +220,7 @@ public abstract class Magcard extends Utils.DialogFragment
     public class MagcardTask extends AsyncTask<Void, Void, String>
     {
 	private FragmentManager manager;
+	private MagcardDialog dialog;
 
 	public MagcardTask(FragmentManager manager) {
 	    this.manager = manager;
@@ -254,30 +233,24 @@ public abstract class Magcard extends Utils.DialogFragment
 
 	@Override
 	protected void onPreExecute() {
-	    if (!open()) {
-		Utils.showToast("打开刷卡设备失败", R.drawable.cry);
-		cancel(true);
-		return;
-	    }
-	    show(manager, "Magcard");
+	    dialog = new MagcardDialog(Magcard.this);
+	    dialog.show(manager, "MagcardDialog");
 	}
 
 	@Override
 	protected void onPostExecute(String cardno) {
-	    if (isVisible()) {
-		dismiss();
-	    }
+	    dialog.dismiss();
 	    close();
 
 	    if (cardno != null) {
 		if (listener != null) {
 		    listener.onMagcardRead(Magcard.this, cardno);
 		}
-		Magcard.error_count = 0;
+		Magcard.swipe_error_count = 0;
 	    } else {
-		if (++Magcard.error_count >= 3) {
-		    Utils.showToast("已经连续 " + Magcard.error_count + " 次刷卡失败，"
-			    + "请联系管理员检查设备配置", R.drawable.cry);
+		if (++Magcard.swipe_error_count >= 3) {
+		    Utils.showToast("已经连续 " + Magcard.swipe_error_count +
+			    " 次刷卡失败，请联系管理员检查设备配置", R.drawable.cry);
 		} else {
 		    Utils.showToast("读取卡号失败，请重试！", R.drawable.cry);
 		}
@@ -286,14 +259,46 @@ public abstract class Magcard extends Utils.DialogFragment
 	
 	@Override
 	protected void onCancelled(String cardno) {
-	    if (isVisible()) {
-		Utils.showToast("操作被取消 ...");
-		dismiss();
-	    }
+	    dialog.dismiss();
 	    close();
+	    Utils.showToast("操作被取消 ...");
 	}
     }
 
+    protected String extractCardno(String string) {
+	String[] fields = string.split("\\?", 4);
+
+	for (int i = 0; i < fields.length - 1; i++) {
+	    String track = fields[i].trim();
+
+	    if (track.startsWith("%B")) {	// Track I
+		String[] fields2 = fields[i].split("\\^");
+		if (fields2.length == 3) {
+		    String cardno = fields2[0].substring(3).trim();
+		    if (cardno.matches("[0-9]+")) {
+			return cardno;
+		    }
+		}
+	    } else if (track.startsWith(";")) {	// Track II
+		String[] fields2 = fields[i].split("=");
+		if (fields2.length == 2) {
+		    String cardno = fields2[0].substring(2).trim();
+		    if (cardno.matches("[0-9]+")) {
+			return cardno;
+		    }
+		}
+	    } else if (track.startsWith("+")) {	// Track III
+		String[] fields2 = fields[i].split("=");
+		if (fields2.length == 5) {
+		    String cardno = fields2[0].substring(4).trim();
+		    if (cardno.matches("[0-9]+")) {
+			return cardno;
+		    }
+		}
+	    }
+	}
+	return null;
+    }
 }
 
 class MagcardVirtual extends Magcard
@@ -322,21 +327,20 @@ class MagcardVirtual extends Magcard
     }
 
     @Override
-    protected void cancel() {
-	LogActivity.writeLog("操作被取消");
+    protected void close() {
     }
 
     @Override
-    protected void close() {
+    public boolean probe() {
+	return true;
     }
 }
 
-class MagcardSerial extends Magcard
+class MagcardWBT1370 extends Magcard
 {
     private String path;
 
-    public MagcardSerial(String path) {
-	this.path = path;
+    public MagcardWBT1370() {
     }
 
     @Override
@@ -354,62 +358,51 @@ class MagcardSerial extends Magcard
     }
 
     @Override
-    protected void cancel() {
+    protected void close() {
     }
 
     @Override
-    protected void close() {
+    public boolean probe() {
+	// TODO Auto-generated method stub
+	return false;
     }
+
 }
 
-class MagcardUSBWBT1372 extends Magcard
+
+class MagcardWBT1372 extends Magcard
 {
+    public static final String PRODUCT = "WBT1372";
     public static final int VID = 0x16C0;
     public static final int PID = 0x06EA;
 
-    private UsbInterface intf;
-    private UsbDeviceConnection conn;
+    private UsbManager manager;
+    private UsbDeviceConnection connection;
+    private UsbInterface iface;
+    private UsbRequest request;
 
-    public MagcardUSBWBT1372() {
-	conn = null;
+    public MagcardWBT1372() {
+	Context context = EFormApplication.getContext();
+	manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+	iface = null;
+	connection = null;
     }
 
     @Override
     protected boolean open() {
-	UsbDevice usb_device = Utils.findUsbDevice(VID, PID);
-	if (usb_device == null)
+	UsbDevice device = getUsbDevice(VID, PID);
+	if (device == null)
 	    return false;
 
-	LogActivity.writeLog("numIf: %d", usb_device.getInterfaceCount());
-	for (int i = 0; i < usb_device.getInterfaceCount(); i++) {
-	    UsbInterface uif = usb_device.getInterface(i);
-	    LogActivity.writeLog("接口: %s", uif.toString());
-	    for (int j = 0; j < uif.getEndpointCount(); j++) {
-		UsbEndpoint ep = uif.getEndpoint(j);
-		LogActivity.writeLog("端点：%s", ep.toString());
-		if (ep.getDirection() == UsbConstants.USB_DIR_IN)
-		    LogActivity.writeLog("方向：设备到主机");
-		else
-		    LogActivity.writeLog("方向：主机到设备");
-		LogActivity.writeLog("类型：%d", ep.getType());
-	    }
-	}
-
-	intf = usb_device.getInterface(1);
-	if (intf == null) {
-	    LogActivity.writeLog("不能活的USB接口");
+	connection = manager.openDevice(device);
+	if (connection == null) {
+	    LogActivity.writeLog("刷卡失败，打开USB刷卡设备失败");
 	    return false;
 	}
 
-	Context context = EFormApplication.getContext();
-	UsbManager mg = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-	conn = mg.openDevice(usb_device);
-	if (conn == null) {
-	    LogActivity.writeLog("不能打开设备连接");
-	    return false;
-	}
-	if (!conn.claimInterface(intf, true)) {
-	    LogActivity.writeLog("不能申请设备独占访问");
+	iface = device.getInterface(1);
+	if (!connection.claimInterface(iface, true)) {
+	    LogActivity.writeLog("刷卡失败，申请USB接口独占访问失败");
 	    return false;
 	}
 	return true;
@@ -417,35 +410,60 @@ class MagcardUSBWBT1372 extends Magcard
 
     @Override
     protected String read() {
-	if (conn == null) return null;
+	if (connection == null) return null;
 
-	UsbRequest request = new UsbRequest();
-	request.initialize(conn, intf.getEndpoint(0));
+	UsbEndpoint endpoint = iface.getEndpoint(0);
+	if (endpoint == null ||
+		endpoint.getDirection() != UsbConstants.USB_DIR_IN) {
+	    LogActivity.writeLog("刷卡失败，端点选择错误");
+	    return null;
+	}
 
-	ByteBuffer buffer = ByteBuffer.allocate(60);
-        if (!request.queue(buffer, 18)) {
-            LogActivity.writeLog("排队请求失败");
-            return null;
-        }
+	request = new UsbRequest();
+	if (!request.initialize(connection, endpoint)) {
+	    LogActivity.writeLog("刷卡失败，初始化请求错误");
+	    return null;
+	}
 
-        if (conn.requestWait() == request) {
-            byte[] bytes = buffer.array();
-            LogActivity.writeLog("请求返回 %d, %s", bytes.length, new String(bytes));
-            request.close();
+	ByteBuffer buffer = ByteBuffer.allocate(512);
+    	if (!request.queue(buffer, 512)) {
+    	    LogActivity.writeLog("刷卡失败，刷卡请求排队错误");
+    	    return null;
+    	}
 
-        }
-	return null;
+    	String cardno = null;
+
+    	if (connection.requestWait() == request) {
+    	    if (!task.isCancelled()) {
+    		cardno = extractCardno(new String(buffer.array()));
+    	    }
+    	}
+    	request.close();
+
+	return cardno;
     }
 
     @Override
     protected void close() {
-	if (conn != null) {
-	    conn.close();
-	    conn.releaseInterface(intf);
+	if (connection != null) {
+	    connection.releaseInterface(iface);
+	    connection.close();
 	}
     }
 
     @Override
     protected void cancel() {
+	super.cancel();
+
+	if (!request.cancel()) {
+	    close();
+	    connection = null;
+	}
     }
+
+    @Override
+    public boolean probe() {
+	return (getUsbDevice(VID, PID) == null) ? false : true;
+    }
+
 }

@@ -17,31 +17,31 @@ public abstract class Printer
     static public final int PRINT_WIDTH_HALF = 1;
 
     static public Printer getPrinter() {
-	Preferences prefs = Preferences.getPreferences();
-
-	String driver = prefs.getDeviceDriver("Printer");
-	if (driver == null || driver.length() == 0) {
-	    LogActivity.writeLog("打印机驱动未指定");
-	    return null;
-	}
-
-	if (driver.equalsIgnoreCase("virtual")) {
-	    return new PrinterVirtual();
-	}
-	if (driver.equalsIgnoreCase("usb")) {
-	    return PrinterUSB.getUSBPrinter(prefs.getDeviceNameOrVid("Printer"),
-		    prefs.getDevicePathOrPid("Printer"));
-	}
-	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
-	    return new PrinterSerial(prefs.getDevicePathOrPid("Printer"));
-	}
-	LogActivity.writeLog("不能识别的打印机驱动: %s", driver);
+//	Preferences prefs = Preferences.getPreferences();
+//
+//	String driver = prefs.getDeviceDriver("Printer");
+//	if (driver == null || driver.length() == 0) {
+//	    LogActivity.writeLog("打印机驱动未指定");
+//	    return null;
+//	}
+//
+//	if (driver.equalsIgnoreCase("virtual")) {
+//	    return new PrinterVirtual();
+//	}
+//	if (driver.equalsIgnoreCase("usb")) {
+//	    return PrinterUSB.getUSBPrinter(prefs.getDeviceNameOrVid("Printer"),
+//		    prefs.getDevicePathOrPid("Printer"));
+//	}
+//	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
+//	    return new PrinterSerial(prefs.getDevicePathOrPid("Printer"));
+//	}
+//	LogActivity.writeLog("不能识别的打印机驱动: %s", driver);
 	return null;
     }
-
-    static public ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
-	return PrinterUSB.listUSBDevices();
-    }
+//
+//    static public ArrayList<Utils.SerialAdapter.SerialPortDevice> listUSBDevices() {
+//	return PrinterUSB.listUSBDevices();
+//    }
 
     abstract public boolean open();
     abstract public void close();
@@ -134,16 +134,16 @@ abstract class PrinterUSB extends Printer
 	}
     }
 
-    public static ArrayList<Utils.DeviceAdapter.Device> listUSBDevices() {
-	ArrayList<Utils.DeviceAdapter.Device> array =
-		new ArrayList<Utils.DeviceAdapter.Device>();
-
-	array.add(new Utils.DeviceAdapter.Device("usb",
-		String.format("0x%04X", PrinterUSBLQ90KP.VID),
-		String.format("0x%04X", PrinterUSBLQ90KP.PID)));
-
-	return array;
-    }
+//    public static ArrayList<Utils.SerialAdapter.SerialPortDevice> listUSBDevices() {
+//	ArrayList<Utils.SerialAdapter.SerialPortDevice> array =
+//		new ArrayList<Utils.SerialAdapter.SerialPortDevice>();
+//
+//	array.add(new Utils.SerialAdapter.SerialPortDevice("usb",
+//		String.format("0x%04X", PrinterUSBLQ90KP.VID),
+//		String.format("0x%04X", PrinterUSBLQ90KP.PID)));
+//
+//	return array;
+//    }
 }
 
 class PrinterUSBLQ90KP extends PrinterUSB
