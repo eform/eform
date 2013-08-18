@@ -5,6 +5,7 @@
  */
 package com.cansiny.eform;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
@@ -193,9 +194,7 @@ public abstract class Magcard extends Utils.Device
 	this.listener = listener;
     }
 
-    abstract protected boolean open();
     abstract protected String read();
-    abstract protected void close();
 
     protected void cancel() {
 	if (task != null && !task.isCancelled()) {
@@ -336,40 +335,6 @@ class MagcardVirtual extends Magcard
     }
 }
 
-class MagcardWBT1370 extends Magcard
-{
-    private String path;
-
-    public MagcardWBT1370() {
-    }
-
-    @Override
-    protected boolean open() {
-	return false;
-    }
-
-    @Override
-    protected String read() {
-	if (path == null) {
-	    LogActivity.writeLog("不能得到刷卡器设备路径");
-	    return null;
-	}
-	return null;
-    }
-
-    @Override
-    protected void close() {
-    }
-
-    @Override
-    public boolean probe() {
-	// TODO Auto-generated method stub
-	return false;
-    }
-
-}
-
-
 class MagcardWBT1372 extends Magcard
 {
     public static final String PRODUCT = "WBT1372";
@@ -464,6 +429,62 @@ class MagcardWBT1372 extends Magcard
     @Override
     public boolean probe() {
 	return (getUsbDevice(VID, PID) == null) ? false : true;
+    }
+
+}
+
+class MagcardWBT1370 extends Magcard
+{
+    static private final int BAUDRATE = 9600;
+
+    private SerialPort serial;
+
+    public MagcardWBT1370() {
+    }
+
+    @Override
+    protected boolean open() {
+	Preferences prefs = Preferences.getPreferences();
+
+	String path = prefs.getDevicePath(DEVICE_MAGCARD);
+	if (path == null) {
+	    LogActivity.writeLog("打开刷卡器失败，串口设备未配置");
+	    return false;
+	}
+	try {
+	    serial = new SerialPort(new File(path), BAUDRATE, 0);
+	    return true;
+	} catch (Exception e) {
+	    LogActivity.writeLog(e);
+	    return false;
+	}
+    }
+
+    @Override
+    protected String read() {
+	if (serial == null) return null;
+
+	return null;
+    }
+
+    @Override
+    protected void close() {
+	serial.close();
+    }
+
+    @Override
+    protected void cancel() {
+	super.cancel();
+    }
+
+    @Override
+    public boolean probe() {
+	if (!open()) {
+	    return false;
+	} else {
+	    close();
+	    return true;
+	}
     }
 
 }

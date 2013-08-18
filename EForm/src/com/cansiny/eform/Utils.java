@@ -289,26 +289,6 @@ public class Utils
 
     }
 
-//    static public UsbDevice findUsbDevice(int vid, int pid) {
-//	Context context = EFormApplication.getContext();
-//	UsbManager manager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-//	HashMap<String, UsbDevice> devices = manager.getDeviceList();
-//	Iterator<UsbDevice> iterator = devices.values().iterator();
-//	while (iterator.hasNext()) {
-//	    UsbDevice device = iterator.next();
-//	    if (device.getVendorId() == vid && device.getProductId() == pid) {
-//		if (!manager.hasPermission(device)) {
-//		    LogActivity.writeLog("没有操作USB设备的权限");
-//		    return null;
-//		}
-//		return device;
-//	    }
-//	}
-//	LogActivity.writeLog("找不到vid为%s，pid为%s的设备", String.format("0x%04X", vid),
-//		String.format("0x%04X", pid));
-//	return null;
-//    }
-
     static public class SerialAdapter extends BaseAdapter
     {
 	private ArrayList<Serial> devices;
@@ -570,6 +550,9 @@ public class Utils
 	}
 
 	abstract public boolean probe();
+	abstract protected void cancel();
+	abstract protected boolean open();
+	abstract protected void close();
     }
 
     static public class IntegerAdapter extends BaseAdapter
