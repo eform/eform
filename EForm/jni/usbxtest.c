@@ -61,12 +61,13 @@ static void usbx_list_devices(libusb_context *context)
   ssize_t i;
 
   ssize_t count = libusb_get_device_list(context, &devices);
-  printf("device count: %ld\n", count);
+  printf("Number of USB Device: %ld\n", count);
 
   for (i = 0; i < count; i++)
     {
       char *speed = "";
       struct libusb_device_descriptor desc;
+      int j;
 
       switch(libusb_get_device_speed(devices[i]))
 	{
@@ -87,16 +88,47 @@ static void usbx_list_devices(libusb_context *context)
 	  break;
 	}
 
-      printf("BUS: %d, Port: %d, Address: %d, Speed: %s\n",
+      printf("%ld. BUS: %d, Port: %d, Address: %d, Speed: %s\n", i,
 	     libusb_get_bus_number(devices[i]),
 	     libusb_get_port_number(devices[i]),
 	     libusb_get_device_address(devices[i]), speed);
 
       libusb_get_device_descriptor(devices[i], &desc);
-      printf(" Descriptor Size: %d, Type: %d, bcdUSB: %04X,"
-	     "Class: %s\n",
+      printf("  Descriptor:\n");
+      printf("    Size: %d, Type: %d, bcdUSB: %04X, "
+	     "VID: %04x, PID: %04X, bcdDevice: %04X\n"
+	     "    Class: %s\n"
+	     "    SubClass: %s\n"
+	     "    Protocol: %s\n"
+	     "    Max Packet Size of Endpoint 0: %d\n"
+	     "    Number of Configurations: %d\n",
 	     desc.bLength, desc.bDescriptorType, desc.bcdUSB,
-	     usbx_device_class_name(desc.bDeviceClass));
+	     desc.idVendor, desc.idProduct, desc.bcdDevice,
+	     usbx_device_class_name(desc.bDeviceClass),
+	     usbx_device_class_name(desc.bDeviceSubClass),
+	     usbx_device_class_name(desc.bDeviceProtocol),
+	     desc.bMaxPacketSize0, desc.bNumConfigurations);
+
+      for (j = 0; j < desc.bNumConfigurations; j++)
+	{
+	  struct libusb_config_descriptor *conf;
+	  int k;
+
+	  libusb_get_config_descriptor(devices[i], j, &conf);
+	  printf("    Configuration: %d\n", j);
+	  printf("      Size: %d, Type, %d, Total: %d, Value: %d, "
+		 "Attrs: %04X, Max Power: %d\n"
+		 "      Extra Length: %d, Number of Interface: %d\n",
+		 conf->bLength, conf->bDescriptorType,
+		 conf->wTotalLength, conf->bConfigurationValue,
+		 conf->bmAttributes, conf->MaxPower,
+		 conf->extra_length, conf->bNumInterfaces);
+
+	  for (k = 0; k < conf->bNumInterfaces; k++)
+	    {
+	    }
+	  libusb_free_config_descriptor(conf);
+	}
     }
 }
 
