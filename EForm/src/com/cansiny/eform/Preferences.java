@@ -317,7 +317,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        }
 	        @Override
 	        public void onDeviceTaskSuccessed(Device device, Object result) {
-	            showToast("测试成功！读取的卡号为 " + (String) result, R.drawable.smile);
+	            showToast("刷卡器配置正确！\n读取的卡号为 " + (String) result, R.drawable.smile);
 	        }
 	        @Override
 	        public void onDeviceTaskFailed(Device device) {
@@ -328,8 +328,55 @@ class PreferencesDialog extends Utils.DialogFragment
 	    magcard.startTask(getFragmentManager());
 	    break;
 	case R.id.printer_testing_button:
+	    Device printer = Device.getDevice(Device.DEVICE_PRINTER);
+	    if (printer == null) {
+		showToast("测试失败！未找到打印机驱动", R.drawable.cry);
+		break;
+	    }
+	    printer.setListener(new Device.DeviceListener() {
+	        @Override
+	        public void onDeviceTaskStart(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskCancelled(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskSuccessed(Device device, Object result) {
+	            showToast("打印机配置正确！", R.drawable.smile);
+	        }
+	        @Override
+	        public void onDeviceTaskFailed(Device device) {
+	            LogActivity.writeLog("测试打印机驱动'%s'失败！",
+	        	    prefs.getDeviceDriver(Device.DEVICE_PRINTER));
+	        }
+	    });
+	    printer.startTask(getFragmentManager());
 	    break;
 	case R.id.idcard_testing_button:
+	    Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
+	    if (idcard == null) {
+		showToast("测试失败！未找到身份证读卡器驱动", R.drawable.cry);
+		break;
+	    }
+	    idcard.setListener(new Device.DeviceListener() {
+	        @Override
+	        public void onDeviceTaskStart(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskCancelled(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskSuccessed(Device device, Object result) {
+	            IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
+	            showToast("身份证读卡器配置正确！\n读取的身份证号码为 " + info.idno, R.drawable.smile);
+	        }
+	        @Override
+	        public void onDeviceTaskFailed(Device device) {
+	            LogActivity.writeLog("测试身份证读卡器驱动'%s'失败！",
+	        	    prefs.getDeviceDriver(Device.DEVICE_IDCARD));
+	        }
+	    });
+	    idcard.startTask(getFragmentManager());
 	    break;
 
 	case R.id.member_password_button:

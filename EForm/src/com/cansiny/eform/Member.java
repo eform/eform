@@ -5,6 +5,7 @@
  */
 package com.cansiny.eform;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -260,21 +261,33 @@ class MemberRegisterDialog extends Utils.DialogFragment
 	textview.setMovementMethod(new ScrollingMovementMethod());
 	textview.setPadding(20, 10, 20, 10);
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-	try {
-	    /* TODO: read protocol file from data dir */
-	    AssetManager assets = getActivity().getAssets();
-	    InputStream stream = assets.open("member_protocol.txt");
 
-	    byte[] buffer = new byte[10240];
-	    int count = stream.read(buffer, 0, buffer.length);
-	    if (count >= buffer.length) {
-		LogActivity.writeLog("会员注册协议文件大于10K，超出的部分不显示。");
+	InputStream stream = null;
+	try {
+	    stream = getActivity().openFileInput("member_protocol.txt");
+	} catch (FileNotFoundException e1) {
+	    AssetManager assets = getActivity().getAssets();
+	    try {
+		stream = assets.open("member_protocol.txt");
+	    } catch (IOException e) {
+		LogActivity.writeLog(e);
+		textview.setText("会员注册协议文件未找到，请联系管理员。");
 	    }
-	    stream.close();
-	    textview.setText(new String(buffer, 0, count, "UTF-8"));
-	} catch (IOException e) {
-	    LogActivity.writeLog(e);
-	    textview.setText("协议文件未找到，请联系管理员。");
+	} finally {
+	    if (stream != null) {
+		try {
+		    byte[] buffer = new byte[10240];
+		    int count = stream.read(buffer, 0, buffer.length);
+		    if (count >= buffer.length) {
+			LogActivity.writeLog("会员注册协议文件大于10K，超出的部分不显示。");
+		    }
+		    stream.close();
+		    textview.setText(new String(buffer, 0, count, "UTF-8"));
+		} catch(Exception e) {
+		    LogActivity.writeLog(e);
+		    textview.setText("读会员注册协议文件失败");
+		}
+	    }
 	}
 	return textview;
     }

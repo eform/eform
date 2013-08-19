@@ -102,7 +102,6 @@ public class HomeActivity extends Activity
 	atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
 
 	home_info = HomeInfo.getHomeInfo();
-	home_info.loadCustomerRes();
 
 	LogActivity.clearLog();
 
