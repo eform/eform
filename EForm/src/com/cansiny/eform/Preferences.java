@@ -49,7 +49,7 @@ import android.widget.TextView;
 
 
 class PreferencesDialog extends Utils.DialogFragment
-    implements OnCheckedChangeListener, OnTabChangeListener, IDCard.IDCardListener
+    implements OnCheckedChangeListener, OnTabChangeListener
 {
     static final private String TAB_TAG_GENERIC = "Generic";
     static final private String TAB_TAG_DEVICE  = "Device";
@@ -159,36 +159,48 @@ class PreferencesDialog extends Utils.DialogFragment
 
     private void onMemberPasswordButtonClick() {
 	showToast("请提供会员注册时的身份证件");
-	IDCard idcard = IDCard.getIDCard();
+
+	Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
 	if (idcard == null) {
 	    showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
-	} else {
-	    idcard.setListener(this);
-	    idcard.read(getFragmentManager());
+	    return;
 	}
-    }
 
-    @Override
-    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
-	AlertDialog dialog = (AlertDialog) getDialog();
+	idcard.setListener(new Device.DeviceListener() {
+	    @Override
+	    public void onDeviceTaskSuccessed(Device device, Object result) {
+		IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
+		AlertDialog dialog = (AlertDialog) getDialog();
 
-	View userid_view = dialog.findViewById(R.id.member_userid_textview);
-	View table = dialog.findViewById(R.id.member_password_table);
+		View userid_view = dialog.findViewById(R.id.member_userid_textview);
+		View table = dialog.findViewById(R.id.member_password_table);
 
-	member_password_rowid = EFormSQLite.Member.getid(getActivity(), info.idno);
-	if (member_password_rowid >= 0) {
-	    View edit = dialog.findViewById(R.id.member_password_edittext);
-	    ((TextView) edit).setText("");
-	    edit = dialog.findViewById(R.id.member_password2_edittext);
-	    ((TextView) edit).setText("");
+		member_password_rowid = EFormSQLite.Member.getid(getActivity(), info.idno);
+		if (member_password_rowid >= 0) {
+		    View edit = dialog.findViewById(R.id.member_password_edittext);
+		    ((TextView) edit).setText("");
+		    edit = dialog.findViewById(R.id.member_password2_edittext);
+		    ((TextView) edit).setText("");
 
-	    ((TextView) userid_view).setText(info.idno);
-	    table.setVisibility(View.VISIBLE);
-	} else {
-	    showToast("没有证件号码为“" + info.idno + "”的会员！");
-	    ((TextView) userid_view).setText("");
-	    table.setVisibility(View.GONE);
-	}
+		    ((TextView) userid_view).setText(info.idno);
+		    table.setVisibility(View.VISIBLE);
+		} else {
+		    showToast("没有证件号码为“" + info.idno + "”的会员！");
+		    ((TextView) userid_view).setText("");
+		    table.setVisibility(View.GONE);
+		}
+	    }
+	    @Override
+	    public void onDeviceTaskStart(Device device) {
+	    }
+	    @Override
+	    public void onDeviceTaskFailed(Device device) {
+	    }
+	    @Override
+	    public void onDeviceTaskCancelled(Device device) {
+	    }
+	});
+	idcard.read(getFragmentManager());
     }
 
     private void onMemberPasswordSetButtonClick() {
@@ -296,7 +308,7 @@ class PreferencesDialog extends Utils.DialogFragment
 		showToast("测试失败！未找到刷卡设备驱动", R.drawable.cry);
 		break;
 	    }
-	    magcard.setListener(new Utils.DeviceListener() {
+	    magcard.setListener(new Device.DeviceListener() {
 	        @Override
 	        public void onDeviceTaskStart(Device device) {
 	        }

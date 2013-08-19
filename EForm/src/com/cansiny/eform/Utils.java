@@ -20,7 +20,9 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -491,18 +493,10 @@ public class Utils
 	}
     }
 
-    static interface DeviceListener
-    {
-	public void onDeviceTaskStart(Device device);
-	public void onDeviceTaskCancelled(Device device);
-	public void onDeviceTaskSuccessed(Device device, Object result);
-	public void onDeviceTaskFailed(Device device);
-    }
-
     static abstract public class Device
     {
 	public static final String DEVICE_MAGCARD = "Magcard";
-	public static final String DEVICE_IDCARD = "IDCard";
+	public static final String DEVICE_IDCARD  = "IDCard";
 	public static final String DEVICE_PRINTER = "Printer";
 
 	protected DeviceListener listener = null;
@@ -545,6 +539,10 @@ public class Utils
 	    this.listener = listener;
 	}
 
+	public DeviceListener getListener() {
+	    return listener;
+	}
+
 	public void setClientData(Object data) {
 	    client_data = data;
 	}
@@ -577,10 +575,130 @@ public class Utils
 	abstract protected void cancel();
 
 	protected void read(FragmentManager manager) {}
-	protected String read() { return null; }
-	protected int write(String string, int size) { return 0; }
-    }
+	protected Object read() { return null; }
+	protected int write(Object object, int size) { return 0; }
 
+	static interface DeviceListener
+	{
+	    public void onDeviceTaskStart(Device device);
+	    public void onDeviceTaskCancelled(Device device);
+	    public void onDeviceTaskSuccessed(Device device, Object result);
+	    public void onDeviceTaskFailed(Device device);
+	}
+
+	static public abstract class Task<Params, Progress, Result> extends AsyncTask<Params, Progress, Result>
+	{
+	    protected Device device;
+
+	    public Task(Device device) {
+		this.device = device;
+	    }
+
+	    @Override
+	    protected void onPreExecute() {
+		DeviceListener listener = device.getListener();
+		if (listener != null) {
+		    listener.onDeviceTaskStart(device);
+		}
+	    }
+
+	    @Override
+	    protected void onPostExecute(Result result) {
+		DeviceListener listener = device.getListener();
+		if (listener != null) {
+		    if (result == null) {
+			listener.onDeviceTaskFailed(device);
+		    } else {
+			listener.onDeviceTaskSuccessed(device, result);
+		    }
+		}
+	    }
+
+	    @Override
+	    protected void onCancelled(Result result) {
+		DeviceListener listener = device.getListener();
+		if (listener != null) {
+		    listener.onDeviceTaskCancelled(device);
+		}
+		Utils.showToast("操作被取消 ...");
+	    }
+	}
+
+	static abstract class DeviceDialog extends Utils.DialogFragment
+	{
+	    private Device device;
+	    private int  totaltime = 30;
+	    private long starttime;
+	    private Handler handler;
+	    private Runnable runnable;
+	    protected TextView timeview;
+	    protected AlertDialog.Builder builder;
+
+	    public DeviceDialog(Device device) {
+		this.device = device;
+	    }
+
+	    @Override
+	    public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		handler = new Handler();
+		runnable = new Runnable() {
+		    @Override
+		    public void run() {
+			long currtime = System.currentTimeMillis();
+			totaltime -= (int) ((currtime - starttime) / 1000);
+			if (totaltime <= 0) {
+			    if (device != null) {
+				device.cancel();
+			    }
+			} else {
+			    starttime = currtime;
+			    if (timeview != null) {
+				timeview.setText("" + totaltime);
+			    }
+			    handler.postDelayed(this, 1000);
+			}
+		    }
+		};
+	    }
+
+	    @Override
+	    public Dialog onCreateDialog(Bundle savedInstanceState) {
+		super.onCreateDialog(savedInstanceState);
+
+		builder = new AlertDialog.Builder(getActivity());
+		builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
+		    @Override
+		    public void onClick(DialogInterface dialog, int which) {
+			if (device != null) {
+			    device.cancel();
+			}
+		    }
+		});
+		return null;
+	    }
+
+	    @Override
+	    public void onStart() {
+		super.onStart();
+
+		setCancelable(false);
+
+		if (timeview != null) {
+		    timeview.setText("" + totaltime);
+		}
+		starttime = System.currentTimeMillis();
+		handler.postDelayed(runnable, 0);
+	    }
+
+	    @Override
+	    public void onDismiss(DialogInterface dialog) {
+		super.onDismiss(dialog);
+		handler.removeCallbacks(runnable);
+	    }
+	}
+    }
 
     static public class IntegerAdapter extends BaseAdapter
     {

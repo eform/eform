@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import com.cansiny.eform.Utils.Device;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -28,8 +30,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,7 +42,7 @@ import android.widget.TextView;
 
 
 class MemberLoginDialog extends Utils.DialogFragment
-	implements Administrator.AdministratorLoginDialogListener, IDCard.IDCardListener
+	implements Administrator.AdministratorLoginDialogListener
 {
     private static final int TAG_IDNO_TEXTVIEW = 1;
     private static final int TAG_IDCARD_BUTTON = 2;
@@ -209,13 +209,28 @@ class MemberLoginDialog extends Utils.DialogFragment
 		userid_edittext.setEnabled(true);
 		break;
 	    case TAG_IDCARD_BUTTON:
-		IDCard idcard = IDCard.getIDCard();
+		Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
 		if (idcard == null) {
 		    showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
-		} else {
-		    idcard.setListener(this);
-		    idcard.read(getFragmentManager());
+		    return;
 		}
+		idcard.setListener(new Device.DeviceListener() {
+		    @Override
+		    public void onDeviceTaskSuccessed(Device device, Object result) {
+			IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
+			userid_edittext.setText(info.idno);
+		    }
+		    @Override
+		    public void onDeviceTaskStart(Device device) {
+		    }
+		    @Override
+		    public void onDeviceTaskFailed(Device device) {
+		    }
+		    @Override
+		    public void onDeviceTaskCancelled(Device device) {
+		    }
+		});
+		idcard.read(getFragmentManager());
 		break;
 	    }
 	}
@@ -230,11 +245,6 @@ class MemberLoginDialog extends Utils.DialogFragment
 	    MemberRegisterDialog dialog = new MemberRegisterDialog();
 	    dialog.show(getFragmentManager(), "MemberRegisterDialog");
 	}
-    }
-
-    @Override
-    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
-	userid_edittext.setText(info.idno);
     }
 
 }
@@ -302,7 +312,7 @@ class MemberRegisterDialog extends Utils.DialogFragment
 }
 
 
-class MemberProfileDialog extends Utils.DialogFragment implements IDCard.IDCardListener
+class MemberProfileDialog extends Utils.DialogFragment
 {
     private EditText userid_edittext;
     private EditText username_edittext;
@@ -491,26 +501,37 @@ class MemberProfileDialog extends Utils.DialogFragment implements IDCard.IDCardL
 
 	switch (view.getId()) {
 	case R.id.idcard_read_button:
-	    IDCard idcard = IDCard.getIDCard();
+	    Device idcard = Device.getDevice(Device.DEVICE_IDCARD);;
 	    if (idcard == null) {
 		showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
-	    } else {
-		idcard.setListener(this);
-		idcard.read(getFragmentManager());
+		break;
 	    }
+
+	    idcard.setListener(new Device.DeviceListener() {
+		@Override
+		public void onDeviceTaskSuccessed(Device device, Object result) {
+		    IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
+		    userid_edittext.setText(info.idno);
+		    username_edittext.setText(info.name);
+		}
+		@Override
+		public void onDeviceTaskStart(Device device) {
+		}
+		@Override
+		public void onDeviceTaskFailed(Device device) {
+		}
+		@Override
+		public void onDeviceTaskCancelled(Device device) {
+		}
+	    });
+	    idcard.read(getFragmentManager());
 	    break;
 	}
-    }
-
-    @Override
-    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
-	userid_edittext.setText(info.idno);
-	username_edittext.setText(info.name);
     }
 }
 
 
-class MemberDeleteDialog extends Utils.DialogFragment implements IDCard.IDCardListener
+class MemberDeleteDialog extends Utils.DialogFragment
 {
     private LinearLayout buildLayout() {
 	LinearLayout linear = new LinearLayout(getActivity());
@@ -583,42 +604,54 @@ class MemberDeleteDialog extends Utils.DialogFragment implements IDCard.IDCardLi
 	    @Override
 	    public void onClick(View view) {
 		showToast("请提供会员的身份证件！");
-		IDCard idcard = IDCard.getIDCard();
+
+		Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
 		if (idcard == null) {
 		    showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
-		} else {
-		    idcard.setListener(MemberDeleteDialog.this);
-		    idcard.read(getFragmentManager());
+		    return;
 		}
+
+		idcard.setListener(new Device.DeviceListener() {
+		    @Override
+		    public void onDeviceTaskSuccessed(Device device, Object result) {
+			Member member = Member.getMember();
+
+			if (!member.isLogin() || member.getProfile() == null) {
+			    dismiss();
+			    return;
+			}
+
+			IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
+			if (member.getProfile().userid.equals(info.idno)) {
+			    if (member.delete(getActivity())) {
+				Utils.showToast("会员注销成功！");
+			    } else {
+				Utils.showToast("注销会员失败！", R.drawable.cry);
+			    }
+			    dismiss();
+			} else {
+			    showToastLong("必须提供会员注册时使用的的身份证才能注销！", R.drawable.cry);
+			}
+		    }
+		    @Override
+		    public void onDeviceTaskStart(Device device) {
+		    }
+		    @Override
+		    public void onDeviceTaskFailed(Device device) {
+		    }
+		    @Override
+		    public void onDeviceTaskCancelled(Device device) {
+		    }
+		});
+		idcard.read(getFragmentManager());
 	    }
 	});
-    }
-
-    @Override
-    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
-	Member member = Member.getMember();
-
-	if (!member.isLogin() || member.getProfile() == null) {
-	    dismiss();
-	    return;
-	}
-
-	if (member.getProfile().userid.equals(info.idno)) {
-	    if (member.delete(getActivity())) {
-		Utils.showToast("会员注销成功！");
-	    } else {
-		Utils.showToast("注销会员失败！", R.drawable.cry);
-	    }
-	    dismiss();
-	} else {
-	    showToastLong("必须提供会员注册时使用的的身份证才能注销！", R.drawable.cry);
-	}
     }
 }
 
 
 class MemberVouchersDialog extends Utils.DialogFragment
-	implements OnItemClickListener, OnItemLongClickListener
+	implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener
 {
     private static final int TAG_BUTTON_SCROLLUP   = 0x00010001;
     private static final int TAG_BUTTON_SCROLLDOWN = 0x00010002;

@@ -11,6 +11,8 @@ import java.io.InputStream;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.cansiny.eform.Utils.Device;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -700,7 +702,7 @@ public class Print
 
     public Printer getPrinter() {
 	if (printer == null)
-	    printer = Printer.getPrinter();
+	    printer = (Printer) Device.getDevice(Device.DEVICE_PRINTER);
 	return printer;
     }
 
@@ -709,7 +711,7 @@ public class Print
 	    LogActivity.writeLog("没有需要打印的凭条");
 	    return false;
 	}
-	printer = Printer.getPrinter();
+	printer = getPrinter();
 
 	new PrintDialog(this).show(manager, "PrintDialog");
 

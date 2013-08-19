@@ -9,7 +9,8 @@ import java.io.File;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import android.app.AlertDialog;
+
+import com.cansiny.eform.Utils.Device;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -21,9 +22,7 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbRequest;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -33,17 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-class MagcardDialog extends Utils.DialogFragment
+class MagcardDialog extends Device.DeviceDialog
 {
-    private Magcard magcard;
-    private int  totaltime = 30;
-    private long starttime;
-    private TextView timeview;
-    private Handler handler;
-    private Runnable runnable;
-
-    public MagcardDialog(Magcard magcard) {
-	this.magcard = magcard;
+    public MagcardDialog(Device device) {
+	super(device);
     }
 
     private View buildLayout() {
@@ -108,57 +100,22 @@ class MagcardDialog extends Utils.DialogFragment
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-
-	handler = new Handler();
-	runnable = new Runnable() {
-	    @Override
-	    public void run() {
-		long currtime = System.currentTimeMillis();
-		totaltime -= (int) ((currtime - starttime) / 1000);
-		if (totaltime <= 0) {
-		    magcard.cancel();
-		} else {
-		    starttime = currtime;
-		    timeview.setText("" + totaltime);
-		    handler.postDelayed(this, 1000);
-		}
-	    }
-	};
-    }
-
-    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 	super.onCreateDialog(savedInstanceState);
 
-	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 	builder.setTitle("请刷磁条卡或存折");
 	builder.setView(buildLayout());
-	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
-	    @Override
-	    public void onClick(DialogInterface dialog, int which) {
-		magcard.cancel();
-	    }
-	});
 	return builder.create();
     }
 
     @Override
     public void onStart() {
 	super.onStart();
-
-	setCancelable(false);
-
-	timeview.setText("" + totaltime);
-	starttime = System.currentTimeMillis();
-	handler.postDelayed(runnable, 0);
     }
 
     @Override
     public void onDismiss(DialogInterface dialog) {
 	super.onDismiss(dialog);
-	handler.removeCallbacks(runnable);
     }
 
 }
@@ -200,36 +157,37 @@ public abstract class Magcard extends Utils.Device
 	if (!open()) {
 	    Utils.showToast("打开刷卡设备失败", R.drawable.cry);
 	} else {
-	    task = new MagcardTask(manager);
+	    task = new MagcardTask(this, manager);
 	    task.execute();
 	}
     }
 
-    public class MagcardTask extends AsyncTask<Void, Void, String>
+    public class MagcardTask extends Device.Task<Void, Void, String>
     {
 	private FragmentManager manager;
 	private MagcardDialog dialog;
 
-	public MagcardTask(FragmentManager manager) {
+	public MagcardTask(Device device, FragmentManager manager) {
+	    super(device);
 	    this.manager = manager;
 	}
 
 	@Override
 	protected String doInBackground(Void... args) {
-	    return read();
+	    return (String) read();
 	}
 
 	@Override
 	protected void onPreExecute() {
+	    super.onPreExecute();
 	    dialog = new MagcardDialog(Magcard.this);
 	    dialog.show(manager, "MagcardDialog");
-	    if (listener != null) {
-		listener.onDeviceTaskStart(Magcard.this);
-	    }
 	}
 
 	@Override
 	protected void onPostExecute(String result) {
+	    super.onPostExecute(result);
+
 	    dialog.dismiss();
 	    close();
 
@@ -240,27 +198,16 @@ public abstract class Magcard extends Utils.Device
 		} else {
 		    Utils.showToast("读取卡号失败，请重试！", R.drawable.cry);
 		}
-		if (listener != null) {
-		    listener.onDeviceTaskFailed(Magcard.this);
-		}
-		return;
-	    }
-	    Magcard.swipe_error_count = 0;
-
-	    if (listener != null) {
-		listener.onDeviceTaskSuccessed(Magcard.this, result);
+	    } else {
+		Magcard.swipe_error_count = 0;
 	    }
 	}
 	
 	@Override
 	protected void onCancelled(String result) {
+	    super.onCancelled(result);
 	    dialog.dismiss();
 	    close();
-	    Utils.showToast("操作被取消 ...");
-
-	    if (listener != null) {
-		listener.onDeviceTaskCancelled(Magcard.this);
-	    }
 	}
     }
 
@@ -300,11 +247,9 @@ public abstract class Magcard extends Utils.Device
     }
 }
 
+
 class MagcardVirtual extends Magcard
 {
-    public MagcardVirtual() {
-    }
-
     @Override
     protected boolean open() {
 	return true;
@@ -329,6 +274,7 @@ class MagcardVirtual extends Magcard
 	}
     }
 }
+
 
 class MagcardWBT1372 extends Magcard
 {
@@ -428,6 +374,7 @@ class MagcardWBT1370 extends Magcard
     private SerialPort serial;
 
     public MagcardWBT1370() {
+	serial = null;
     }
 
     @Override

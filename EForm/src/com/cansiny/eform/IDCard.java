@@ -6,13 +6,13 @@
 package com.cansiny.eform;
 
 import java.security.SecureRandom;
-import android.app.AlertDialog;
+
+import com.cansiny.eform.Utils.Device;
+
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -22,42 +22,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-class IDCardDialog extends Utils.DialogFragment
+class IDCardDialog extends Device.DeviceDialog
 {
-    
-}
-
-public abstract class IDCard extends Utils.DialogFragment
-{
-    static final private int LEAVE_START = 3;
-    static final private int LEAVE_END   = 4;
-
-    static public String formatIdno(CharSequence idno) {
-	StringBuilder builder = new StringBuilder();
-	int length = idno.length();
-
-	for (int i = 0; i < length; i++) {
-	    if (i < LEAVE_START || i >= length - LEAVE_END)
-		builder.append(idno.charAt(i));
-	    else
-		builder.append('*');
-
-	    if ((i + 1) % 4 == 0)
-		builder.append(' ');
-	}
-	return builder.toString();
+    public IDCardDialog(Device device) {
+	super(device);
     }
 
-    private int  totaltime = 30;
-    private long starttime;
-    private TextView timeview;
-    private Handler handler;
-    private Runnable runnable;
-    private IDCardTask task;
-    private IDCardListener listener;
-    static private int error_count = 0;
-
-    static public IDCard getIDCard() { return null; }
     private View buildLayout() {
 	LinearLayout layout = new LinearLayout(getActivity());
 	layout.setOrientation(LinearLayout.VERTICAL);
@@ -87,7 +57,6 @@ public abstract class IDCard extends Utils.DialogFragment
     		ViewGroup.LayoutParams.MATCH_PARENT));
 
 	timeview = new TextView(getActivity());
-	timeview.setText("");
 	timeview.setGravity(Gravity.CENTER_VERTICAL);
 	timeview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28);
 	timeview.setTextColor(getResources().getColor(R.color.red));
@@ -121,75 +90,68 @@ public abstract class IDCard extends Utils.DialogFragment
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-
-	handler = new Handler();
-	runnable = new Runnable() {
-	    @Override
-	    public void run() {
-		long currtime = System.currentTimeMillis();
-		totaltime -= (int) ((currtime - starttime) / 1000);
-		if (totaltime <= 0) {
-		    if (task != null) {
-			task.cancel(true);
-		    }
-		    dismiss();
-		} else {
-		    starttime = currtime;
-		    timeview.setText("" + totaltime);
-		    handler.postDelayed(this, 1000);
-		}
-	    }
-	};
-    }
-
-    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 	super.onCreateDialog(savedInstanceState);
 
-	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 	builder.setTitle("请将身份证放在感应区域");
 	builder.setView(buildLayout());
-	builder.setNegativeButton("取 消", new DialogInterface.OnClickListener() {
-	    @Override
-	    public void onClick(DialogInterface dialog, int which) {
-		cancel();
-		if (task != null) {
-		    task.cancel(true);
-		}
-	    }
-	});
+
 	return builder.create();
     }
 
     @Override
     public void onStart() {
 	super.onStart();
-
-	setCancelable(false);
-
-	timeview.setText("" + totaltime);
-	starttime = System.currentTimeMillis();
-	handler.postDelayed(runnable, 0);
     }
 
     @Override
     public void onDismiss(DialogInterface dialog) {
 	super.onDismiss(dialog);
-	handler.removeCallbacks(runnable);
     }
 
-    abstract protected IDCardInfo read();
-    abstract protected void cancel();
+}
 
-    public void setListener(IDCardListener listener) {
-	this.listener = listener;
+public abstract class IDCard extends Utils.Device
+{
+    static final private int LEAVE_START = 3;
+    static final private int LEAVE_END   = 4;
+
+    static public String formatId(CharSequence idno) {
+	StringBuilder builder = new StringBuilder();
+	int length = idno.length();
+
+	for (int i = 0; i < length; i++) {
+	    if (i < LEAVE_START || i >= length - LEAVE_END)
+		builder.append(idno.charAt(i));
+	    else
+		builder.append('*');
+
+	    if ((i + 1) % 4 == 0)
+		builder.append(' ');
+	}
+	return builder.toString();
     }
 
+    static private int read_error_count = 0;
+    protected IDCardTask task;
+
+//    static public IDCard getIDCard() { return null; }
+
+    @Override
+    protected void cancel() {
+	if (task != null && !task.isCancelled()) {
+	    task.cancel(true);
+	}
+    }
+
+    @Override
     public void read(FragmentManager manager) {
-	task = new IDCardTask(manager);
-	task.execute();
+	if (!open()) {
+	    Utils.showToast("打开身份证读卡器失败", R.drawable.cry);
+	} else {
+	    task = new IDCardTask(this, manager);
+	    task.execute();
+	}
     }
 
     static public class IDCardInfo
@@ -209,51 +171,51 @@ public abstract class IDCard extends Utils.DialogFragment
 	public String nationality;
     }
 
-    public interface IDCardListener
-    {
-	public void onIDCardRead(IDCard IDCard, IDCardInfo info);
-    }
-
-    public class IDCardTask extends AsyncTask<Void, Void, IDCardInfo>
+    public class IDCardTask extends Device.Task<Void, Void, IDCardInfo>
     {
 	private FragmentManager manager;
+	IDCardDialog dialog;
 
-	public IDCardTask(FragmentManager manager) {
+	public IDCardTask(Device device, FragmentManager manager) {
+	    super(device);
 	    this.manager = manager;
 	}
 
 	@Override
 	protected IDCardInfo doInBackground(Void... args) {
-	    return read();
+	    return (IDCardInfo) read();
 	}
 
 	@Override
 	protected void onPreExecute() {
-	    show(manager, "IDCard");
+	    super.onPreExecute();
+	    dialog = new IDCardDialog(IDCard.this);
+	    dialog.show(manager, "IDCardDialog");
 	}
 
 	@Override
-	protected void onPostExecute(IDCardInfo info) {
-	    if (info != null) {
-		if (listener != null) {
-		    listener.onIDCardRead(IDCard.this, info);
-		}
-		IDCard.error_count = 0;
-	    } else {
-		if (++IDCard.error_count >= 3) {
-		    Utils.showToast("已经连续 " + IDCard.error_count + " 次读身份证失败，"
-			    + "请联系管理员检查设备配置", R.drawable.cry);
+	protected void onPostExecute(IDCardInfo result) {
+	    super.onPostExecute(result);
+	    dialog.dismiss();
+	    device.close();
+
+	    if (result == null) {
+		if (++IDCard.read_error_count >= 3) {
+		    Utils.showToast("已经连续 " + IDCard.read_error_count +
+			    " 次读身份证失败，请联系管理员检查设备配置", R.drawable.cry);
 		} else {
 		    Utils.showToast("读取身份证信息失败，请重试！", R.drawable.cry);
 		}
+	    } else {
+		IDCard.read_error_count = 0;
 	    }
-	    dismiss();
 	}
 	
 	@Override
-	protected void onCancelled(IDCardInfo info) {
-	    Utils.showToast("操作被取消 ...");
-	    dismiss();
+	protected void onCancelled(IDCardInfo result) {
+	    super.onCancelled(result);
+	    dialog.dismiss();
+	    device.close();
 	}
     }
 
@@ -275,7 +237,7 @@ class IDCardVirtual extends IDCard
 	SecureRandom random = new SecureRandom();
 	if (random.nextBoolean()) {
 	    IDCardInfo info = new IDCardInfo();
-	    info.name = "吴小虎";
+	    info.name = "小虎哥";
 	    info.gender = 1;
 	    info.address = "安徽省庐阳区濉溪路万豪广场";
 	    info.born_year = "1980";
@@ -298,30 +260,17 @@ class IDCardVirtual extends IDCard
     protected void cancel() {
 	LogActivity.writeLog("操作被取消");
     }
-}
 
-class IDCardSerial extends IDCard
-{
-    private String path;
-
-    public IDCardSerial(String path) {
-	this.path = path;
+    @Override
+    protected boolean open() {
+	return true;
     }
 
     @Override
-    protected IDCardInfo read() {
-	if (path == null) {
-	    LogActivity.writeLog("不能得到身份证阅读器设备路径");
-	    return null;
-	}
-	return null;
-    }
-
-    @Override
-    protected void cancel() {
-	// TODO Auto-generated method stub
+    protected void close() {
     }
 }
+
 
 class IDCardUSBGTICR100 extends IDCard
 {
@@ -330,13 +279,22 @@ class IDCardUSBGTICR100 extends IDCard
 
     public IDCardUSBGTICR100() {
     }
-    
+
     @Override
-    protected IDCardInfo read() {
-	return null;
+    protected boolean open() {
+	return false;
+    }
+
+    @Override
+    protected void close() {
     }
 
     @Override
     protected void cancel() {
+    }
+    
+    @Override
+    protected IDCardInfo read() {
+	return null;
     }
 }

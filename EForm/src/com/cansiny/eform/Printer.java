@@ -6,45 +6,16 @@
 package com.cansiny.eform;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import com.cansiny.eform.Utils.Device;
 
 import android.util.Log;
 
 
-public abstract class Printer
+public abstract class Printer extends Device
 {
     static public final int PRINT_WIDTH_NORMAL = 0;
     static public final int PRINT_WIDTH_HALF = 1;
 
-    static public Printer getPrinter() {
-//	Preferences prefs = Preferences.getPreferences();
-//
-//	String driver = prefs.getDeviceDriver("Printer");
-//	if (driver == null || driver.length() == 0) {
-//	    LogActivity.writeLog("打印机驱动未指定");
-//	    return null;
-//	}
-//
-//	if (driver.equalsIgnoreCase("virtual")) {
-//	    return new PrinterVirtual();
-//	}
-//	if (driver.equalsIgnoreCase("usb")) {
-//	    return PrinterUSB.getUSBPrinter(prefs.getDeviceNameOrVid("Printer"),
-//		    prefs.getDevicePathOrPid("Printer"));
-//	}
-//	if (driver.equalsIgnoreCase("serial") || driver.equalsIgnoreCase("usbserial")) {
-//	    return new PrinterSerial(prefs.getDevicePathOrPid("Printer"));
-//	}
-//	LogActivity.writeLog("不能识别的打印机驱动: %s", driver);
-	return null;
-    }
-//
-//    static public ArrayList<Utils.SerialAdapter.SerialPortDevice> listUSBDevices() {
-//	return PrinterUSB.listUSBDevices();
-//    }
-
-    abstract public boolean open();
-    abstract public void close();
     abstract public boolean move(int x, int y);
     abstract public boolean write(String text, PrintParam param);
 
@@ -70,6 +41,12 @@ class PrinterVirtual extends Printer
     }
 
     @Override
+    protected void cancel() {
+	// TODO Auto-generated method stub
+	
+    }
+    
+    @Override
     public boolean move(int x, int y) {
 	Log.d(TAG, "移到 X: " + x + " Y: " + y);
 	return true;
@@ -80,73 +57,11 @@ class PrinterVirtual extends Printer
 	Log.d(TAG, "打印数据：" + text);
 	return true;
     }
-    
+
 }
 
-class PrinterSerial extends Printer
-{
-    private String path;
 
-    public PrinterSerial(String path) {
-	this.path = path;
-    }
-
-    @Override
-    public boolean open() {
-	// TODO Auto-generated method stub
-	return false;
-    }
-
-    @Override
-    public void close() {
-	// TODO Auto-generated method stub
-	
-    }
-
-    @Override
-    public boolean move(int x, int y) {
-	// TODO Auto-generated method stub
-	return false;
-    }
-
-    @Override
-    public boolean write(String text, PrintParam param) {
-	// TODO Auto-generated method stub
-	return false;
-    }
-}
-
-abstract class PrinterUSB extends Printer
-{
-    public static PrinterUSB getUSBPrinter(String vid, String pid) {
-	try {
-	    int ivid = Integer.decode(vid);
-	    int ipid = Integer.decode(pid);
-
-	    if (ivid == PrinterUSBLQ90KP.VID && ipid == PrinterUSBLQ90KP.PID) {
-		return new PrinterUSBLQ90KP();
-	    }
-	    LogActivity.writeLog("不能找到厂商ID为%s和产品ID为%s的驱动程序", vid, pid);
-	    return null;
-	} catch (NumberFormatException e) {
-	    LogActivity.writeLog(e);
-	    return null;
-	}
-    }
-
-//    public static ArrayList<Utils.SerialAdapter.SerialPortDevice> listUSBDevices() {
-//	ArrayList<Utils.SerialAdapter.SerialPortDevice> array =
-//		new ArrayList<Utils.SerialAdapter.SerialPortDevice>();
-//
-//	array.add(new Utils.SerialAdapter.SerialPortDevice("usb",
-//		String.format("0x%04X", PrinterUSBLQ90KP.VID),
-//		String.format("0x%04X", PrinterUSBLQ90KP.PID)));
-//
-//	return array;
-//    }
-}
-
-class PrinterUSBLQ90KP extends PrinterUSB
+class PrinterUSBLQ90KP extends Printer
 {
     public static final int VID = 0x3001;
     public static final int PID = 0x3002;
@@ -161,6 +76,10 @@ class PrinterUSBLQ90KP extends PrinterUSB
 
     @Override
     public void close() {
+    }
+
+    @Override
+    protected void cancel() {
     }
 
     @Override

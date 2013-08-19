@@ -679,8 +679,8 @@ public class FormCIB01 extends Form
     }
 
     @Override
-    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
-	switch(last_idcard_button.getId()) {
+    public void onIDCardResponse(Button button, IDCard.IDCardInfo info) {
+	switch(button.getId()) {
 	case R.id.p1_idcard_button:
 	    findEditText(R.id.p1_name_edittext).setText(info.name);
 	    if (info.gender == 1) {

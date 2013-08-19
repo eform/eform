@@ -12,7 +12,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.cansiny.eform.IDCard.IDCardListener;
 import com.cansiny.eform.Utils.Device;
 
 import android.app.Activity;
@@ -45,7 +44,7 @@ import android.widget.TextView;
 
 public abstract class Form extends DefaultHandler
     implements OnClickListener, OnFocusChangeListener, OnTouchListener,
-    Utils.GenericTextWatcher.TextWatcherListener, IDCardListener
+    Utils.GenericTextWatcher.TextWatcherListener
 {
     static final private String TAG_KEY_WARNING = "Warning";
     static final private String TAG_CLEAR_BUTTON = "edittext_clear_button";
@@ -128,44 +127,59 @@ public abstract class Form extends DefaultHandler
 
     protected void swipeMagcard(TextView textview) {
 	Device magcard = Device.getDevice(Device.DEVICE_MAGCARD);
-	if (magcard != null) {
-	    magcard.setClientData(textview);
-	    magcard.setListener(new Utils.DeviceListener() {
-	        @Override
-	        public void onDeviceTaskSuccessed(Device device, Object result) {
-	            TextView textview = (TextView) device.getClientData();
-	            textview.setText((CharSequence) result);
-	        }
-	        @Override
-	        public void onDeviceTaskStart(Device device) {
-	        }
-	        @Override
-	        public void onDeviceTaskFailed(Device device) {
-	        }
-	        @Override
-	        public void onDeviceTaskCancelled(Device device) {
-	        }
-	    });
-	    magcard.read(activity.getFragmentManager());
-	} else {
+	if (magcard == null) {
 	    Utils.showToast("不能刷卡，请联系管理员检查设备配置", R.drawable.cry);
+	    return;
 	}
+
+	magcard.setClientData(textview);
+	magcard.setListener(new Device.DeviceListener() {
+	    @Override
+	    public void onDeviceTaskSuccessed(Device device, Object result) {
+		TextView textview = (TextView) device.getClientData();
+		textview.setText((CharSequence) result);
+	    }
+	    @Override
+	    public void onDeviceTaskStart(Device device) {
+	    }
+	    @Override
+	    public void onDeviceTaskFailed(Device device) {
+	    }
+	    @Override
+	    public void onDeviceTaskCancelled(Device device) {
+	    }
+	});
+	magcard.read(activity.getFragmentManager());
     }
 
     protected void readIdCard(Button button) {
-	IDCard idcard = IDCard.getIDCard();
-	if (idcard != null) {
-	    last_idcard_button = button;
-	    idcard.setListener(this);
-	    idcard.read(activity.getFragmentManager());
-	} else {
+	Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
+	if (idcard == null) {
 	    Utils.showToast("不能读身份证信息，请联系管理员检查设备配置", R.drawable.cry);
+	    return;
 	}
+
+	idcard.setClientData(button);
+	idcard.setListener(new Device.DeviceListener() {
+	    @Override
+	    public void onDeviceTaskSuccessed(Device device, Object result) {
+		Button button = (Button) device.getClientData();
+		onIDCardResponse(button, (IDCard.IDCardInfo) result);
+	    }
+	    @Override
+	    public void onDeviceTaskStart(Device device) {
+	    }
+	    @Override
+	    public void onDeviceTaskFailed(Device device) {
+	    }
+	    @Override
+	    public void onDeviceTaskCancelled(Device device) {
+	    }
+	});
+	idcard.read(activity.getFragmentManager());
     }
 
-    @Override
-    public void onIDCardRead(IDCard IDCard, IDCard.IDCardInfo info) {
-    }
+    abstract void onIDCardResponse(Button button, IDCard.IDCardInfo info);
 
     public int getPageCount() {
 	return pages.size();
