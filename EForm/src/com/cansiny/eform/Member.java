@@ -230,7 +230,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 		    public void onDeviceTaskCancelled(Device device) {
 		    }
 		});
-		idcard.read(getFragmentManager());
+		idcard.startTask(getFragmentManager());
 		break;
 	    }
 	}
@@ -524,7 +524,7 @@ class MemberProfileDialog extends Utils.DialogFragment
 		public void onDeviceTaskCancelled(Device device) {
 		}
 	    });
-	    idcard.read(getFragmentManager());
+	    idcard.startTask(getFragmentManager());
 	    break;
 	}
     }
@@ -643,7 +643,7 @@ class MemberDeleteDialog extends Utils.DialogFragment
 		    public void onDeviceTaskCancelled(Device device) {
 		    }
 		});
-		idcard.read(getFragmentManager());
+		idcard.startTask(getFragmentManager());
 	    }
 	});
     }

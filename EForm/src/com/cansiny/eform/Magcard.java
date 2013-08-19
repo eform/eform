@@ -14,7 +14,6 @@ import com.cansiny.eform.Utils.Device;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -143,7 +142,7 @@ public abstract class Magcard extends Utils.Device
     }
 
     @Override
-    public void read(FragmentManager manager) {
+    public void startTask(FragmentManager manager) {
 	if (!open()) {
 	    Utils.showToast("打开刷卡设备失败", R.drawable.cry);
 	} else {

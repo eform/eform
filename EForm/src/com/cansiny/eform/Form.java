@@ -149,7 +149,7 @@ public abstract class Form extends DefaultHandler
 	    public void onDeviceTaskCancelled(Device device) {
 	    }
 	});
-	magcard.read(activity.getFragmentManager());
+	magcard.startTask(activity.getFragmentManager());
     }
 
     protected void readIdCard(Button button) {
@@ -176,7 +176,7 @@ public abstract class Form extends DefaultHandler
 	    public void onDeviceTaskCancelled(Device device) {
 	    }
 	});
-	idcard.read(activity.getFragmentManager());
+	idcard.startTask(activity.getFragmentManager());
     }
 
     abstract void onIDCardResponse(Button button, IDCard.IDCardInfo info);

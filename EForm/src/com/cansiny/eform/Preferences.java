@@ -200,7 +200,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	    public void onDeviceTaskCancelled(Device device) {
 	    }
 	});
-	idcard.read(getFragmentManager());
+	idcard.startTask(getFragmentManager());
     }
 
     private void onMemberPasswordSetButtonClick() {
@@ -325,7 +325,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        	    prefs.getDeviceDriver(Device.DEVICE_MAGCARD));
 	        }
 	    });
-	    magcard.read(getFragmentManager());
+	    magcard.startTask(getFragmentManager());
 	    break;
 	case R.id.printer_testing_button:
 	    break;

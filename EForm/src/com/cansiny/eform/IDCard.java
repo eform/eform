@@ -133,7 +133,7 @@ public abstract class IDCard extends Utils.Device
     }
 
     @Override
-    public void read(FragmentManager manager) {
+    public void startTask(FragmentManager manager) {
 	if (!open()) {
 	    Utils.showToast("打开身份证读卡器失败", R.drawable.cry);
 	} else {
@@ -208,6 +208,7 @@ public abstract class IDCard extends Utils.Device
     }
 
 }
+
 
 class IDCardVirtual extends IDCard
 {

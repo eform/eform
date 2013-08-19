@@ -19,7 +19,6 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
@@ -108,15 +107,18 @@ public class HomeActivity extends Activity
 	LogActivity.clearLog();
 
 	setContentView(R.layout.activity_home);
-	buildLayout();
+	setupLayout();
 
 	/* catch long click event to popup menu */
-	View view = findViewById(R.id.main_layout);
-	view.setLongClickable(true);
-	view.setOnLongClickListener(this);
-	view = findViewById(R.id.contents_frame);
-	view.setLongClickable(true);
-	view.setOnLongClickListener(this);
+	int[] ids = {
+		R.id.root_layout,
+		R.id.contents_frame,
+	};
+	for (int id : ids) {
+	    View view = findViewById(id);
+	    view.setLongClickable(true);
+	    view.setOnLongClickListener(this);
+	}
     }
 
     @Override
@@ -146,8 +148,8 @@ public class HomeActivity extends Activity
 	slogan_lasttime = System.currentTimeMillis();
 	handler.postDelayed(runable, 0);
 
-//	Member member = Member.getMember();
-//	member.login(this, "222", "222222");
+	Administrator.getAdministrator().login(this, "222222");
+	Member.getMember().login(this, "429005198005300614", "333333");
     }
 
     @Override
@@ -155,9 +157,6 @@ public class HomeActivity extends Activity
 	super.onStart();
 
 	Log.d("HomeActivity", "onStart");
-
-	Administrator.getAdministrator().login(this, "222222");
-	Log.d("", Environment.getExternalStorageDirectory().getAbsolutePath());
 
 	Administrator admin = Administrator.getAdministrator();
 	admin.addListener(this);
@@ -228,7 +227,7 @@ public class HomeActivity extends Activity
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void buildLayout() {
+    private void setupLayout() {
 	View layout = findViewById(R.id.root_layout);
 	layout.setBackgroundResource(home_info.background);
 
@@ -252,14 +251,14 @@ public class HomeActivity extends Activity
 	    }
 	});
 
+	buildContentsLayout();
+
 	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
 	switcher.setInAnimation(AnimationUtils.loadAnimation(this,
 		android.R.anim.fade_in));
 	switcher.setOutAnimation(AnimationUtils.loadAnimation(this,
 		android.R.anim.fade_out));
 	switcher.setCurrentText(home_info.slogans.get(0));
-
-	buildContentsLayout();
     }
 
 	
@@ -354,7 +353,7 @@ public class HomeActivity extends Activity
     public void refreshLayout() {
 	ViewGroup group = (ViewGroup) findViewById(R.id.contents_frame);
 	group.removeAllViews();
-	buildLayout();
+	setupLayout();
     }
 
 
@@ -407,7 +406,7 @@ public class HomeActivity extends Activity
     @Override
     public boolean onLongClick(View view) {
 	switch (view.getId()) {
-	case R.id.main_layout:
+	case R.id.root_layout:
 	case R.id.contents_frame:
 	    HomeMenu menu = new HomeMenu();
 	    menu.show(getFragmentManager(), "HomeMenu");

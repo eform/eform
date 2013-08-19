@@ -490,6 +490,7 @@ public class Utils
 	    if (BuildConfig.DEBUG) {
 		products.add(new Product("模拟设备", "com.cansiny.eform.PrinterVirtual"));
 	    }
+	    products.add(new Product("LP90PK", "com.cansiny.eform.PrinterLQ90KP"));
 	}
     }
 
@@ -574,7 +575,8 @@ public class Utils
 	abstract protected void close();
 	abstract protected void cancel();
 
-	protected void read(FragmentManager manager) {}
+	protected void startTask(FragmentManager manager) {}
+
 	protected Object read() { return null; }
 	protected int write(Object object, int size) { return 0; }
 
