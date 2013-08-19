@@ -586,7 +586,8 @@ public class Utils
 	    public void onDeviceTaskFailed(Device device);
 	}
 
-	static public abstract class Task<Params, Progress, Result> extends AsyncTask<Params, Progress, Result>
+	static public abstract class Task<Params, Progress, Result>
+		extends AsyncTask<Params, Progress, Result>
 	{
 	    protected Device device;
 

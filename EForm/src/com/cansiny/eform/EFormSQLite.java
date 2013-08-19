@@ -599,20 +599,29 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    database.beginTransaction();
 	    boolean retval = false;
 	    try {
-		int rows = database.delete(TABLE_NAME, "_id=?",
-			new String[] { String.valueOf(rowid) });
-		if (rows == 1) {
+		do {
+		    // delete member from member table
+		    int rows = database.delete(TABLE_NAME, "_id=?",
+			    new String[] { String.valueOf(rowid) });
+		    if (rows != 1) {
+			LogActivity.writeLog("从Member表删除会员返回 %d", rows);
+			break;
+		    }
+		    // delete member from account table
 		    rows = database.delete(Account.TABLE_NAME, "userid=?", 
 			    new String[] { String.valueOf(rowid) });
-		    if (rows == 1) {
+		    if (rows != 1) {
+			LogActivity.writeLog("从Account表删除会员返回 %d", rows);
+			break;
+		    }
+		    // delete all vouchers belongs to member
+		    rows = database.delete(Voucher.TABLE_NAME, "userid=?",
+			    new String[] { String.valueOf(rowid) });
+		    if (rows >= 0) {
 			database.setTransactionSuccessful();
 			retval = true;
-		    } else {
-			LogActivity.writeLog("从Account表删除会员返回 %d", rows);
 		    }
-		} else {
-		    LogActivity.writeLog("从Member表删除会员返回 %d", rows);
-		}
+		} while(false);
 	    } finally {
 		database.endTransaction();
 		database.close();

@@ -5,13 +5,13 @@
  */
 package com.cansiny.eform;
 
+import java.math.BigInteger;
 import java.security.SecureRandom;
 
 import com.cansiny.eform.Utils.Device;
 
 import android.app.Dialog;
 import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -99,16 +99,6 @@ class IDCardDialog extends Device.DeviceDialog
 	return builder.create();
     }
 
-    @Override
-    public void onStart() {
-	super.onStart();
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
-    }
-
 }
 
 public abstract class IDCard extends Utils.Device
@@ -135,8 +125,6 @@ public abstract class IDCard extends Utils.Device
     static private int read_error_count = 0;
     protected IDCardTask task;
 
-//    static public IDCard getIDCard() { return null; }
-
     @Override
     protected void cancel() {
 	if (task != null && !task.isCancelled()) {
@@ -152,23 +140,6 @@ public abstract class IDCard extends Utils.Device
 	    task = new IDCardTask(this, manager);
 	    task.execute();
 	}
-    }
-
-    static public class IDCardInfo
-    {
-	public String name;
-	public byte gender;
-	public String idno;
-	public String grant_dept;
-	public String due_year;
-	public String due_month;
-	public String due_day;
-	public String born_year;
-	public String born_month;
-	public String born_day;
-	public String address;
-	public String nation;
-	public String nationality;
     }
 
     public class IDCardTask extends Device.Task<Void, Void, IDCardInfo>
@@ -219,55 +190,77 @@ public abstract class IDCard extends Utils.Device
 	}
     }
 
+    static public class IDCardInfo
+    {
+	public String name;
+	public byte   gender;
+	public String idno;
+	public String grant_dept;
+	public String due_year;
+	public String due_month;
+	public String due_day;
+	public String born_year;
+	public String born_month;
+	public String born_day;
+	public String address;
+	public String nation;
+	public String nationality;
+    }
+
 }
 
 class IDCardVirtual extends IDCard
 {
-    public IDCardVirtual() {
-    }
+    @Override
+    protected boolean open() { return true; }
+
+    @Override
+    protected void close() {}
 
     @Override
     protected IDCardInfo read() {
 	try {
-	    Thread.sleep(3000);
+	    Thread.sleep(2000);
 	} catch (InterruptedException e) {
 	    LogActivity.writeLog(e);
 	}
 
+	IDCardInfo info = new IDCardInfo();
+
 	SecureRandom random = new SecureRandom();
-	if (random.nextBoolean()) {
-	    IDCardInfo info = new IDCardInfo();
+
+	switch(Math.abs(random.nextInt() % 3)) {
+	case 0:
 	    info.name = "小虎哥";
-	    info.gender = 1;
 	    info.address = "安徽省庐阳区濉溪路万豪广场";
-	    info.born_year = "1980";
-	    info.born_month = "5";
-	    info.born_day = "30";
-	    info.due_year = "2020";
-	    info.due_month = "12";
-	    info.due_day = "20";
+	    info.born_year = "1990";
 	    info.idno = "429005198005300614";
-	    info.grant_dept = "湖北省公安局";
-	    info.nation = "汉";
-	    info.nationality = "中国";
-	    return info;
-	} else {
-	    return null;
+	    break;
+	case 1:
+	    info.name = "测试哥";
+	    info.address = "安徽省测试区人民影院";
+	    info.born_year = "2000";
+	    info.idno = "530122398402321231";
+	    break;
+	case 2:
+	    info.name = "身份哥";
+	    info.address = "安徽省身份区公安局";
+	    info.born_year = "1999";
+	    info.idno = new BigInteger(130, random).toString(10).substring(0, 18);
+	    break;
 	}
-    }
 
-    @Override
-    protected void cancel() {
-	LogActivity.writeLog("操作被取消");
-    }
+	info.born_month = "9";
+	info.born_day = "20";
+	info.gender = 1;
+	info.due_year = "2020";
+	info.due_month = "12";
+	info.due_day = "20";
+	info.grant_dept = "合肥市公安局";
+	info.nation = "汉";
+	info.nationality = "中国";
 
-    @Override
-    protected boolean open() {
-	return true;
-    }
-
-    @Override
-    protected void close() {
+	return info;
     }
 }
 

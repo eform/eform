@@ -108,16 +108,6 @@ class MagcardDialog extends Device.DeviceDialog
 	return builder.create();
     }
 
-    @Override
-    public void onStart() {
-	super.onStart();
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-	super.onDismiss(dialog);
-    }
-
 }
 
 
@@ -187,9 +177,8 @@ public abstract class Magcard extends Utils.Device
 	@Override
 	protected void onPostExecute(String result) {
 	    super.onPostExecute(result);
-
 	    dialog.dismiss();
-	    close();
+	    device.close();
 
 	    if (result == null) {
 		if (++Magcard.swipe_error_count >= 3) {
@@ -207,7 +196,7 @@ public abstract class Magcard extends Utils.Device
 	protected void onCancelled(String result) {
 	    super.onCancelled(result);
 	    dialog.dismiss();
-	    close();
+	    device.close();
 	}
     }
 
@@ -251,13 +240,10 @@ public abstract class Magcard extends Utils.Device
 class MagcardVirtual extends Magcard
 {
     @Override
-    protected boolean open() {
-	return true;
-    }
+    protected boolean open() { return true; }
 
     @Override
-    protected void close() {
-    }
+    protected void close() {}
 
     @Override
     protected String read() {
@@ -354,7 +340,6 @@ class MagcardWBT1372 extends Magcard
     	}
 
     	String result = null;
-
     	if (connection.requestWait() == request) {
     	    if (!task.isCancelled()) {
     		result = extractCardno(new String(buffer.array()));
