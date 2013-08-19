@@ -59,7 +59,7 @@ public class SerialPort
 
 	mFd = open(device.getAbsolutePath(), baudrate, flags);
 	if (mFd == null) {
-	    LogActivity.writeLog("底层打开串口函数返回 null");
+	    LogActivity.writeLog("打开串口失败：%s", getErrbuf());
 	    throw new IOException();
 	}
 	mFileInputStream  = new FileInputStream(mFd);
@@ -75,6 +75,7 @@ public class SerialPort
 
     private native static FileDescriptor open(String path, int baudrate, int flags);
     public native void close();
+    private native static String getErrbuf();
     static {
 	System.loadLibrary("serial");
     }

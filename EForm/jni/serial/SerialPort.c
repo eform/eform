@@ -21,12 +21,15 @@
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 #include <jni.h>
 
 #include "SerialPort.h"
 #include "android/log.h"
 
-static const char *TAG = "serial_port";
+//static const char *TAG = "serialPort";
+#define TAG "SerialPort"
+
 #define LOGI(fmt, args...) \
 	__android_log_print(ANDROID_LOG_INFO,  TAG, fmt, ##args)
 #define LOGD(fmt, args...) \
@@ -34,8 +37,117 @@ static const char *TAG = "serial_port";
 #define LOGE(fmt, args...) \
  	__android_log_print(ANDROID_LOG_ERROR, TAG, fmt, ##args)
 
+static speed_t getBaudrate(jint baudrate);
 
-static speed_t getBaudrate(jint baudrate)
+static char errbuf[1024] = { '\0', };
+
+/*
+ * Class:     com_cansiny_eform_SerialPort
+ * Method:    open
+ * Signature: (Ljava/lang/String;II)Ljava/io/FileDescriptor;
+ */
+JNIEXPORT jobject JNICALL
+Java_com_cansiny_eform_SerialPort_open(JNIEnv *env,
+				       jclass  thiz,
+				       jstring path,
+				       jint    baudrate,
+				       jint    flags)
+{
+  int fd;
+  speed_t speed;
+  jobject mFileDescriptor;
+  jboolean iscopy;
+  const char *path_utf;
+  struct termios cfg;
+  jclass cFileDescriptor;
+  jmethodID iFileDescriptor;
+  jfieldID descriptorID;
+
+  speed = getBaudrate(baudrate);
+  if (speed == -1)
+    {
+      snprintf(errbuf, sizeof(errbuf), "波特率 %d 无效", baudrate);
+      return NULL;
+    }
+  path_utf = (*env)->GetStringUTFChars(env, path, &iscopy);
+  fd = open(path_utf, O_RDWR | flags);
+  if (fd == -1)
+    {
+      snprintf(errbuf, sizeof(errbuf),
+	       "不能打开串口 %s: %s", path_utf, strerror(errno));
+      (*env)->ReleaseStringUTFChars(env, path, path_utf);
+      return NULL;
+    }
+  (*env)->ReleaseStringUTFChars(env, path, path_utf);
+
+  if (tcgetattr(fd, &cfg))
+    {
+      snprintf(errbuf, sizeof(errbuf),
+	       "tcgetattr() 错误: %s", strerror(errno));
+      close(fd);
+      return NULL;
+    }
+  cfmakeraw(&cfg);
+  cfsetispeed(&cfg, speed);
+  cfsetospeed(&cfg, speed);
+  if (tcsetattr(fd, TCSANOW, &cfg))
+    {
+      snprintf(errbuf, sizeof(errbuf),
+	       "tcsetattr() 错误: %s", strerror(errno));
+      close(fd);
+      return NULL;
+    }
+
+  /* Create a corresponding file descriptor */
+  cFileDescriptor =
+    (*env)->FindClass(env, "java/io/FileDescriptor");
+  iFileDescriptor =
+    (*env)->GetMethodID(env, cFileDescriptor, "<init>", "()V");
+  descriptorID =
+    (*env)->GetFieldID(env, cFileDescriptor, "descriptor", "I");
+  mFileDescriptor =
+    (*env)->NewObject(env, cFileDescriptor, iFileDescriptor);
+
+  (*env)->SetIntField(env, mFileDescriptor, descriptorID, (jint)fd);
+  return mFileDescriptor;
+}
+
+/*
+ * Class:     com_cansiny_eform_SerialPort
+ * Method:    close
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL
+Java_com_cansiny_eform_SerialPort_close(JNIEnv *env, jobject thiz)
+{
+  jclass SerialPortClass = (*env)->GetObjectClass (env, thiz);
+  jclass FileDescriptorClass =
+    (*env)->FindClass (env, "java/io/FileDescriptor");
+  jfieldID mFdID =
+    (*env)->GetFieldID (env, SerialPortClass, "mFd",
+			"Ljava/io/FileDescriptor;");
+  jfieldID descriptorID =
+    (*env)->GetFieldID (env, FileDescriptorClass, "descriptor", "I");
+
+  jobject mFd = (*env)->GetObjectField(env, thiz, mFdID);
+  jint descriptor = (*env)->GetIntField(env, mFd, descriptorID);
+
+  close(descriptor);
+}
+
+/*
+ * Class:     com_cansiny_eform_SerialPort
+ * Method:    getErrbuf
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring
+JNICALL Java_com_cansiny_eform_SerialPort_getErrbuf(JNIEnv *env,
+						    jclass  thiz)
+{
+  return (*env)->NewStringUTF(env, errbuf);
+}
+
+speed_t getBaudrate(jint baudrate)
 {
   switch(baudrate)
     {
@@ -72,99 +184,4 @@ static speed_t getBaudrate(jint baudrate)
     case 4000000: return B4000000;
     default: return -1;
     }
-}
-
-/*
- * Class:     com_cansiny_eform_SerialPort
- * Method:    open
- * Signature: (Ljava/lang/String;II)Ljava/io/FileDescriptor;
- */
-JNIEXPORT jobject JNICALL
-Java_com_cansiny_eform_SerialPort_open(JNIEnv *env,
-				       jclass  thiz,
-				       jstring path,
-				       jint    baudrate,
-				       jint    flags)
-{
-  int fd;
-  speed_t speed;
-  jobject mFileDescriptor;
-  jboolean iscopy;
-  const char *path_utf;
-  struct termios cfg;
-  jclass cFileDescriptor;
-  jmethodID iFileDescriptor;
-  jfieldID descriptorID;
-
-  /* Check arguments */
-  speed = getBaudrate(baudrate);
-  if (speed == -1)
-    {
-      /* TODO: throw an exception */
-      LOGE("Invalid baudrate");
-      return NULL;
-    }
-
-  /* Opening device */
-  path_utf = (*env)->GetStringUTFChars(env, path, &iscopy);
-  LOGD("Opening serial port %s with flags 0x%x", path_utf, O_RDWR | flags);
-  fd = open(path_utf, O_RDWR | flags);
-  if (fd == -1)
-    {
-      LOGE("Cannot open port %s: %s", path_utf, strerror(errno));
-      (*env)->ReleaseStringUTFChars(env, path, path_utf);
-      return NULL;
-    }
-  (*env)->ReleaseStringUTFChars(env, path, path_utf);
-
-  /* Configure device */
-  LOGD("Configuring serial port");
-  if (tcgetattr(fd, &cfg))
-    {
-      LOGE("tcgetattr() error: %s", strerror(errno));
-      close(fd);
-      return NULL;
-    }
-
-  cfmakeraw(&cfg);
-  cfsetispeed(&cfg, speed);
-  cfsetospeed(&cfg, speed);
-
-  if (tcsetattr(fd, TCSANOW, &cfg))
-    {
-      LOGE("tcsetattr() error: %s", strerror(errno));
-      close(fd);
-      return NULL;
-    }
-
-  /* Create a corresponding file descriptor */
-  cFileDescriptor = (*env)->FindClass(env, "java/io/FileDescriptor");
-  iFileDescriptor = (*env)->GetMethodID(env, cFileDescriptor, "<init>", "()V");
-  descriptorID = (*env)->GetFieldID(env, cFileDescriptor, "descriptor", "I");
-  mFileDescriptor = (*env)->NewObject(env, cFileDescriptor, iFileDescriptor);
-  (*env)->SetIntField(env, mFileDescriptor, descriptorID, (jint)fd);
-
-  return mFileDescriptor;
-}
-
-/*
- * Class:     com_cansiny_eform_SerialPort
- * Method:    close
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_com_cansiny_eform_SerialPort_close(JNIEnv *env, jobject thiz)
-{
-  jclass SerialPortClass = (*env)->GetObjectClass(env, thiz);
-  jclass FileDescriptorClass = (*env)->FindClass(env, "java/io/FileDescriptor");
-
-  jfieldID mFdID = (*env)->GetFieldID(env, SerialPortClass,
-				      "mFd", "Ljava/io/FileDescriptor;");
-  jfieldID descriptorID = (*env)->GetFieldID(env, FileDescriptorClass,
-					     "descriptor", "I");
-
-  jobject mFd = (*env)->GetObjectField(env, thiz, mFdID);
-  jint descriptor = (*env)->GetIntField(env, mFd, descriptorID);
-
-  close(descriptor);
 }

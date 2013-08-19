@@ -347,6 +347,13 @@
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
 
+            <Button
+                android:id="@+id/magcard_testing_button"
+		android:layout_marginLeft="10dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/testing" />
+
           </TableRow>
 
           <TableRow
@@ -373,6 +380,13 @@
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
 
+            <Button
+                android:id="@+id/printer_testing_button"
+		android:layout_marginLeft="10dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/testing" />
+
           </TableRow>
 
           <TableRow
@@ -398,6 +412,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 		android:spinnerStyle="@android:style/Widget.Spinner.DropDown" />
+
+            <Button
+                android:id="@+id/idcard_testing_button"
+		android:layout_marginLeft="10dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/testing" />
 
           </TableRow>
 

@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -490,43 +491,66 @@ public class Utils
 	}
     }
 
+    static interface DeviceListener
+    {
+	public void onDeviceTaskStart(Device device);
+	public void onDeviceTaskCancelled(Device device);
+	public void onDeviceTaskSuccessed(Device device, Object result);
+	public void onDeviceTaskFailed(Device device);
+    }
+
     static abstract public class Device
     {
 	public static final String DEVICE_MAGCARD = "Magcard";
 	public static final String DEVICE_IDCARD = "IDCard";
 	public static final String DEVICE_PRINTER = "Printer";
 
-	static public Magcard getMagcard() {
+	protected DeviceListener listener = null;
+	protected Object client_data = null;
+
+	static public Device getDevice(String device) {
 	    Preferences prefs = Preferences.getPreferences();
-	    Object object = prefs.getDeviceDriverObject(DEVICE_MAGCARD);
-	    if (object instanceof Magcard) {
-		return (Magcard) object;
-	    } else {
-		LogActivity.writeLog("不能获得刷卡器驱动，可能配置错误");
+
+	    String driver = prefs.getDeviceDriver(device);
+	    Object object = prefs.getDeviceDriverObject(device);
+
+	    if (object == null) {
+		LogActivity.writeLog("不能获得设备'%s'的驱动，可能配置错误", device);
 		return null;
 	    }
+
+	    if (device.equals(DEVICE_MAGCARD)) {
+		if (!(object instanceof Magcard)) {
+		    LogActivity.writeLog("'%s'不是刷卡器驱动，可能配置错误", driver);
+		    return null;
+		}
+	    } else if (device.equals(DEVICE_PRINTER)) {
+		if (!(object instanceof Printer)) {
+		    LogActivity.writeLog("'%s'不是打印机驱动，可能配置错误", driver);
+		    return null;
+		}
+	    } else if (device.equals(DEVICE_IDCARD)) {
+		if (!(object instanceof IDCard)) {
+		    LogActivity.writeLog("'%s'不是身份证读卡器驱动，可能配置错误", driver);
+		    return null;
+		}
+	    } else {
+		LogActivity.writeLog("不支持设备'%s'", device);
+		return null;
+	    }
+	    return (Device) object;
 	}
 
-	static public IDCard getIDCard() {
-	    Preferences prefs = Preferences.getPreferences();
-	    Object object = prefs.getDeviceDriverObject(DEVICE_IDCARD);
-	    if (object instanceof Magcard) {
-		return (IDCard) object;
-	    } else {
-		LogActivity.writeLog("不能获得身份证驱动，可能配置错误");
-		return null;
-	    }
+	public void setListener(DeviceListener listener) {
+	    this.listener = listener;
 	}
 
-	static public Printer getPrinter() {
-	    Preferences prefs = Preferences.getPreferences();
-	    Object object = prefs.getDeviceDriverObject(DEVICE_PRINTER);
-	    if (object instanceof Magcard) {
-		return (Printer) object;
-	    } else {
-		LogActivity.writeLog("不能获得打印机驱动，可能配置错误");
-		return null;
-	    }
+	public void setClientData(Object data) {
+	    client_data = data;
+	}
+
+	public Object getClientData() {
+	    return client_data;
 	}
 
 	protected UsbDevice getUsbDevice(int vid, int pid) {
@@ -538,22 +562,25 @@ public class Utils
 		UsbDevice device = iterator.next();
 		if (device.getVendorId() == vid && device.getProductId() == pid) {
 		    if (!manager.hasPermission(device)) {
-			LogActivity.writeLog("没有操作USB设备的权限");
+			LogActivity.writeLog("没有读写USB设备(0x%04X, 0x%04X)的权限", vid, pid);
 			return null;
 		    }
 		    return device;
 		}
 	    }
-	    LogActivity.writeLog("找不到设备(VID=%s, PID=%s)",
-		    String.format("0x%04X", vid), String.format("0x%04X", pid));
+	    LogActivity.writeLog("找不到设备(VID=0x%04X, PID=0x%04X)", vid, pid);
 	    return null;
 	}
 
-	abstract public boolean probe();
-	abstract protected void cancel();
 	abstract protected boolean open();
 	abstract protected void close();
+	abstract protected void cancel();
+
+	protected void read(FragmentManager manager) {}
+	protected String read() { return null; }
+	protected int write(String string, int size) { return 0; }
     }
+
 
     static public class IntegerAdapter extends BaseAdapter
     {
@@ -562,6 +589,13 @@ public class Utils
 	public IntegerAdapter(int min, int max) {
 	    numbers = new ArrayList<Integer>();
 	    for (int i = min; i <= max; i++) {
+		numbers.add(i);
+	    }
+	}
+
+	public IntegerAdapter(int[] array) {
+	    numbers = new ArrayList<Integer>();
+	    for (int i : array) {
 		numbers.add(i);
 	    }
 	}
@@ -604,61 +638,6 @@ public class Utils
 	    textview.setText(String.valueOf(value));
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    textview.setTextColor(parent.getResources().getColor(R.color.blue));
-	    linear.addView(textview);
-
-	    return linear;
-	}
-    }
-
-    static public class BaudrateAdapter extends BaseAdapter
-    {
-	protected ArrayList<Integer> baudrates;
-
-	public BaudrateAdapter() {
-	    baudrates = new ArrayList<Integer>();
-
-	    baudrates.add(1200);
-	    baudrates.add(9600);
-	    baudrates.add(115200);
-	}
-
-	@Override
-	public int getCount() {
-	    return baudrates.size();
-	}
-
-	@Override
-	public Object getItem(int position) {
-	    if (position < baudrates.size() && position >= 0) {
-		return baudrates.get(position);
-	    } else {
-		return null;
-	    }
-	}
-
-	@Override
-	public long getItemId(int position) {
-	    if (position < baudrates.size() && position >= 0) {
-		return baudrates.get(position).longValue();
-	    } else {
-		return position;
-	    }
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-	    int value = 0;
-	    if (position < baudrates.size())
-		value = baudrates.get(position);
-
-	    LinearLayout linear = new LinearLayout(parent.getContext());
-	    linear.setOrientation(LinearLayout.HORIZONTAL);
-	    linear.setPadding(10, 10, 10, 0);
-	    linear.setGravity(Gravity.RIGHT);
-
-	    TextView textview = new TextView(parent.getContext());
-	    textview.setText(String.valueOf(value));
-	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 	    linear.addView(textview);
 
 	    return linear;

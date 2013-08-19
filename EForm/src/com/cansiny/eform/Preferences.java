@@ -258,7 +258,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	super.onClick(view);
 
 	Administrator admin = Administrator.getAdministrator();
-	Preferences prefs = Preferences.getPreferences();
+	final Preferences prefs = Preferences.getPreferences();
 	AlertDialog dialog = (AlertDialog) getDialog();
 
 	View view2;
@@ -288,6 +288,36 @@ class PreferencesDialog extends Utils.DialogFragment
 	case R.id.logview_button:
 	    Intent intent = new Intent(getActivity(), LogActivity.class);
 	    startActivity(intent);
+	    break;
+
+	case R.id.magcard_testing_button:
+	    Device magcard = Device.getDevice(Device.DEVICE_MAGCARD);
+	    if (magcard == null) {
+		showToast("测试失败！未找到刷卡设备驱动", R.drawable.cry);
+		break;
+	    }
+	    magcard.setListener(new Utils.DeviceListener() {
+	        @Override
+	        public void onDeviceTaskStart(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskCancelled(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskSuccessed(Device device, Object result) {
+	            showToast("测试成功！读取的卡号为 " + (String) result, R.drawable.smile);
+	        }
+	        @Override
+	        public void onDeviceTaskFailed(Device device) {
+	            LogActivity.writeLog("测试刷卡驱动'%s'失败！",
+	        	    prefs.getDeviceDriver(Device.DEVICE_MAGCARD));
+	        }
+	    });
+	    magcard.read(getFragmentManager());
+	    break;
+	case R.id.printer_testing_button:
+	    break;
+	case R.id.idcard_testing_button:
 	    break;
 
 	case R.id.member_password_button:
@@ -413,25 +443,10 @@ class PreferencesDialog extends Utils.DialogFragment
 	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 	    @Override
 	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-		try {
-		    Object product = parent.getItemAtPosition(position);
-		    String driver = ((ProductAdapter.Product) product).getDriver();
-		    Object object = Class.forName(driver).newInstance();
-		    if (!(object instanceof Utils.Device)) {
-			showToast("驱动 " + driver + " 无效，请联系技术支持", R.drawable.cry);
-			selectDeviceDriver(device, spinner);
-			return;
-		    }
-		    if (!((Utils.Device) object).probe()) {
-			showToast("本驱动对本设备不适用，因为缺少相应的硬件设备", R.drawable.cry);
-			selectDeviceDriver(device, spinner);
-			return;
-		    }
-		    prefs.setDeviceDriver(device, driver);
-		    prefs.applyTransaction();
-		} catch (Exception e) {
-		    LogActivity.writeLog(e);
-		}
+		Object product = parent.getItemAtPosition(position);
+		String driver = ((ProductAdapter.Product) product).getDriver();
+		prefs.setDeviceDriver(device, driver);
+		prefs.applyTransaction();
 	    }
 	    @Override
 	    public void onNothingSelected(AdapterView<?> parent) {
@@ -473,6 +488,16 @@ class PreferencesDialog extends Utils.DialogFragment
 
     private void onDeviceTabActived() {
 	AlertDialog dialog = (AlertDialog) getDialog();
+
+	int[] ids = {
+		R.id.magcard_testing_button,
+		R.id.printer_testing_button,
+		R.id.idcard_testing_button,
+	};
+	for (int id : ids) {
+	    Button button = (Button) dialog.findViewById(id);
+	    button.setOnClickListener(this);
+	}
 
 	Utils.SerialAdapter device_adapter = new Utils.SerialAdapter();
 

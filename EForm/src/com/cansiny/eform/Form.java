@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import com.cansiny.eform.IDCard.IDCardListener;
+import com.cansiny.eform.Utils.Device;
 
 import android.app.Activity;
 import android.content.Context;
@@ -56,7 +57,6 @@ public abstract class Form extends DefaultHandler
     protected ArrayList<Integer> cardno_edittexts;
     protected ArrayList<Integer> verify_edittexts;
     private FormListener listener;
-    private TextView last_swipecard_textview;
     protected Button last_idcard_button;
 
     public Form(Activity activity, String label) {
@@ -127,14 +127,24 @@ public abstract class Form extends DefaultHandler
     }
 
     protected void swipeMagcard(TextView textview) {
-	Magcard magcard = Magcard.getMagcard();
+	Device magcard = Device.getDevice(Device.DEVICE_MAGCARD);
 	if (magcard != null) {
-	    last_swipecard_textview = textview;
-	    magcard.setListener(new Magcard.MagcardListener() {
-		@Override
-		public void onMagcardRead(Magcard magcard, String cardno) {
-		    last_swipecard_textview.setText(cardno);
-		}
+	    magcard.setClientData(textview);
+	    magcard.setListener(new Utils.DeviceListener() {
+	        @Override
+	        public void onDeviceTaskSuccessed(Device device, Object result) {
+	            TextView textview = (TextView) device.getClientData();
+	            textview.setText((CharSequence) result);
+	        }
+	        @Override
+	        public void onDeviceTaskStart(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskFailed(Device device) {
+	        }
+	        @Override
+	        public void onDeviceTaskCancelled(Device device) {
+	        }
 	    });
 	    magcard.read(activity.getFragmentManager());
 	} else {
