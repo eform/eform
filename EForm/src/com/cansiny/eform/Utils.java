@@ -500,6 +500,12 @@ public class Utils
 	public static final String DEVICE_IDCARD  = "IDCard";
 	public static final String DEVICE_PRINTER = "Printer";
 
+	public static final int TASK_FLAG_IDCARD_MEMBER = 1;
+	public static final int TASK_FLAG_IDCARD_FORM   = 2;
+	public static final int TASK_FLAG_IDCARD_TEST   = 3;
+	public static final int TASK_FLAG_MAGCARD_FORM  = 1;
+	public static final int TASK_FLAG_MAGCARD_TEST  = 2;
+
 	protected DeviceListener listener = null;
 	protected Object client_data = null;
 
@@ -575,7 +581,7 @@ public class Utils
 	abstract protected void close();
 	abstract protected void cancel();
 
-	protected void startTask(FragmentManager manager) {}
+	protected void startTask(FragmentManager manager, int flags) {}
 
 	protected Object read() { return null; }
 	protected int write(Object object, int size) { return 0; }

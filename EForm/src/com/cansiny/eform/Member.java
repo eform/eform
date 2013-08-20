@@ -231,7 +231,7 @@ class MemberLoginDialog extends Utils.DialogFragment
 		    public void onDeviceTaskCancelled(Device device) {
 		    }
 		});
-		idcard.startTask(getFragmentManager());
+		idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_MEMBER);
 		break;
 	    }
 	}
@@ -479,7 +479,7 @@ class MemberProfileDialog extends Utils.DialogFragment
 		    } else if (rowid == -1) {
 			showToast("注册失败！", R.drawable.cry);
 		    } else if (rowid == -2) {
-			showToast("证件号码 " + userid + " 已经注册过。", R.drawable.tips);
+			showToast("证件号码'" + userid + "'已被注册", R.drawable.tips);
 		    } else {
 			showToast("未知错误！", R.drawable.cry);
 		    }
@@ -537,7 +537,7 @@ class MemberProfileDialog extends Utils.DialogFragment
 		public void onDeviceTaskCancelled(Device device) {
 		}
 	    });
-	    idcard.startTask(getFragmentManager());
+	    idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_MEMBER);
 	    break;
 	}
     }
@@ -656,7 +656,7 @@ class MemberDeleteDialog extends Utils.DialogFragment
 		    public void onDeviceTaskCancelled(Device device) {
 		    }
 		});
-		idcard.startTask(getFragmentManager());
+		idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_MEMBER);
 	    }
 	});
     }

@@ -24,8 +24,11 @@ import android.widget.TextView;
 
 class IDCardDialog extends Device.DeviceDialog
 {
-    public IDCardDialog(Device device) {
+    private int flags;
+
+    public IDCardDialog(Device device, int flags) {
 	super(device);
+	this.flags = flags;
     }
 
     private View buildLayout() {
@@ -42,6 +45,7 @@ class IDCardDialog extends Device.DeviceDialog
 
 	LinearLayout layout2 = new LinearLayout(getActivity());
 	layout2.setOrientation(LinearLayout.HORIZONTAL);
+	layout2.setGravity(Gravity.BOTTOM);
     	params = new LinearLayout.LayoutParams(
     		ViewGroup.LayoutParams.WRAP_CONTENT,
     		ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -50,40 +54,43 @@ class IDCardDialog extends Device.DeviceDialog
 
 	TextView view = new TextView(getActivity());
 	view.setText("操作将在");
-	view.setGravity(Gravity.CENTER_VERTICAL);
-	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-	layout2.addView(view, new LinearLayout.LayoutParams(
-    		ViewGroup.LayoutParams.WRAP_CONTENT,
-    		ViewGroup.LayoutParams.MATCH_PARENT));
+	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	layout2.addView(view);
 
 	timeview = new TextView(getActivity());
-	timeview.setGravity(Gravity.CENTER_VERTICAL);
 	timeview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28);
 	timeview.setTextColor(getResources().getColor(R.color.red));
     	params = new LinearLayout.LayoutParams(
     		ViewGroup.LayoutParams.WRAP_CONTENT,
-    		ViewGroup.LayoutParams.MATCH_PARENT);
+    		ViewGroup.LayoutParams.WRAP_CONTENT);
     	params.leftMargin = 5;
     	params.rightMargin = 5;
 	layout2.addView(timeview, params);
 
 	view = new TextView(getActivity());
 	view.setText("秒后自动终止");
-	view.setGravity(Gravity.CENTER_VERTICAL);
-	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-	layout2.addView(view, new LinearLayout.LayoutParams(
-    		ViewGroup.LayoutParams.WRAP_CONTENT,
-    		ViewGroup.LayoutParams.MATCH_PARENT));
+	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	layout2.addView(view);
 
 	view = new TextView(getActivity());
-	view.setText("读取的身份证信息仅用来填写本凭条相关字段。");
-	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-    	params = new LinearLayout.LayoutParams(
-    		ViewGroup.LayoutParams.WRAP_CONTENT,
-    		ViewGroup.LayoutParams.MATCH_PARENT);
-    	params.leftMargin = 10;
-    	params.topMargin = 8;
-    	params.bottomMargin = 2;
+	switch(flags) {
+	case Device.TASK_FLAG_IDCARD_FORM:
+	    view.setText("读取的身份证信息仅用于填写本凭条相关字段");
+	    break;
+	case Device.TASK_FLAG_IDCARD_MEMBER:
+	    view.setText("读取的身份证信息仅用于会员相关功能");
+	    break;
+	case Device.TASK_FLAG_IDCARD_TEST:
+	    view.setText("读取的身份证信息仅用于测试");
+	    break;
+	}
+	view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.WRAP_CONTENT,
+		ViewGroup.LayoutParams.MATCH_PARENT);
+	params.leftMargin = 10;
+	params.topMargin = 12;
+	params.bottomMargin = 4;
 	layout.addView(view, params);
 
 	return layout;
@@ -133,11 +140,11 @@ public abstract class IDCard extends Utils.Device
     }
 
     @Override
-    public void startTask(FragmentManager manager) {
+    public void startTask(FragmentManager manager, int flags) {
 	if (!open()) {
 	    Utils.showToast("打开身份证读卡器失败", R.drawable.cry);
 	} else {
-	    task = new IDCardTask(this, manager);
+	    task = new IDCardTask(this, manager, flags);
 	    task.execute();
 	}
     }
@@ -145,11 +152,13 @@ public abstract class IDCard extends Utils.Device
     public class IDCardTask extends Device.Task<Void, Void, IDCardInfo>
     {
 	private FragmentManager manager;
-	IDCardDialog dialog;
+	private int flags;
+	private IDCardDialog dialog;
 
-	public IDCardTask(Device device, FragmentManager manager) {
+	public IDCardTask(Device device, FragmentManager manager, int flags) {
 	    super(device);
 	    this.manager = manager;
+	    this.flags = flags;
 	}
 
 	@Override
@@ -160,7 +169,7 @@ public abstract class IDCard extends Utils.Device
 	@Override
 	protected void onPreExecute() {
 	    super.onPreExecute();
-	    dialog = new IDCardDialog(IDCard.this);
+	    dialog = new IDCardDialog(IDCard.this, flags);
 	    dialog.show(manager, "IDCardDialog");
 	}
 

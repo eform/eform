@@ -37,6 +37,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -200,7 +201,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	    public void onDeviceTaskCancelled(Device device) {
 	    }
 	});
-	idcard.startTask(getFragmentManager());
+	idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_TEST);
     }
 
     private void onMemberPasswordSetButtonClick() {
@@ -325,7 +326,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        	    prefs.getDeviceDriver(Device.DEVICE_MAGCARD));
 	        }
 	    });
-	    magcard.startTask(getFragmentManager());
+	    magcard.startTask(getFragmentManager(), Device.TASK_FLAG_MAGCARD_TEST);
 	    break;
 	case R.id.printer_testing_button:
 	    Device printer = Device.getDevice(Device.DEVICE_PRINTER);
@@ -350,7 +351,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        	    prefs.getDeviceDriver(Device.DEVICE_PRINTER));
 	        }
 	    });
-	    printer.startTask(getFragmentManager());
+	    printer.startTask(getFragmentManager(), 0);
 	    break;
 	case R.id.idcard_testing_button:
 	    Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
@@ -376,7 +377,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        	    prefs.getDeviceDriver(Device.DEVICE_IDCARD));
 	        }
 	    });
-	    idcard.startTask(getFragmentManager());
+	    idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_TEST);
 	    break;
 
 	case R.id.member_password_button:
@@ -812,7 +813,7 @@ class MemberListDialog extends Utils.DialogFragment
 
 	    TextView textview = new TextView(parent.getContext());
 	    textview.setText(profile.username);
-	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 	    linear.addView(textview, new LinearLayout.LayoutParams(
 		    (int) Utils.convertDpToPixel(120),
 		    ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -834,16 +835,43 @@ class MemberListDialog extends Utils.DialogFragment
 
 	    LinearLayout linear3 = new LinearLayout(parent.getContext());
 	    linear3.setOrientation(LinearLayout.HORIZONTAL);
+	    linear3.setGravity(Gravity.CENTER_VERTICAL);
 	    params = new LinearLayout.LayoutParams(
 		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    ViewGroup.LayoutParams.WRAP_CONTENT);
 	    linear2.addView(linear3, params);
 
+	    ImageView image = new ImageView(parent.getContext());
+	    image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+	    image.setImageResource(R.drawable.phone);
+	    params = new LinearLayout.LayoutParams(
+		    (int) Utils.convertDpToPixel(16),
+		    (int) Utils.convertDpToPixel(16));
+	    params.rightMargin = (int) Utils.convertDpToPixel(2);
+	    linear3.addView(image, params);
+
 	    textview = new TextView(parent.getContext());
 	    if (profile.phone == null || profile.phone.length() == 0)
 		textview.setText("-");
-	    else
-		textview.setText(profile.phone);
+	    else {
+		if (profile.phone.matches("[0-9]+")) {
+		    if (profile.phone.length() == 11 ||
+			    profile.phone.length() == 8) {
+			StringBuilder builder = new StringBuilder(profile.phone);
+			if (profile.phone.length() == 11) {
+			    builder.insert(3, "-");
+			    builder.insert(8, "-");
+			} else {
+			    builder.insert(4, "-");
+			}
+			textview.setText(builder);
+		    } else {
+			textview.setText(profile.phone);
+		    }
+		} else {
+		    textview.setText(profile.phone);
+		}
+	    }
 	    textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	    linear3.addView(textview);
 
