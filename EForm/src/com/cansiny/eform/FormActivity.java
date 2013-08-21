@@ -13,7 +13,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.cansiny.eform.Print.PrintListener;
+import com.cansiny.eform.Utils.Device;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -44,7 +44,7 @@ import android.widget.Toast;
 
 
 public class FormActivity extends Activity implements
-	OnClickListener, OnTouchListener, Form.FormListener, PrintListener
+	OnClickListener, OnTouchListener, Form.FormListener, Device.DeviceListener
 {
     /* constants uses for communication with previous activity. */
     static public final String INTENT_MESSAGE_VOUCHER   = "com.cansiny.eform.VOUCHER";
@@ -520,12 +520,13 @@ public class FormActivity extends Activity implements
 	int retval = form.verify(true, true);
 	if (retval > 0) {
 	    String message = "还剩 " + retval + " 个未填写项，是否继续打印？";
-	    PrintConfirmDialog dialog = new PrintConfirmDialog(form, message);
+	    PrinterConfirmDialog dialog = new PrinterConfirmDialog(this, message);
 	    dialog.show(getFragmentManager(), "PrintConfirmDialog");
 	} else {
-	    Print print = new Print(form);
-	    print.setPrintListener(this);
-	    print.print(getFragmentManager());
+	    Device printer = Device.getDevice(Device.DEVICE_PRINTER);
+	    ((Printer) printer).setForm(form);
+	    printer.setListener(this);
+	    printer.startTask(getFragmentManager(), 0);
 	}
     }
 
@@ -577,27 +578,55 @@ public class FormActivity extends Activity implements
     }
 
     @Override
-    public void onPrintStart(Print print) {
-	timeout_remains = TIMEOUT_VALUE;
-	print_in_progress = true;
-	setTimeoutTipVisible(false);
+    public void onDeviceTaskStart(Device device) {
+	LogActivity.writeLog("任务开始");
+	if (device instanceof Printer) {
+	    timeout_remains = TIMEOUT_VALUE;
+	    print_in_progress = true;
+	    setTimeoutTipVisible(false);
+	}
     }
 
     @Override
-    public void onPrintStop(Print print) {
-	timeout_remains = TIMEOUT_VALUE;
-	print_in_progress = false;
+    public void onDeviceTaskCancelled(Device device) {
+	LogActivity.writeLog("任务取消");
+	if (device instanceof Printer) {
+	    device.setListener(null);
+	    timeout_remains = TIMEOUT_VALUE;
+	    print_in_progress = false;
+	}
+    }
+
+    @Override
+    public void onDeviceTaskSuccessed(Device device, Object result) {
+	LogActivity.writeLog("任务成功");
+	if (device instanceof Printer) {
+	    showToast("打印完成！", R.drawable.smile);
+	    device.setListener(null);
+	    timeout_remains = TIMEOUT_VALUE;
+	    print_in_progress = false;
+	}
+    }
+
+    @Override
+    public void onDeviceTaskFailed(Device device) {
+	LogActivity.writeLog("任务失败");
+	if (device instanceof Printer) {
+	    device.setListener(null);
+	    timeout_remains = TIMEOUT_VALUE;
+	    print_in_progress = false;
+	}
     }
 
 }
 
-class PrintConfirmDialog extends Utils.DialogFragment
+class PrinterConfirmDialog extends Utils.DialogFragment
 {
-    private Form form;
+    private FormActivity activity;
     private String message;
 
-    public PrintConfirmDialog(Form form, String message) {
-	this.form = form;
+    public PrinterConfirmDialog(FormActivity activity, String message) {
+	this.activity = activity;
 	this.message = message;
     }
 
@@ -634,9 +663,10 @@ class PrintConfirmDialog extends Utils.DialogFragment
 	builder.setPositiveButton("继续打印", new DialogInterface.OnClickListener() {
 	    @Override
 	    public void onClick(DialogInterface dialog, int which) {
-		Print print = new Print(form);
-		print.setPrintListener((PrintListener) getActivity());
-		print.print(getFragmentManager());
+		Device printer = Device.getDevice(Device.DEVICE_PRINTER);
+		((Printer) printer).setForm(activity.getForm());
+		printer.setListener(activity);
+		printer.startTask(getFragmentManager(), 0);
 	    }
 	});
 	return builder.create();

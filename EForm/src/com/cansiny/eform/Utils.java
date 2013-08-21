@@ -577,14 +577,13 @@ public class Utils
 	    return null;
 	}
 
+	abstract public void startTask(FragmentManager manager, int flags);
+	abstract public void cancelTask();
+
 	abstract protected boolean open();
 	abstract protected void close();
-	abstract protected void cancel();
-
-	protected void startTask(FragmentManager manager, int flags) {}
-
-	protected Object read() { return null; }
-	protected int write(Object object, int size) { return 0; }
+	abstract protected Object read();
+	abstract protected int write(String string);
 
 	static interface DeviceListener
 	{
@@ -618,7 +617,15 @@ public class Utils
 		    if (result == null) {
 			listener.onDeviceTaskFailed(device);
 		    } else {
-			listener.onDeviceTaskSuccessed(device, result);
+			if (result instanceof Boolean) {
+			    if (((Boolean) result).booleanValue()) {
+				listener.onDeviceTaskSuccessed(device, result);
+			    } else {
+				listener.onDeviceTaskFailed(device);
+			    }
+			} else {
+			    listener.onDeviceTaskSuccessed(device, result);
+			}
 		    }
 		}
 	    }
@@ -629,7 +636,6 @@ public class Utils
 		if (listener != null) {
 		    listener.onDeviceTaskCancelled(device);
 		}
-		Utils.showToast("操作被取消 ...");
 	    }
 	}
 
@@ -659,7 +665,7 @@ public class Utils
 			totaltime -= (int) ((currtime - starttime) / 1000);
 			if (totaltime <= 0) {
 			    if (device != null) {
-				device.cancel();
+				device.cancelTask();
 			    }
 			} else {
 			    starttime = currtime;
@@ -681,7 +687,7 @@ public class Utils
 		    @Override
 		    public void onClick(DialogInterface dialog, int which) {
 			if (device != null) {
-			    device.cancel();
+			    device.cancelTask();
 			}
 		    }
 		});

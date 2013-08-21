@@ -133,19 +133,19 @@ public abstract class IDCard extends Utils.Device
     protected IDCardTask task;
 
     @Override
-    protected void cancel() {
-	if (task != null && !task.isCancelled()) {
-	    task.cancel(true);
-	}
-    }
-
-    @Override
     public void startTask(FragmentManager manager, int flags) {
 	if (!open()) {
 	    Utils.showToast("打开身份证读卡器失败", R.drawable.cry);
 	} else {
 	    task = new IDCardTask(this, manager, flags);
 	    task.execute();
+	}
+    }
+
+    @Override
+    public void cancelTask() {
+	if (task != null && !task.isCancelled()) {
+	    task.cancel(true);
 	}
     }
 
@@ -162,15 +162,15 @@ public abstract class IDCard extends Utils.Device
 	}
 
 	@Override
-	protected IDCardInfo doInBackground(Void... args) {
-	    return (IDCardInfo) read();
-	}
-
-	@Override
 	protected void onPreExecute() {
 	    super.onPreExecute();
 	    dialog = new IDCardDialog(IDCard.this, flags);
 	    dialog.show(manager, "IDCardDialog");
+	}
+
+	@Override
+	protected IDCardInfo doInBackground(Void... args) {
+	    return (IDCardInfo) read();
 	}
 
 	@Override
@@ -196,6 +196,7 @@ public abstract class IDCard extends Utils.Device
 	    super.onCancelled(result);
 	    dialog.dismiss();
 	    device.close();
+	    Utils.showToast("操作被取消 ...");
 	}
     }
 
@@ -221,23 +222,35 @@ public abstract class IDCard extends Utils.Device
 
 class IDCardVirtual extends IDCard
 {
-    @Override
-    protected boolean open() { return true; }
+    private boolean is_open;
 
     @Override
-    protected void close() {}
+    protected boolean open() {
+	is_open = true;
+	return true;
+    }
+
+    @Override
+    protected void close() {
+	is_open = false;
+    }
 
     @Override
     protected IDCardInfo read() {
+	if (!is_open) {
+	    LogActivity.writeLog("身份证阅读器未打开或已关闭");
+	    return null;
+	}
+
 	try {
 	    Thread.sleep(2000);
 	} catch (InterruptedException e) {
 	    LogActivity.writeLog(e);
+	    return null;
 	}
 
-	IDCardInfo info = new IDCardInfo();
-
 	SecureRandom random = new SecureRandom();
+	IDCardInfo info = new IDCardInfo();
 
 	switch(Math.abs(random.nextInt() % 3)) {
 	case 0:
@@ -272,6 +285,11 @@ class IDCardVirtual extends IDCard
 
 	return info;
     }
+
+    @Override
+    protected int write(String string) {
+	return 0;
+    }
 }
 
 
@@ -293,11 +311,16 @@ class IDCardUSBGTICR100 extends IDCard
     }
 
     @Override
-    protected void cancel() {
+    public void cancelTask() {
     }
     
     @Override
     protected IDCardInfo read() {
 	return null;
+    }
+
+    @Override
+    protected int write(String string) {
+	return 0;
     }
 }

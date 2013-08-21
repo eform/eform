@@ -139,19 +139,19 @@ public abstract class Magcard extends Utils.Device
     protected MagcardTask task;
 
     @Override
-    protected void cancel() {
-	if (task != null && !task.isCancelled()) {
-	    task.cancel(true);
-	}
-    }
-
-    @Override
     public void startTask(FragmentManager manager, int flags) {
 	if (!open()) {
 	    Utils.showToast("打开刷卡设备失败", R.drawable.cry);
 	} else {
 	    task = new MagcardTask(this, manager, flags);
 	    task.execute();
+	}
+    }
+
+    @Override
+    public void cancelTask() {
+	if (task != null && !task.isCancelled()) {
+	    task.cancel(true);
 	}
     }
 
@@ -168,15 +168,15 @@ public abstract class Magcard extends Utils.Device
 	}
 
 	@Override
-	protected String doInBackground(Void... args) {
-	    return (String) read();
-	}
-
-	@Override
 	protected void onPreExecute() {
 	    super.onPreExecute();
 	    dialog = new MagcardDialog(Magcard.this, flags);
 	    dialog.show(manager, "MagcardDialog");
+	}
+
+	@Override
+	protected String doInBackground(Void... args) {
+	    return (String) read();
 	}
 
 	@Override
@@ -196,12 +196,13 @@ public abstract class Magcard extends Utils.Device
 		Magcard.swipe_error_count = 0;
 	    }
 	}
-	
+
 	@Override
 	protected void onCancelled(String result) {
 	    super.onCancelled(result);
 	    dialog.dismiss();
 	    device.close();
+	    Utils.showToast("操作被取消 ...");
 	}
     }
 
@@ -244,25 +245,43 @@ public abstract class Magcard extends Utils.Device
 
 class MagcardVirtual extends Magcard
 {
-    @Override
-    protected boolean open() { return true; }
+    private boolean is_open;
 
     @Override
-    protected void close() {}
+    protected boolean open() {
+	is_open = true;
+	return true;
+    }
+
+    @Override
+    protected void close() {
+	is_open = false;
+    }
 
     @Override
     protected String read() {
-	try {
-	    Thread.sleep(2000);
-	} catch (InterruptedException e) {
-	    LogActivity.writeLog(e);
-	}
-	SecureRandom random = new SecureRandom();
-	if (random.nextBoolean()) {
-	    return new BigInteger(130, random).toString(10).substring(0, 18);
-	} else {
+	if (!is_open) {
+	    LogActivity.writeLog("刷卡器未打开或已关闭");
 	    return null;
 	}
+
+	try {
+	    Thread.sleep(2000);
+	    SecureRandom random = new SecureRandom();
+	    if (random.nextBoolean()) {
+		return new BigInteger(130, random).toString(10).substring(0, 18);
+	    } else {
+		return null;
+	    }
+	} catch (InterruptedException e) {
+	    LogActivity.writeLog(e);
+	    return null;
+	}
+    }
+
+    @Override
+    protected int write(String string) {
+	return 0;
     }
 }
 
@@ -312,8 +331,8 @@ class MagcardWBT1372 extends Magcard
     }
 
     @Override
-    protected void cancel() {
-	super.cancel();
+    public void cancelTask() {
+	super.cancelTask();
 
 	if (!request.cancel()) {
 	    close();
@@ -353,6 +372,11 @@ class MagcardWBT1372 extends Magcard
     	request.close();
 
 	return result;
+    }
+
+    @Override
+    protected int write(String string) {
+	return 0;
     }
 
 }
@@ -398,8 +422,13 @@ class MagcardWBT1370 extends Magcard
     }
 
     @Override
-    protected void cancel() {
-	super.cancel();
+    public void cancelTask() {
+	super.cancelTask();
+    }
+
+    @Override
+    protected int write(String string) {
+	return 0;
     }
 
 }
