@@ -33,6 +33,7 @@ import android.hardware.usb.UsbRequest;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
@@ -738,6 +739,7 @@ public abstract class Printer extends Device
 		    LogActivity.writeLog("打印页面“%d”没有配置打印数据", page_no);
 		    continue;
 		}
+
 		publishProgress(PROGRESS_PAGE_START_S, String.valueOf(page_no),
 			String.valueOf(fields.size()));
 
@@ -745,21 +747,32 @@ public abstract class Printer extends Device
 		    LogActivity.writeLog("打印等待插入纸张错误");
 		    return false;
 		}
+
 		publishProgress(PROGRESS_PAPER_READY_S, String.valueOf(page_no));
+
+		form.readyPageForPrint(page_no);
 
 		for (int field_no = 0; field_no < fields.size(); field_no++) {
 		    if (isCancelled()) {
 			break;
 		    }
-
 		    PrinterField field = fields.get(field_no);
 
 		    publishProgress(PROGRESS_FIELD_START_S, String.valueOf(field_no), field.name);
 
-		    if (!write("", field)) {
-			LogActivity.writeLog("写入打印机错误");
-			return false;
+		    Form.FormPage page = form.getPage(page_no);
+		    String value = page.getPrintString(field.resid, field.want);
+		    if (value == null) {
+			LogActivity.writeLog("取%s(%s)的值失败，跳过", field.name, field.resid);
+			continue;
 		    }
+		    if (value.trim().length() > 0) {
+			if (!write(value.trim(), field)) {
+			    LogActivity.writeLog("写入打印机错误");
+			    return false;
+			}
+		    }
+
 		    publishProgress(PROGRESS_FIELD_FINISH_S, String.valueOf(field_no), field.name);
 
 		    while (is_task_paused) {
@@ -819,8 +832,6 @@ public abstract class Printer extends Device
     {
 	static public final int WIDTH_NORMAL = 0;
 	static public final int WIDTH_HALF   = 1;
-	static public final String WANT_TEXT  = "text";
-	static public final String WANT_CHECK = "check";
 
 	public String name;
 	public String resid;
@@ -842,17 +853,8 @@ public abstract class Printer extends Device
 		return false;
 	    }
 	    if (want == null) {
-		if (BuildConfig.DEBUG) {
-		    LogActivity.writeLog("打印字段的 want 不能为空");
-		    return false;
-		} else {
-		    want = WANT_TEXT;
-		}
-	    } else if (BuildConfig.DEBUG) {
-		if (!want.equals(WANT_TEXT) && !want.equals(WANT_CHECK)) {
-		    LogActivity.writeLog("打印字段的 want 值必须是 'text' 或 'check'");
-		    return false;
-		}
+		LogActivity.writeLog("打印字段的 want 不能为空");
+		return false;
 	    }
 	    if (x < 0 || y < 0) {
 		LogActivity.writeLog("打印字段的x和y坐标不能小于0");
@@ -1053,20 +1055,22 @@ class PrinterVirtual extends Printer
 
     @Override
     protected int write(String string) {
-	if (!is_open) {
-	    LogActivity.writeLog("打印机未打开或已关闭");
-	    return -1;
-	}
-	LogActivity.writeLog("打印数据：%s", string);
-	return string.length();
+	return 0;
     }
 
     @Override
-    public boolean write(String text, PrinterField param) {
+    public boolean write(String string, PrinterField field) {
+	if (!is_open) {
+	    LogActivity.writeLog("打印机未打开或已关闭");
+	    return false;
+	}
+
 	try {
 	    Thread.sleep(100);
-	    if (write(text) < 0)
-		return false;
+	    Log.d("虚拟打印", String.format("打印数据: 名称(%s), ID(%s), 期盼(%s), " +
+		    "X(%d), Y(%d), 间隙(%d)，宽度(%d)",
+		    field.name, field.resid, field.want,
+		    field.x, field.y, field.spacing, field.width));
 	    return true;
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
@@ -1136,7 +1140,7 @@ class PrinterLQ90KP extends Printer
     }
 
     @Override
-    public boolean write(String text, PrinterField param) {
+    public boolean write(String text, PrinterField field) {
 	if (text == null) {
 	    LogActivity.writeLog("没有要打印的数据");
 	    return false;

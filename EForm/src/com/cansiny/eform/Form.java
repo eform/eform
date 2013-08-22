@@ -73,6 +73,10 @@ public abstract class Form extends DefaultHandler
 	this.listener = listener;
     }
 
+    public Activity getActivity() {
+	return activity;
+    }
+
     /* convenient method to find view and cast to corresponding type */
     protected View findView(int id) {
 	return activity.findViewById(id);
@@ -657,11 +661,14 @@ public abstract class Form extends DefaultHandler
 	return retval;
     }
 	
-	
+
     public boolean print() {
 	return true;
     }
 
+    public void readyPageForPrint(int page_no) {
+	savePage(page_no);
+    }
 
     public interface FormListener
     {
@@ -866,9 +873,9 @@ public abstract class Form extends DefaultHandler
 
 	    builder.append("    <field ");
 	    Resources res = activity.getResources();
-	    builder.append("resid=\"" + res.getResourceEntryName(viewid) + "\" ");
+	    builder.append("resid=\"" + res.getResourceName(viewid) + "\" ");
 	    if (object instanceof EditText) {
-		builder.append("want=\"text\" ");
+		builder.append("want=\"" + String.class.getName() + "\" ");
 
 		ViewGroup parent = (ViewGroup) object.getParent();
 		int index = parent.indexOfChild(object);
@@ -884,7 +891,7 @@ public abstract class Form extends DefaultHandler
 		    builder.append("name=\"TODO\" ");
 		}
 	    } else if (object instanceof CheckBox) {
-		builder.append("want=\"check\" ");
+		builder.append("want=\"" + Boolean.class.getName() + "\" ");
 		builder.append("name=\"" + ((CheckBox) object).getText() + "\" ");
 	    } else {
 		builder.append("want=\"" + object.getClass().getName() + "\" ");
@@ -892,6 +899,44 @@ public abstract class Form extends DefaultHandler
 	    }
 	    builder.append("x=\"0\" y=\"0\" spacing=\"0\" width=\"0\" ");
 	    builder.append("/>\n");
+	}
+
+	public String getPrintString(String resid, String want) {
+	    int viewid = activity.getResources().getIdentifier(resid, null, null);
+	    if (viewid == 0) {
+		LogActivity.writeLog("不能找到ID为“%s”的资源", resid);
+		return null;
+	    }
+	    View view = findViewById(viewid);
+	    if (view == null) {
+		LogActivity.writeLog("找不到ID为“%d(%s)“的控件", viewid, resid);
+		return null;
+	    }
+	    String key = String.valueOf(viewid);
+
+	    if (view instanceof CheckBox) {
+		if (want.equals(Boolean.class.getName())) {
+		    return bundle.getBoolean(key) ? "√" : "";
+		} else if (want.equals(String.class.getName())) {
+		    return ((CheckBox) view).getText().toString();
+		} else {
+		    LogActivity.writeLog("不能处理打印字段 %s 期盼的类型 %s", resid, want);
+		    return "";
+		}
+	    } else if (view instanceof EditText) {
+		if (want.equals(Boolean.class.getName())) {
+		    LogActivity.writeLog("打印字段 %s 不支持Boolean类型", resid);
+		    return "";
+		} else if (want.equals(String.class.getName())) {
+		    return bundle.containsKey(key) ? bundle.getString(key) : "";
+		} else {
+		    LogActivity.writeLog("不能处理打印字段 %s 期盼的类型 %s", resid, want);
+		    return "";
+		}
+	    } else {
+		LogActivity.writeLog("打印字段类型 %s 不支持，略过", view.getClass().getName());
+		return "";
+	    }
 	}
 
 	public boolean canScrollUp() {
