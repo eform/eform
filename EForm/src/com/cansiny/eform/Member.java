@@ -729,6 +729,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	listview = new ListView(getActivity());
 	listview.setOnItemClickListener(this);
 	listview.setOnItemLongClickListener(this);
+	listview.setAdapter(new VoucherListAdapter());
 	linear.addView(listview);
 
 	View view = new View(getActivity());
@@ -737,9 +738,9 @@ class MemberVouchersDialog extends Utils.DialogFragment
 		ViewGroup.LayoutParams.MATCH_PARENT, 1));
 
 	TextView textview = new TextView(getActivity());
-	textview.setText("点击打开选择的凭条；" +
-		"长按可以删除选择的凭条；" +
-		"点击描述文字或后面的图标可以编辑描述信息；");
+	textview.setText("点击某项可打开选择的凭条；" +
+		"长按某项可删除选择的凭条；" +
+		"点击凭条描述文字或后面的图标可编辑描述信息；");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	textview.setPadding(10, 10, 10, 5);
 	textview.setLineSpacing(1, 1.2f);
@@ -755,9 +756,8 @@ class MemberVouchersDialog extends Utils.DialogFragment
     public void onStart() {
 	super.onStart();
 
-	VoucherListAdapter adapter = new VoucherListAdapter();
+	VoucherListAdapter adapter = (VoucherListAdapter) listview.getAdapter();
 	adapter.loadFromDB();
-	listview.setAdapter(adapter);
 
 	total_textview.setText("共 " + adapter.getVoucherCount() + " 张凭证");
 
@@ -805,8 +805,6 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	if (voucher == null)
 	    return;
 
-	voucher.updateAccessTime(getActivity());
-
 	dismiss();
 
 	Activity activity = getActivity();
@@ -814,6 +812,7 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    HomeActivity home = (HomeActivity) activity;
 	    home.startFormActivity(voucher);
 	}
+	voucher.updateAccessTime(getActivity());
     }
 
     @Override

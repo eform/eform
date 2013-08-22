@@ -15,6 +15,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -28,8 +29,6 @@ import android.widget.ScrollView;
 public class LogActivity extends Activity implements OnClickListener
 {
     static final private String LOG_TAGNAME = "Log";
-
-    static final private int BUTTON_TAG_CLOSE = 1;
 
     static private String log_filepath = 
 	EFormApplication.getContext().getCacheDir().getAbsolutePath() + 
@@ -118,20 +117,26 @@ public class LogActivity extends Activity implements OnClickListener
 	}
     }
 
+    private static final int BUTTON_TAG_CLOSE      = 1;
+    private static final int BUTTON_TAG_SCROLLUP   = 2;
+    private static final int BUTTON_TAG_SCROLLDOWN = 3;
+
+    private ScrollView scroll_view;
+    private EditText edittext;
 
     private View buildLayout() {
 	LinearLayout linear = new LinearLayout(this);
 	linear.setBackgroundResource(R.color.black);
 	linear.setPadding(2, 2, 2, 2);
 	
-	ScrollView scroll = new ScrollView(this);
+	scroll_view = new ScrollView(this);
 	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.MATCH_PARENT);
 	params.weight = 1;
-	linear.addView(scroll, params);
+	linear.addView(scroll_view, params);
 	
-	EditText edittext = new EditText(this);
+	edittext = new EditText(this);
 	edittext.setEnabled(false);
 	edittext.setSingleLine(false);
 	edittext.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
@@ -139,8 +144,19 @@ public class LogActivity extends Activity implements OnClickListener
 	if (buffer != null) {
 	    edittext.setText(buffer);
 	}
-	scroll.addView(edittext);
-	
+	scroll_view.addView(edittext);
+
+	LinearLayout linear2 = new LinearLayout(this);
+	linear2.setOrientation(LinearLayout.VERTICAL);
+	linear2.setGravity(Gravity.CENTER_HORIZONTAL);
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.WRAP_CONTENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = 20;
+	params.leftMargin = 20;
+	params.rightMargin = 20;
+	linear.addView(linear2, params);
+
 	Button button = new Button(this);
 	button.setText("关 闭");
 	button.setTag(BUTTON_TAG_CLOSE);
@@ -151,10 +167,27 @@ public class LogActivity extends Activity implements OnClickListener
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.WRAP_CONTENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
+	linear2.addView(button, params);
+
+	button = new Button(this);
+	button.setBackgroundResource(R.drawable.up);
+	button.setTag(BUTTON_TAG_SCROLLUP);
+	button.setOnClickListener(this);
+	params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(64),
+		(int) Utils.convertDpToPixel(64));
+	params.topMargin = 40;
+	linear2.addView(button, params);
+
+	button = new Button(this);
+	button.setBackgroundResource(R.drawable.down);
+	button.setTag(BUTTON_TAG_SCROLLDOWN);
+	button.setOnClickListener(this);
+	params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(64),
+		(int) Utils.convertDpToPixel(64));
 	params.topMargin = 20;
-	params.leftMargin = 20;
-	params.rightMargin = 20;
-	linear.addView(button, params);
+	linear2.addView(button, params);
 
 	return linear;
     }
@@ -164,9 +197,10 @@ public class LogActivity extends Activity implements OnClickListener
     public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 
-	setContentView(buildLayout());
+	getWindow().setSoftInputMode(
+		WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-	getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+	setContentView(buildLayout());
     }
 
 
@@ -176,6 +210,13 @@ public class LogActivity extends Activity implements OnClickListener
 	case BUTTON_TAG_CLOSE:
 	    finish();
 	    break;
+	case BUTTON_TAG_SCROLLUP:
+	    scroll_view.smoothScrollBy(0, -100);
+	    break;
+	case BUTTON_TAG_SCROLLDOWN:
+	    scroll_view.smoothScrollBy(0, 100);
+	    break;
 	}
     }
+
 }

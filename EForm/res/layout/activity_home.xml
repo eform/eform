@@ -75,9 +75,10 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:background="@drawable/button"
+            android:onClick="onDeviceCheckButtonClick"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:text="重新检查"
+            android:text="重新检测"
             android:textColor="@color/purple" />
 
     </LinearLayout>

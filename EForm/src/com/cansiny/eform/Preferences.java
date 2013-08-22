@@ -392,7 +392,6 @@ class PreferencesDialog extends Utils.DialogFragment
 	    view2.setVisibility(View.GONE);
 	    break;
 	case R.id.member_list_button:
-	    showToast("正在加载，请稍候 ...");
 	    MemberListDialog dialog2 = new MemberListDialog();
 	    dialog2.show(getFragmentManager(), "MemberListDialog");
 	    break;

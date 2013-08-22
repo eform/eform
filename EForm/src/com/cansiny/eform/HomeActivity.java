@@ -441,7 +441,6 @@ public class HomeActivity extends Activity
 	checkForSingleDevice(Device.DEVICE_IDCARD,
 		FLAG_IDCARD_DRIVER_ERROR, FLAG_IDCARD_DISCONNECTED);
 
-	LogActivity.writeLog("Flag: 0x%04X", device_check_flags);
 	updateUsbDeviceTips();
     }
 
@@ -458,6 +457,10 @@ public class HomeActivity extends Activity
 	} else {
 	    device_check_flags |= disconn_flag;
 	}
+    }
+
+    public void onDeviceCheckButtonClick(View view) {
+	checkForDevices();
     }
 
     @Override
