@@ -3,10 +3,11 @@
 <!-- Copyright © 2013 Hefei Cansiny Co.,Ltd. -->
 
 <resources>
-  <!-- vendor and product ID for WBT-1372 VER 2.1 -->
+  <!-- vendor and product ID for VOTI WBT-1372 VER 2.1 -->
   <usb-device vendor-id="5824" product-id="1770" />
 
-  <!-- vendor and product ID for Epson LP 90KP Printer -->
+  <!-- vendor and product ID for Epson LQ-90KP Printer -->
+  <usb-device vendor-id="1208" product-id="5" />
 
   <!-- vendor and product ID for -->
 

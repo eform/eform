@@ -463,9 +463,9 @@ public class Utils
 
 	    if (BuildConfig.DEBUG) {
 		products.add(new Product("模拟设备", "com.cansiny.eform.MagcardVirtual"));
+		products.add(new Product("WBT-1370（串口）", "com.cansiny.eform.MagcardWBT1370"));
 	    }
 	    products.add(new Product("WBT-1372（USB）", "com.cansiny.eform.MagcardWBT1372"));
-	    products.add(new Product("WBT-1370（串口）", "com.cansiny.eform.MagcardWBT1370"));
 	}
     }
 
@@ -584,6 +584,9 @@ public class Utils
 	abstract protected void close();
 	abstract protected Object read();
 	abstract protected int write(String string);
+
+	public boolean isUsbDevice() { return false; }
+	public boolean checkDevice() { return false; }
 
 	static interface DeviceListener
 	{

@@ -599,7 +599,6 @@ public class FormActivity extends Activity implements
 
     @Override
     public void onDeviceTaskSuccessed(Device device, Object result) {
-	LogActivity.writeLog("任务成功");
 	if (device instanceof Printer) {
 	    showToast("打印完成！", R.drawable.smile);
 	    device.setListener(null);
@@ -610,8 +609,8 @@ public class FormActivity extends Activity implements
 
     @Override
     public void onDeviceTaskFailed(Device device) {
-	LogActivity.writeLog("任务失败");
 	if (device instanceof Printer) {
+	    showToast("打印失败，请联系设备管理员", R.drawable.cry);
 	    device.setListener(null);
 	    timeout_remains = TIMEOUT_VALUE;
 	    print_in_progress = false;

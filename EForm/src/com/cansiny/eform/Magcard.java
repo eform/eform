@@ -9,7 +9,6 @@ import java.io.File;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-
 import com.cansiny.eform.Utils.Device;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -135,6 +134,16 @@ public abstract class Magcard extends Utils.Device
 	return builder.toString();
     }
 
+    static public boolean usbDeviceIsMagcard(UsbDevice device) {
+	int vid = device.getVendorId();
+	int pid = device.getProductId();
+
+	if (vid == MagcardWBT1372.VID && pid == MagcardWBT1372.PID) {
+	    return true;
+	}
+	return false;
+    }
+
     static private int swipe_error_count = 0;
     protected MagcardTask task;
 
@@ -248,6 +257,11 @@ class MagcardVirtual extends Magcard
     private boolean is_open;
 
     @Override
+    public boolean checkDevice() {
+	return true;
+    }
+
+    @Override
     protected boolean open() {
 	is_open = true;
 	return true;
@@ -298,6 +312,16 @@ class MagcardWBT1372 extends Magcard
     public MagcardWBT1372() {
 	iface = null;
 	connection = null;
+    }
+
+    @Override
+    public boolean isUsbDevice() {
+	return true;
+    }
+
+    @Override
+    public boolean checkDevice() {
+	return (getUsbDevice(VID, PID) != null) ? true : false;
     }
 
     @Override

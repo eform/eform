@@ -8,6 +8,7 @@ package com.cansiny.eform;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.util.Log;
 
 public class EFormApplication extends Application
@@ -23,14 +24,26 @@ public class EFormApplication extends Application
     }
 
     public static SharedPreferences getSharedPreferences() {
-	return application.getSharedPreferences("eform_settings", MODE_PRIVATE);
+	return application.getSharedPreferences("settings", MODE_PRIVATE);
     }
 
     @Override
     public void onCreate() {
-	Log.d("EFormApplication", "onCreate");
-    	application = this;
         super.onCreate();
+
+        application = this;
+
+        Log.d("EFormApplication", "onCreate 应用程序启动了");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration new_config) {
+	super.onConfigurationChanged(new_config);
+    }
+
+    @Override
+    public void onTerminate() {
+	super.onTerminate();
     }
 
 }

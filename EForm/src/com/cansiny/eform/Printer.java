@@ -5,7 +5,16 @@
  */
 package com.cansiny.eform;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import com.cansiny.eform.Utils.Device;
 import com.cansiny.eform.Utils.IntegerAdapter;
@@ -25,6 +34,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.TypedValue;
+import android.util.Xml;
+import android.util.Xml.Encoding;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -601,6 +612,16 @@ public abstract class Printer extends Device
     protected int page_from;
     protected int page_to;
 
+    static public boolean usbDeviceIsPrinter(UsbDevice device) {
+	int vid = device.getVendorId();
+	int pid = device.getProductId();
+
+	if (vid == PrinterLQ90KP.VID && pid == PrinterLQ90KP.PID) {
+	    return true;
+	}
+	return false;
+    }
+
     public void setForm(Form form) {
 	this.form = form;
 	is_task_paused = false;
@@ -659,14 +680,19 @@ public abstract class Printer extends Device
 	return is_task_paused;
     }
 
-    public class PrinterParams
+    public class PrinterField
     {
+	public String resid;
+	public String klass;
+	public String name;
+	public int x;
+	public int y;
 	public int spacing;
 	public int width;
     }
 
     abstract public boolean waitForPaper();
-    abstract public boolean write(String text, PrinterParams param);
+    abstract public boolean write(String text, PrinterField param);
 
     public class PrinterTask extends Device.Task<Void, Integer, Boolean>
     {
@@ -693,8 +719,37 @@ public abstract class Printer extends Device
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
+	    String filepath = String.format("print/%s.xml", form.getClass().getName());
+	    try {
+		Context context = EFormApplication.getContext();
+		File file = new File(context.getFilesDir(), filepath);
+		PrinterHandler handler = new PrinterHandler(page_from, page_to);
+		Xml.parse(new FileInputStream(file), Xml.Encoding.UTF_8, handler);
+		ArrayList<ArrayList<PrinterField>> page_fields = handler.pages;
+	    } catch (FileNotFoundException e) {
+		LogActivity.writeLog(e);
+		LogActivity.writeLog("未找到打印配置文件 %s，请联系技术支持", filepath);
+		return false;
+	    } catch (IOException e) {
+		LogActivity.writeLog(e);
+		LogActivity.writeLog("不能读写打印配置文件 %s", filepath);
+		return false;
+	    } catch (SAXException e) {
+		LogActivity.writeLog(e);
+		LogActivity.writeLog("打印配置文件 %s 格式错误", filepath);
+		return false;
+	    }
+
+
 	    for (int page_no = page_from; page_no <= page_to; page_no++) {
-		publishProgress(PROGRESS_PAGE_START, page_no);
+		ArrayList<PrinterField> fields = null;
+
+		if (fields == null || fields.size() == 0) {
+		    LogActivity.writeLog("页面 %d 没有配置可打印的内容", page_no);
+		    continue;
+		}
+
+		publishProgress(PROGRESS_PAGE_START, page_no, fields.size());
 
 		if (!waitForPaper()) {
 		    LogActivity.writeLog("等待插入纸张错误");
@@ -750,7 +805,7 @@ public abstract class Printer extends Device
 	protected void onProgressUpdate(Integer... args) {
 	    switch (args[0].intValue()) {
 	    case PROGRESS_PAGE_START:
-		dialog.pageStart(args[1].intValue(), 100);
+		dialog.pageStart(args[1].intValue(), args[2].intValue());
 		break;
 	    case PROGRESS_PAGE_FINISH:
 		dialog.pageFinish(args[1].intValue());
@@ -766,12 +821,30 @@ public abstract class Printer extends Device
 	    }
 	}
     }
+
+    class PrinterHandler extends DefaultHandler
+    {
+	private int page_from;
+	private int page_to;
+	private ArrayList<ArrayList<PrinterField>> pages;
+
+	public PrinterHandler(int page_from, int page_to) {
+	    this.page_from = page_from;
+	    this.page_to = page_to;
+	    pages = new ArrayList<ArrayList<PrinterField>>();
+	}
+    }
 }
 
 
 class PrinterVirtual extends Printer
 {
     private boolean is_open;
+
+    @Override
+    public boolean checkDevice() {
+	return true;
+    }
 
     @Override
     public boolean open() {
@@ -816,7 +889,7 @@ class PrinterVirtual extends Printer
     }
 
     @Override
-    public boolean write(String text, PrinterParams param) {
+    public boolean write(String text, PrinterField param) {
 	try {
 	    Thread.sleep(100);
 	    if (write(text) < 0)
@@ -833,12 +906,22 @@ class PrinterVirtual extends Printer
 
 class PrinterLQ90KP extends Printer
 {
-    public static final int VID = 0x3001;
-    public static final int PID = 0x3002;
+    public static final int VID = 0x04B8;
+    public static final int PID = 0x0005;
 
     private UsbDeviceConnection connection;
     private UsbInterface iface;
     private UsbRequest request;
+
+    @Override
+    public boolean isUsbDevice() {
+	return true;
+    }
+
+    @Override
+    public boolean checkDevice() {
+	return (getUsbDevice(VID, PID) != null) ? true : false;
+    }
 
     @Override
     public boolean open() {
@@ -880,7 +963,7 @@ class PrinterLQ90KP extends Printer
     }
 
     @Override
-    public boolean write(String text, PrinterParams param) {
+    public boolean write(String text, PrinterField param) {
 	if (text == null) {
 	    LogActivity.writeLog("没有要打印的数据");
 	    return false;

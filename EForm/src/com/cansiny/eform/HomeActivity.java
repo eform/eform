@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cansiny.eform.Administrator.AdministratorListener;
 import com.cansiny.eform.Member.MemberListener;
+import com.cansiny.eform.Utils.Device;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -16,8 +17,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -91,7 +96,29 @@ public class HomeActivity extends Activity
 	    handler.postDelayed(this, 1000);
 	}
     };
+    private BroadcastReceiver usb_receiver = new BroadcastReceiver() {
+	@Override
+	public void onReceive(Context context, Intent intent) {
+	    String action = intent.getAction(); 
 
+	    if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+		Object device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+		if (device != null) {
+		    LogActivity.writeLog("设备断开连接");
+		    checkForDevices();
+		}
+		return;
+	    }
+	}
+    };
+    private int device_check_flags;
+
+    static private final int FLAG_PRINTER_DISCONNECTED = 0x0001;
+    static private final int FLAG_PRINTER_DRIVER_ERROR = 0x0002;
+    static private final int FLAG_MAGCARD_DISCONNECTED = 0x0004;
+    static private final int FLAG_MAGCARD_DRIVER_ERROR = 0x0008;
+    static private final int FLAG_IDCARD_DISCONNECTED  = 0x0010;
+    static private final int FLAG_IDCARD_DRIVER_ERROR  = 0x0020;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +127,6 @@ public class HomeActivity extends Activity
 	Log.d("HomeActivity", "onCreate");
 
 	atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
-
 	home_info = HomeInfo.getHomeInfo();
 
 	LogActivity.clearLog();
@@ -126,6 +152,8 @@ public class HomeActivity extends Activity
 
 	Log.d("HomeActivity", "onPause");
 
+	unregisterReceiver(usb_receiver);
+
 	WebView webview = (WebView) findViewById(R.id.logo_webview);
 	webview.onPause();
 
@@ -138,7 +166,13 @@ public class HomeActivity extends Activity
 
 	Log.d("HomeActivity", "onResume");
 
-	WebView webview = (WebView) findViewById(R.id.logo_webview);
+	checkForDevices();
+
+    	IntentFilter usb_filter = new IntentFilter();
+    	usb_filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+    	registerReceiver(usb_receiver, usb_filter);
+
+    	WebView webview = (WebView) findViewById(R.id.logo_webview);
 	webview.onResume();
 
 	TextSwitcher switcher = (TextSwitcher) findViewById(R.id.slogan_switcher);
@@ -355,13 +389,83 @@ public class HomeActivity extends Activity
 	setupLayout();
     }
 
+    private void updateUsbDeviceTips() {
+	View tips_layout = findViewById(R.id.tips_layout);
+	TextView tips_text = (TextView) findViewById(R.id.tips_text);
+	TextView tips_second_text = (TextView) findViewById(R.id.tips_second_text);
+
+	if ((device_check_flags & FLAG_PRINTER_DRIVER_ERROR) != 0) {
+	    tips_text.setText("设备软件故障：打印机驱动错误");
+	    tips_second_text.setText("请进入系统设置检查打印机设备驱动配置是否正确");
+	    tips_layout.setVisibility(View.VISIBLE);
+	    return;
+	}
+	if ((device_check_flags & FLAG_PRINTER_DISCONNECTED) != 0) {
+	    tips_text.setText("设备硬件故障：打印机断开连接");
+	    tips_second_text.setText("请检查打印机电缆是否松动，或打印机是否已损坏");
+	    tips_layout.setVisibility(View.VISIBLE);
+	    return;
+	}
+	if ((device_check_flags & FLAG_MAGCARD_DRIVER_ERROR) != 0) {
+	    tips_text.setText("设备软件故障：刷卡器驱动错误");
+	    tips_second_text.setText("请进入系统设置检查刷卡器设备驱动配置是否正确");
+	    tips_layout.setVisibility(View.VISIBLE);
+	    return;
+	}
+	if ((device_check_flags & FLAG_MAGCARD_DISCONNECTED) != 0) {
+	    tips_text.setText("设备硬件故障：刷卡器断开连接");
+	    tips_second_text.setText("请检查刷卡器电缆是否松动，或刷卡器是否已损坏");
+	    tips_layout.setVisibility(View.VISIBLE);
+	    return;
+	}
+	if ((device_check_flags & FLAG_IDCARD_DRIVER_ERROR) != 0) {
+	    tips_text.setText("设备软件故障：身份证阅读器驱动错误");
+	    tips_second_text.setText("请进入系统设置检查身份证阅读器设备驱动配置是否正确");
+	    tips_layout.setVisibility(View.VISIBLE);
+	    return;
+	}
+	if ((device_check_flags & FLAG_IDCARD_DISCONNECTED) != 0) {
+	    tips_text.setText("设备硬件故障：身份证阅读器断开连接");
+	    tips_second_text.setText("请检查身份证阅读器电缆是否松动，或身份证阅读器是否已损坏");
+	    tips_layout.setVisibility(View.VISIBLE);
+	    return;
+	}
+	tips_layout.setVisibility(View.GONE);
+    }
+
+    private void checkForDevices() {
+	checkForSingleDevice(Device.DEVICE_PRINTER,
+		FLAG_PRINTER_DRIVER_ERROR, FLAG_PRINTER_DISCONNECTED);
+	checkForSingleDevice(Device.DEVICE_MAGCARD,
+		FLAG_MAGCARD_DRIVER_ERROR, FLAG_MAGCARD_DISCONNECTED);
+	checkForSingleDevice(Device.DEVICE_IDCARD,
+		FLAG_IDCARD_DRIVER_ERROR, FLAG_IDCARD_DISCONNECTED);
+
+	LogActivity.writeLog("Flag: 0x%04X", device_check_flags);
+	updateUsbDeviceTips();
+    }
+
+    private void checkForSingleDevice(String klass, int driver_flag, int disconn_flag) {
+	Device device = Device.getDevice(klass);
+	if (device == null) {
+	    device_check_flags |= driver_flag;
+	    return;
+	}
+	device_check_flags &= ~driver_flag;
+
+	if (device.checkDevice()) {
+	    device_check_flags &= ~disconn_flag;
+	} else {
+	    device_check_flags |= disconn_flag;
+	}
+    }
 
     @Override
     public void onClick(View view) {
 	if (view.getClass() == ImageButton.class) {
 	    Object object = view.getTag();
 	    if (object == null || !(object instanceof HomeInfo.HomeItem)) {
-		Log.e("HomeActivity", "Programming error: HomeButton missing class tag");
+		Log.e("HomeActivity", "程序错误: 主页按钮缺少 class Tag");
 		return;
 	    }
 	    HomeInfo.HomeItem item = (HomeInfo.HomeItem) object;
