@@ -9,11 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -39,7 +36,6 @@ import android.text.InputType;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.util.Xml.Encoding;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -460,7 +456,7 @@ class PrinterProgressDialog extends Utils.DialogFragment
 	Drawable drawable = getResources().getDrawable(R.drawable.progressbar);
 	progressbar.setProgressDrawable(drawable);
 	progressbar.setVisibility(View.VISIBLE);
-	int page_count = (printer.getPageTo() - printer.getPageFrom() + 1);
+	int page_count = printer.getPageTo() - printer.getPageFrom();
 	progressbar.setMax(100 * page_count);
 	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.MATCH_PARENT,
@@ -483,7 +479,7 @@ class PrinterProgressDialog extends Utils.DialogFragment
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-	int page_count = (printer.getPageTo() - printer.getPageFrom() + 1);
+	int page_count = printer.getPageTo() - printer.getPageFrom();
 	builder.setTitle("打印进度，共 " + page_count + " 页");
 	builder.setView(buildLayout());
 	builder.setNegativeButton("停 止", null);
@@ -618,16 +614,6 @@ public abstract class Printer extends Device
     protected int page_from;
     protected int page_to;
 
-    static public boolean usbDeviceIsPrinter(UsbDevice device) {
-	int vid = device.getVendorId();
-	int pid = device.getProductId();
-
-	if (vid == PrinterLQ90KP.VID && pid == PrinterLQ90KP.PID) {
-	    return true;
-	}
-	return false;
-    }
-
     public void setForm(Form form) {
 	this.form = form;
 	is_task_paused = false;
@@ -689,13 +675,18 @@ public abstract class Printer extends Device
     abstract public boolean waitForPaper();
     abstract public boolean write(String text, PrinterField field);
 
-    public class PrinterTask extends Device.Task<Void, Integer, Boolean>
+    public class PrinterTask extends Device.Task<Void, String, Boolean>
     {
 	private static final int PROGRESS_PAGE_START   = 1;
 	private static final int PROGRESS_PAGE_FINISH  = 2;
 	private static final int PROGRESS_PAPER_READY  = 3;
 	private static final int PROGRESS_FIELD_START  = 4;
 	private static final int PROGRESS_FIELD_FINISH = 5;
+	private static final String PROGRESS_PAGE_START_S   = "1";
+	private static final String PROGRESS_PAGE_FINISH_S  = "2";
+	private static final String PROGRESS_PAPER_READY_S  = "3";
+	private static final String PROGRESS_FIELD_START_S  = "4";
+	private static final String PROGRESS_FIELD_FINISH_S = "5";
 
 	private FragmentManager manager;
 	private PrinterProgressDialog dialog;
@@ -709,32 +700,37 @@ public abstract class Printer extends Device
 	protected void onPreExecute() {
 	    super.onPreExecute();
 	    dialog = new PrinterProgressDialog(Printer.this);
-	    dialog.show(manager, "PrintProgressDialog");
+	    dialog.show(manager, "PrinterProgressDialog");
 	}
 
-	@Override
-	protected Boolean doInBackground(Void... params) {
+	private SparseArray<ArrayList<PrinterField>> parsePrintConfig() {
 	    String filepath = String.format("print/%s.xml", form.getClass().getName());
-	    SparseArray<ArrayList<PrinterField>> print_pages = null;
-	    PrinterXMLHandler handler = new PrinterXMLHandler(page_from, page_to);
+	    PrinterXMLHandler handler = new PrinterXMLHandler(form, page_from, page_to);
 	    try {
 		File file = new File(EFormApplication.getContext().getFilesDir(), filepath);
 		Xml.parse(new FileInputStream(file), Xml.Encoding.UTF_8, handler);
-		print_pages = handler.getAllPages();
+		return handler.getAllPages();
 	    } catch (FileNotFoundException e) {
 		LogActivity.writeLog(e);
 		LogActivity.writeLog("未找到打印配置文件“%s”，请联系技术支持", filepath);
-		return false;
+		return null;
 	    } catch (IOException e) {
 		LogActivity.writeLog(e);
 		LogActivity.writeLog("不能读写打印配置文件”%s“", filepath);
-		return false;
+		return null;
 	    } catch (SAXException e) {
 		LogActivity.writeLog(e);
 		LogActivity.writeLog("打印配置文件”%s“格式错误，错误位置为第%d行",
 			filepath, handler.getErrorLineNumber());
-		return false;
+		return null;
 	    }
+	}
+
+	@Override
+	protected Boolean doInBackground(Void... params) {
+	    SparseArray<ArrayList<PrinterField>> print_pages = parsePrintConfig();
+	    if (print_pages == null)
+		return false;
 
 	    for (int page_no = page_from; page_no < page_to; page_no++) {
 		ArrayList<PrinterField> fields = print_pages.get(page_no);
@@ -742,40 +738,42 @@ public abstract class Printer extends Device
 		    LogActivity.writeLog("打印页面“%d”没有配置打印数据", page_no);
 		    continue;
 		}
-
-		publishProgress(PROGRESS_PAGE_START, page_no, fields.size());
+		publishProgress(PROGRESS_PAGE_START_S, String.valueOf(page_no),
+			String.valueOf(fields.size()));
 
 		if (!waitForPaper()) {
 		    LogActivity.writeLog("打印等待插入纸张错误");
 		    return false;
 		}
-		publishProgress(PROGRESS_PAPER_READY, page_no);
+		publishProgress(PROGRESS_PAPER_READY_S, String.valueOf(page_no));
 
-		for (int field = 0; field < fields.size(); field++) {
+		for (int field_no = 0; field_no < fields.size(); field_no++) {
 		    if (isCancelled()) {
 			break;
 		    }
 
-		    publishProgress(PROGRESS_FIELD_START, field);
+		    PrinterField field = fields.get(field_no);
 
-		    if (!write("", null)) {
+		    publishProgress(PROGRESS_FIELD_START_S, String.valueOf(field_no), field.name);
+
+		    if (!write("", field)) {
 			LogActivity.writeLog("写入打印机错误");
 			return false;
 		    }
-		    publishProgress(PROGRESS_FIELD_FINISH, field);
+		    publishProgress(PROGRESS_FIELD_FINISH_S, String.valueOf(field_no), field.name);
 
 		    while (is_task_paused) {
 			try {
 			    Thread.sleep(10);
 			} catch (InterruptedException e) {
-			    LogActivity.writeLog("打印暂停睡眠被中断唤醒");
+			    LogActivity.writeLog("打印暂停（睡眠）被中断唤醒");
 			    if (isCancelled()) {
 				return false;
 			    }
 			}
 		    }
 		}
-		publishProgress(PROGRESS_PAGE_FINISH, page_no);
+		publishProgress(PROGRESS_PAGE_FINISH_S, String.valueOf(page_no));
 	    }
 	    return true;
 	}
@@ -796,22 +794,22 @@ public abstract class Printer extends Device
 	}
 
 	@Override
-	protected void onProgressUpdate(Integer... args) {
-	    switch (args[0].intValue()) {
+	protected void onProgressUpdate(String... args) {
+	    switch (Integer.parseInt(args[0])) {
 	    case PROGRESS_PAGE_START:
-		dialog.pageStart(args[1].intValue(), args[2].intValue());
+		dialog.pageStart(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		break;
 	    case PROGRESS_PAGE_FINISH:
-		dialog.pageFinish(args[1].intValue());
+		dialog.pageFinish(Integer.parseInt(args[1]));
 		break;
 	    case PROGRESS_PAPER_READY:
-		dialog.paperReady(args[1].intValue());
+		dialog.paperReady(Integer.parseInt(args[1]));
 		break;
 	    case PROGRESS_FIELD_START:
-		dialog.fieldStart(args[1].intValue(), "");
+		dialog.fieldStart(Integer.parseInt(args[1]), args[2]);
 		break;
 	    case PROGRESS_FIELD_FINISH:
-		dialog.fieldFinish(args[1].intValue(), "");
+		dialog.fieldFinish(Integer.parseInt(args[1]), args[2]);
 		break;
 	    }
 	}
@@ -821,26 +819,43 @@ public abstract class Printer extends Device
     {
 	static public final int WIDTH_NORMAL = 0;
 	static public final int WIDTH_HALF   = 1;
+	static public final String WANT_TEXT  = "text";
+	static public final String WANT_CHECK = "check";
 
-	public String resid;
-	public String klass;
 	public String name;
+	public String resid;
+	public String want;
 	public int x;
 	public int y;
 	public int spacing;
 	public int width;
 
 	boolean isValid() {
+	    if (name == null) {
+		if (BuildConfig.DEBUG) {
+		    LogActivity.writeLog("打印字段的 name 不能为空");
+		    return false;
+		}
+	    }
 	    if (resid == null) {
 		LogActivity.writeLog("打印字段的 resid 不能为空");
 		return false;
 	    }
-	    if (klass == null) {
-		LogActivity.writeLog("打印字段的 class 不能为空");
-		return false;
+	    if (want == null) {
+		if (BuildConfig.DEBUG) {
+		    LogActivity.writeLog("打印字段的 want 不能为空");
+		    return false;
+		} else {
+		    want = WANT_TEXT;
+		}
+	    } else if (BuildConfig.DEBUG) {
+		if (!want.equals(WANT_TEXT) && !want.equals(WANT_CHECK)) {
+		    LogActivity.writeLog("打印字段的 want 值必须是 'text' 或 'check'");
+		    return false;
+		}
 	    }
 	    if (x < 0 || y < 0) {
-		LogActivity.writeLog("打印字段的x和y坐标必须大于0");
+		LogActivity.writeLog("打印字段的x和y坐标不能小于0");
 		return false;
 	    }
 	    return true;
@@ -849,6 +864,7 @@ public abstract class Printer extends Device
 
     class PrinterXMLHandler extends DefaultHandler
     {
+	private Form form;
 	private int page_from;
 	private int page_to;
 	private SparseArray<ArrayList<PrinterField>> print_pages;
@@ -857,7 +873,8 @@ public abstract class Printer extends Device
 	private Locator locator;
 	private int error_line;
 
-	public PrinterXMLHandler(int page_from, int page_to) {
+	public PrinterXMLHandler(Form form, int page_from, int page_to) {
+	    this.form = form;
 	    this.page_from = page_from;
 	    this.page_to = page_to;
 	    print_pages = new SparseArray<ArrayList<PrinterField>>();
@@ -892,6 +909,15 @@ public abstract class Printer extends Device
 		if (level != 1) {
 		    error_line = locator.getLineNumber();
 		    throw new SAXException("元素'form'必须是根结点");
+		}
+		String klass = attrs.getValue("", "class");
+		if (klass == null) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("元素'form'缺少'klass'属性");
+		}
+		if (!klass.equals(form.getClass().getName())) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("打印配置文件和当前凭条类型不匹配");
 		}
 		return;
 	    }
@@ -960,8 +986,8 @@ public abstract class Printer extends Device
 
 		if (name.equals("resid")) {
 		    field.resid = value;
-		} else if (name.equals("class")) {
-		    field.klass = value;
+		} else if (name.equals("want")) {
+		    field.want = value;
 		} else if (name.equals("name")) {
 		    field.name = value;
 		} else if (name.equals("x")) {
@@ -1061,8 +1087,8 @@ class PrinterLQ90KP extends Printer
     private UsbRequest request;
 
     @Override
-    public boolean isUsbDevice() {
-	return true;
+    public int getDeviceType() {
+	return DEVICE_TYPE_USB;
     }
 
     @Override

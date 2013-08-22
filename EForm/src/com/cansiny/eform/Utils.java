@@ -506,6 +506,10 @@ public class Utils
 	public static final int TASK_FLAG_MAGCARD_FORM  = 1;
 	public static final int TASK_FLAG_MAGCARD_TEST  = 2;
 
+	public static final int DEVICE_TYPE_VIRTUAL = 1;
+	public static final int DEVICE_TYPE_SERIAL  = 2;
+	public static final int DEVICE_TYPE_USB     = 3;
+
 	protected DeviceListener listener = null;
 	protected Object client_data = null;
 
@@ -585,7 +589,7 @@ public class Utils
 	abstract protected Object read();
 	abstract protected int write(String string);
 
-	public boolean isUsbDevice() { return false; }
+	public int getDeviceType() { return DEVICE_TYPE_VIRTUAL; }
 	public boolean checkDevice() { return false; }
 
 	static interface DeviceListener

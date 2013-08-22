@@ -205,17 +205,17 @@ public abstract class Form extends DefaultHandler
 	    return null;
 
 	/* store current page state and load new page state. */
-	storePage(active_page);
+	savePage(active_page);
 	active_page = page_no;
 	return loadPage(active_page);
     }
 
-    private void storePage(int page_no) {
+    private void savePage(int page_no) {
 	if (page_no < 0 || page_no >= pages.size())
 	    return;
 
-	FormPage page = pages.get(active_page);
-	page.storeViewValues();
+	FormPage page = pages.get(page_no);
+	page.saveToBundle();
 
 	for (Integer viewid : cardno_edittexts) {
 	    View view = page.findViewById(viewid.intValue());
@@ -223,7 +223,7 @@ public abstract class Form extends DefaultHandler
 		Object cardno = view.getTag(R.id.FormCardnoViewTagKey);
 		if (cardno != null && ((CharSequence) cardno).length() > 0) {
 		    String key = viewid.toString();
-		    page.putCharSequence(key, (CharSequence) cardno);
+		    page.bundle.putString(key, cardno.toString());
 		}
 	    }
 	}
@@ -234,7 +234,7 @@ public abstract class Form extends DefaultHandler
 	    return null;
 
 	FormPage page = pages.get(page_no);
-	page.loadViewValues();
+	page.loadFromBundle();
 
 	setListenerForViews(page);
 		
@@ -243,7 +243,7 @@ public abstract class Form extends DefaultHandler
 	    if (view != null) {
 		String key = viewid.toString();
 		if (page.bundle.containsKey(key)) {
-		    String cardno = page.getString(key);
+		    String cardno = page.bundle.getString(key);
 		    view.setTag(R.id.FormCardnoViewTagKey, cardno);
 		    if (!view.hasFocus()) {
 			((TextView) view).setText(Magcard.formatCardno(cardno));
@@ -262,6 +262,7 @@ public abstract class Form extends DefaultHandler
 	builder.append(">\n");
 
 	for (int i = 0; i < pages.size(); i++) {
+	    savePage(i);
 	    FormPage page = pages.get(i);
 	    builder.append(String.format("  <page index='%d'>\n", i));
 	    builder.append(page.toXmlString());
@@ -334,27 +335,17 @@ public abstract class Form extends DefaultHandler
 	    level--;
 
 	    if (localName.equals("page")) {
-		if (page != null && page.getValueCount() > 0) {
-		    page.loadViewValues();
+		if (page != null && page.bundle.size() > 0) {
+		    page.loadFromBundle();
 		}
 		page = null;
 	    }
 	}
 
 	private void putViewValue(Attributes attrs) throws SAXException {
-	    String resname = attrs.getValue("", "resname");
-	    if (resname == null) {
-		throw new SAXException("元素'view'缺少'resname'属性");
-	    }
-
-	    String restype = attrs.getValue("", "restype");
-	    if (restype == null) {
-		throw new SAXException("元素'view'缺少'restype'属性");
-	    }
-
-	    String respack = attrs.getValue("", "respack");
-	    if (respack == null) {
-		throw new SAXException("元素'view'缺少'respack'属性");
+	    String resid = attrs.getValue("", "resid");
+	    if (resid == null) {
+		throw new SAXException("元素'view'缺少'resid'属性");
 	    }
 
 	    String vclass  = attrs.getValue("", "vclass");
@@ -368,7 +359,7 @@ public abstract class Form extends DefaultHandler
 	    }
 
 	    if (page != null) {
-		page.putValue(resname, restype, respack, vclass, value);
+		page.putValue(resid, vclass, value);
 	    }
 	}
     }
@@ -405,7 +396,7 @@ public abstract class Form extends DefaultHandler
 	    return;
 
 	FormPage page = pages.get(page_no);
-	page.loadFocusView();
+	page.restoreFocusView();
     }
 
 	
@@ -681,18 +672,16 @@ public abstract class Form extends DefaultHandler
 
     public class FormPage extends ScrollView
     {
-	final private static String KEY_FOCUS_VIEW = "page_focus_view";
-
 	private String title;
 	private int layout;
 	private Bundle bundle;
+	private View focus_view;
 
 	private void initialize(String title, int layout) {
 	    this.title = title;
 	    this.layout = layout;
 	    bundle = new Bundle();
-
-	    setDrawingCacheEnabled(true);
+	    focus_view = null;
 	}
 
 	private FormPage(Context context) {
@@ -714,19 +703,25 @@ public abstract class Form extends DefaultHandler
 	    return title;
 	}
 
-	public void loadViewValues() {
+	protected void restoreFocusView() {
+	    if (focus_view != null && findViewById(focus_view.getId()) != null) {
+		focus_view.requestFocus();
+	    }
+	}
+
+	protected void loadFromBundle() {
 	    if (getChildCount() == 0) {
 		LayoutInflater inflater = activity.getLayoutInflater();
 		inflater.inflate(this.layout, this);
 	    }
-	    loadViewValue(this);
+	    setViewFromBundle(this);
 	}
 
-	private void loadViewValue(Object object) {
+	private void setViewFromBundle(Object object) {
 	    if (object instanceof ViewGroup) {
 		ViewGroup group = (ViewGroup) object;
 		for (int i = 0; i < group.getChildCount(); i++) {
-		    loadViewValue(group.getChildAt(i));
+		    setViewFromBundle(group.getChildAt(i));
 		}
 		return;
 	    }
@@ -736,8 +731,7 @@ public abstract class Form extends DefaultHandler
 		((EditText) object).setImeOptions(EditorInfo.IME_ACTION_NEXT);
 	    }
 
-	    int viewid = ((View) object).getId();
-	    String key = Integer.valueOf(viewid).toString();
+	    String key = String.valueOf(((View) object).getId());
 
 	    if (bundle.containsKey(key)) {
 		if (object instanceof EditText) {
@@ -749,23 +743,23 @@ public abstract class Form extends DefaultHandler
 	}
 
 
-	public void storeViewValues() {
+	protected void saveToBundle() {
+	    focus_view = findFocus();
 	    bundle.clear();
-	    storeViewValue(this);
-	    storeFocusView();
+	    saveViewToBundle(this);
 	}
 
-	private void storeViewValue(Object object) {
+	private void saveViewToBundle(Object object) {
 	    if (object instanceof ViewGroup) {
 		ViewGroup group = (ViewGroup) object;
 		for (int i = 0; i < group.getChildCount(); i++) {
-		    storeViewValue(group.getChildAt(i));
+		    saveViewToBundle(group.getChildAt(i));
 		}
 		return;
 	    }
 
 	    int viewid = ((View) object).getId();
-	    String key = Integer.valueOf(viewid).toString();
+	    String key = String.valueOf(viewid);
 
 	    if (object instanceof EditText) {
 		EditText edittext = (EditText) object;
@@ -790,35 +784,9 @@ public abstract class Form extends DefaultHandler
 	    }
 	}
 
-	public void storeFocusView() {
-	    View view = findFocus();
-	    if (view != null) {
-		bundle.putInt(KEY_FOCUS_VIEW, view.getId());
-	    }
-	}
-
-	public void loadFocusView() {
-	    int focus_id = bundle.getInt(KEY_FOCUS_VIEW);
-	    View view = findViewById(focus_id);
-	    if (view != null)
-		view.requestFocus();
-	}
-
-	public String toXmlString() {
-	    storeViewValues();
-
-	    for (Integer viewid : cardno_edittexts) {
-		View view = findViewById(viewid.intValue());
-		if (view != null) {
-		    Object cardno = view.getTag(R.id.FormCardnoViewTagKey);
-		    if (cardno != null && ((CharSequence) cardno).length() > 0) {
-			String key = viewid.toString();
-			putString(key, cardno.toString());
-		    }
-		}
-	    }
-
+	protected String toXmlString() {
 	    StringBuilder builder = new StringBuilder();
+
 	    for (String key : bundle.keySet()) {
 		Object object = bundle.get(key);
 		try {
@@ -826,9 +794,7 @@ public abstract class Form extends DefaultHandler
 		    Resources res = activity.getResources();
 
 		    builder.append("    <view ");
-		    builder.append("resname=\"" + res.getResourceEntryName(viewid) + "\" ");
-		    builder.append("restype=\"" + res.getResourceTypeName(viewid) + "\" ");
-		    builder.append("respack=\"" + res.getResourcePackageName(viewid) + "\" ");
+		    builder.append("resid=\"" + res.getResourceName(viewid) + "\" ");
 		    String canon_name = object.getClass().getCanonicalName();
 		    if (canon_name != null) {
 			builder.append("vclass=\"" + canon_name + "\" ");
@@ -843,6 +809,28 @@ public abstract class Form extends DefaultHandler
 		}
 	    }
 	    return builder.toString();
+	}
+
+	public void putValue(String resid, String vclass, String value) {
+	    int viewid = activity.getResources().getIdentifier(resid, null, null);
+	    if (viewid == 0) {
+		LogActivity.writeLog("不能找到ID为'%s'的资源", resid);
+		return;
+	    }
+
+	    try {
+		String key = String.valueOf(viewid);
+		Object object = Class.forName(vclass).getConstructor(String.class).newInstance(value);
+		if (object.getClass() == Boolean.class) {
+		    bundle.putBoolean(key, (Boolean) object);
+		} else if (object.getClass() == String.class) {
+		    bundle.putString(key, (String) object);
+		} else {
+		    LogActivity.writeLog("未处理的值类型 %s !!!", object.getClass());
+		}
+	    } catch (Exception e) {
+		LogActivity.writeLog(e);
+	    }
 	}
 
 	public String toPrintTemplate() {
@@ -865,90 +853,45 @@ public abstract class Form extends DefaultHandler
 		return;
 	    }
 
-	    if (!(object instanceof EditText) && !(object instanceof CheckBox)) {
-		return;
-	    }
-
 	    int viewid = object.getId();
 	    if (viewid == -1) {
-		LogActivity.writeLog("界面设计错误: %s(%s)没有指定ID",
-			object.getClass().getName(), ((TextView) object).getText());
+		if (object instanceof TextView) {
+		    LogActivity.writeLog("%s(%s)没有指定ID，略过", object.getClass().getName(),
+			    ((TextView) object).getText());
+		} else {
+		    LogActivity.writeLog("%s没有指定ID，略过", object.getClass().getName());
+		}
 		return;
 	    }
 
 	    builder.append("    <field ");
 	    Resources res = activity.getResources();
 	    builder.append("resid=\"" + res.getResourceEntryName(viewid) + "\" ");
-	    String canon_name = object.getClass().getCanonicalName();
-	    if (canon_name != null) {
-		builder.append("class=\"" + canon_name + "\" ");
-	    } else {
-		builder.append("class=\"" + object.getClass().getName() + "\" ");
-	    }
-
 	    if (object instanceof EditText) {
+		builder.append("want=\"text\" ");
+
 		ViewGroup parent = (ViewGroup) object.getParent();
 		int index = parent.indexOfChild(object);
-		boolean set = false;
+		boolean name_set = false;
 		if (index > 0) {
 		    View sibling = parent.getChildAt(index - 1);
 		    if (sibling instanceof TextView) {
 			builder.append("name=\"" + ((TextView) sibling).getText() + "\" ");
-			set = true;
+			name_set = true;
 		    }
 		}
-		if (!set) {
-		    builder.append("name=\"\" ");
+		if (!name_set) {
+		    builder.append("name=\"TODO\" ");
 		}
 	    } else if (object instanceof CheckBox) {
-		builder.append("name=\"" + ((TextView) object).getText() + "\" ");
+		builder.append("want=\"check\" ");
+		builder.append("name=\"" + ((CheckBox) object).getText() + "\" ");
+	    } else {
+		builder.append("want=\"" + object.getClass().getName() + "\" ");
+		builder.append("name=\"TODO\" ");
 	    }
-//	    builder.append("page_order=\"" + order + "\" ");
 	    builder.append("x=\"0\" y=\"0\" spacing=\"0\" width=\"0\" ");
 	    builder.append("/>\n");
-	}
-
-	public void putValue(String entryname, String typename,
-		String packname, String vclass, String value) {
-	    int viewid = activity.getResources().getIdentifier(entryname, typename, packname);
-	    if (viewid == 0) {
-		LogActivity.writeLog("不能找到名称为'%s'的资源ID", entryname);
-		return;
-	    }
-
-	    try {
-		String key = Integer.valueOf(viewid).toString();
-		Object object = Class.forName(vclass).getConstructor(String.class).newInstance(value);
-		if (object.getClass() == Boolean.class) {
-		    bundle.putBoolean(key, (Boolean) object);
-		} else if (object.getClass() == String.class) {
-		    bundle.putString(key, (String) object);
-		} else {
-		    LogActivity.writeLog("未处理的值类型 %s !!!", object.getClass());
-		}
-	    } catch (Exception e) {
-		LogActivity.writeLog(e);
-	    }
-	}
-
-	public void putString(String key, String value) {
-	    bundle.putString(key, value);
-	}
-
-	public String getString(String key) {
-	    return bundle.getString(key);
-	}
-
-	public void putCharSequence(String key, CharSequence value) {
-	    bundle.putCharSequence(key, value);
-	}
-
-	public CharSequence getCharSequence(String key) {
-	    return bundle.getCharSequence(key);
-	}
-
-	public int getValueCount() {
-	    return bundle.size();
 	}
 
 	public boolean canScrollUp() {
@@ -981,7 +924,7 @@ public abstract class Form extends DefaultHandler
 
 	public Bitmap getBitmap() {
 	    if (getChildCount() == 0) {
-		loadViewValues();
+		loadFromBundle();
 	    }
 	    View frame = getChildAt(0);
 	    if (frame != null) {

@@ -390,9 +390,9 @@ public class HomeActivity extends Activity
     }
 
     private void updateUsbDeviceTips() {
-	View tips_layout = findViewById(R.id.tips_layout);
 	TextView tips_text = (TextView) findViewById(R.id.tips_text);
 	TextView tips_second_text = (TextView) findViewById(R.id.tips_second_text);
+	View tips_layout = findViewById(R.id.tips_layout);
 
 	if ((device_check_flags & FLAG_PRINTER_DRIVER_ERROR) != 0) {
 	    tips_text.setText("设备软件故障：打印机驱动错误");
@@ -401,32 +401,32 @@ public class HomeActivity extends Activity
 	    return;
 	}
 	if ((device_check_flags & FLAG_PRINTER_DISCONNECTED) != 0) {
-	    tips_text.setText("设备硬件故障：打印机断开连接");
-	    tips_second_text.setText("请检查打印机电缆是否松动，或打印机是否已损坏");
+	    tips_text.setText("设备故障：打印机已断开连接");
+	    tips_second_text.setText("请检查设备电缆是否松动，或设备是否已损坏，或设备驱动是否正确配置");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
 	if ((device_check_flags & FLAG_MAGCARD_DRIVER_ERROR) != 0) {
-	    tips_text.setText("设备软件故障：刷卡器驱动错误");
+	    tips_text.setText("设备故障：刷卡器驱动错误");
 	    tips_second_text.setText("请进入系统设置检查刷卡器设备驱动配置是否正确");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
 	if ((device_check_flags & FLAG_MAGCARD_DISCONNECTED) != 0) {
-	    tips_text.setText("设备硬件故障：刷卡器断开连接");
-	    tips_second_text.setText("请检查刷卡器电缆是否松动，或刷卡器是否已损坏");
+	    tips_text.setText("设备故障：刷卡器已断开连接");
+	    tips_second_text.setText("请检查设备电缆是否松动，或设备是否已损坏，或设备驱动是否正确配置");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
 	if ((device_check_flags & FLAG_IDCARD_DRIVER_ERROR) != 0) {
-	    tips_text.setText("设备软件故障：身份证阅读器驱动错误");
+	    tips_text.setText("设备故障：身份证阅读器驱动错误");
 	    tips_second_text.setText("请进入系统设置检查身份证阅读器设备驱动配置是否正确");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
 	if ((device_check_flags & FLAG_IDCARD_DISCONNECTED) != 0) {
-	    tips_text.setText("设备硬件故障：身份证阅读器断开连接");
-	    tips_second_text.setText("请检查身份证阅读器电缆是否松动，或身份证阅读器是否已损坏");
+	    tips_text.setText("设备故障：身份证阅读器已断开连接");
+	    tips_second_text.setText("请检查设备电缆是否松动，或设备是否已损坏，或设备驱动是否正确配置");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}

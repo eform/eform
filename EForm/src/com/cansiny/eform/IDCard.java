@@ -12,7 +12,6 @@ import com.cansiny.eform.Utils.Device;
 
 import android.app.Dialog;
 import android.app.FragmentManager;
-import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -132,10 +131,6 @@ public abstract class IDCard extends Utils.Device
 
     static private int read_error_count = 0;
     protected IDCardTask task;
-
-    static public boolean usbDeviceIsIDCard(UsbDevice device) {
-	return false;
-    }
 
     @Override
     public void startTask(FragmentManager manager, int flags) {
@@ -312,9 +307,10 @@ class IDCardUSBGTICR100 extends IDCard
     }
 
     @Override
-    public boolean isUsbDevice() {
-	return true;
+    public int getDeviceType() {
+	return DEVICE_TYPE_USB;
     }
+
 
     @Override
     public boolean checkDevice() {

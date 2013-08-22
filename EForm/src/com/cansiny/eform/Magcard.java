@@ -134,15 +134,6 @@ public abstract class Magcard extends Utils.Device
 	return builder.toString();
     }
 
-    static public boolean usbDeviceIsMagcard(UsbDevice device) {
-	int vid = device.getVendorId();
-	int pid = device.getProductId();
-
-	if (vid == MagcardWBT1372.VID && pid == MagcardWBT1372.PID) {
-	    return true;
-	}
-	return false;
-    }
 
     static private int swipe_error_count = 0;
     protected MagcardTask task;
@@ -315,8 +306,8 @@ class MagcardWBT1372 extends Magcard
     }
 
     @Override
-    public boolean isUsbDevice() {
-	return true;
+    public int getDeviceType() {
+	return DEVICE_TYPE_USB;
     }
 
     @Override
@@ -413,6 +404,11 @@ class MagcardWBT1370 extends Magcard
 
     public MagcardWBT1370() {
 	serial = null;
+    }
+
+    @Override
+    public int getDeviceType() {
+	return DEVICE_TYPE_SERIAL;
     }
 
     @Override

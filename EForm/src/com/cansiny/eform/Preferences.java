@@ -504,6 +504,19 @@ class PreferencesDialog extends Utils.DialogFragment
 	    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 		Object product = parent.getItemAtPosition(position);
 		String driver = ((ProductAdapter.Product) product).getDriver();
+
+		try {
+		    Device devobj = (Device) Class.forName(driver).newInstance();
+		    Spinner spinner = (Spinner) parent.getTag();
+		    if (devobj.getDeviceType() != Device.DEVICE_TYPE_SERIAL) {
+			spinner.setEnabled(false);
+		    } else {
+			spinner.setEnabled(true);
+		    }
+		} catch (Exception e) {
+		    LogActivity.writeLog(e);
+		    return;
+		}
 		prefs.setDeviceDriver(device, driver);
 		prefs.applyTransaction();
 	    }
@@ -561,6 +574,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	Utils.SerialAdapter device_adapter = new Utils.SerialAdapter();
 
 	Spinner spinner = (Spinner) dialog.findViewById(R.id.magcard_driver_spinner);
+	spinner.setTag(dialog.findViewById(R.id.magcard_device_spinner));
 	MagcardAdapter magcard_adapter = new MagcardAdapter();
 	spinner.setAdapter(magcard_adapter);
 	setupDeviceDriver(Device.DEVICE_MAGCARD, spinner);
@@ -570,6 +584,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	setupDevicePath(Device.DEVICE_MAGCARD, spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.printer_driver_spinner);
+	spinner.setTag(dialog.findViewById(R.id.printer_device_spinner));
 	PrinterAdapter printer_adapter = new PrinterAdapter();
 	spinner.setAdapter(printer_adapter);
 	setupDeviceDriver(Device.DEVICE_PRINTER, spinner);
@@ -579,6 +594,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	setupDevicePath(Device.DEVICE_PRINTER, spinner);
 
 	spinner = (Spinner) dialog.findViewById(R.id.idcard_driver_spinner);
+	spinner.setTag(dialog.findViewById(R.id.idcard_device_spinner));
 	IDCardAdapter idcard_adapter = new IDCardAdapter();
 	spinner.setAdapter(idcard_adapter);
 	setupDeviceDriver(Device.DEVICE_IDCARD, spinner);
@@ -1072,4 +1088,5 @@ public class Preferences
 	String key = form.getClass().getName() + "." + page_no + ".top";
 	return prefs.getInt(key, 0);
     }
+
 }

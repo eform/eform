@@ -62,8 +62,35 @@ public class FormActivity extends Activity implements
     private long last_verify_time = 0;
     private FormPageSwitcher page_switcher;
     private int timeout_remains = TIMEOUT_VALUE;
-    private Handler timeout_handler;
-    private Runnable timeout_runnable;
+    private Handler timeout_handler = new Handler();
+    private Runnable timeout_runnable = new Runnable() {
+	@Override
+	public void run() {
+	    if (timeout_remains <= 30) {
+		View view = findViewById(R.id.form_tip_layout);
+		if (view.getVisibility() != View.VISIBLE) {
+		    setTimeoutTipVisible(true);
+		} else {
+		    if (timeout_remains % 2 == 1) {
+			view.setBackgroundResource(R.color.yellow);
+		    } else {
+			view.setBackgroundResource(R.color.white);
+		    }
+		}
+		TextView textview = ((TextView) findViewById(R.id.form_tip_timeout_textview));
+		textview.setText("" + timeout_remains);
+
+		if (timeout_remains <= 0) {
+		    finish();
+		}
+	    }
+	    if (!print_in_progress) {
+		timeout_remains--;
+	    }
+	    timeout_handler.postDelayed(this, 1000);
+	}
+    };
+
     private boolean print_in_progress = false;
 
     @Override
@@ -180,34 +207,6 @@ public class FormActivity extends Activity implements
     protected void onResume() {
 	super.onResume();
 
-	timeout_handler = new Handler();
-	timeout_runnable = new Runnable() {
-	    @Override
-	    public void run() {
-		if (timeout_remains <= 30) {
-		    View view = findViewById(R.id.form_tip_layout);
-		    if (view.getVisibility() != View.VISIBLE) {
-			setTimeoutTipVisible(true);
-		    } else {
-			if (timeout_remains % 2 == 1) {
-			    view.setBackgroundResource(R.color.yellow);
-			} else {
-			    view.setBackgroundResource(R.color.white);
-			}
-		    }
-		    TextView textview = ((TextView) findViewById(R.id.form_tip_timeout_textview));
-		    textview.setText("" + timeout_remains);
-
-		    if (timeout_remains <= 0) {
-			finish();
-		    }
-		}
-		if (!print_in_progress) {
-		    timeout_remains--;
-		}
-		timeout_handler.postDelayed(this, 1000);
-	    }
-	};
 	timeout_handler.postDelayed(timeout_runnable, 1000);
     }
 
@@ -545,8 +544,14 @@ public class FormActivity extends Activity implements
 	    return;
 	}
 
-	LogActivity.writeLog(form.getPagesContents());
-	voucher.setContents(form.getPagesContents());
+	String contents = form.getPagesContents();
+	if (contents != null) {
+	    LogActivity.writeLog(contents);
+	    voucher.setContents(contents);
+	} else {
+	    LogActivity.writeLog("获取凭条数据失败");
+	    return;
+	}
 
 	if (voucher.getRowid() == -1) {
 	    voucher.insert(getFragmentManager());
