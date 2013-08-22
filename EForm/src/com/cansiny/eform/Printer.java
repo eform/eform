@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -33,6 +36,7 @@ import android.hardware.usb.UsbRequest;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.util.Xml.Encoding;
@@ -415,7 +419,7 @@ class PrinterSetupDialog extends Utils.DialogFragment
 	    @Override
 	    public void onClick(View view) {
 		printer.startTask(getFragmentManager(),
-			(int) page_from_spinner.getSelectedItemId(),
+			(int) page_from_spinner.getSelectedItemId() - 1,
 			(int) page_to_spinner.getSelectedItemId());
 		dismiss();
 	    }
@@ -430,12 +434,14 @@ class PrinterProgressDialog extends Utils.DialogFragment
     private TextView prompt_text;
     private ProgressBar progressbar;
     private TextView progress_text;
-    private int page_field_count;
+    private int field_count;
+    private int field_step;
     private AlertDialog stop_dialog;
 
     public PrinterProgressDialog(Printer printer) {
 	this.printer = printer;
 	stop_dialog = null;
+	field_step = 0;
     }
 
     private View buildLayout() {
@@ -567,35 +573,38 @@ class PrinterProgressDialog extends Utils.DialogFragment
     }
 
     public void pageStart(int page_no, int field_count) {
-	page_field_count = field_count;
-	String page_title = printer.getForm().getPage(page_no - 1).getTitle();
+	this.field_count = field_count;
+	field_step = Math.round(progressbar.getMax() / field_count);
+	String page_title = printer.getForm().getPage(page_no).getTitle();
 	prompt_text.setText(String.format("准备打印第 %d 页（%s），请插入纸张 ...",
-		page_no, page_title));
+		page_no + 1, page_title));
 	prompt_text.setTextColor(getResources().getColor(R.color.fuchsia));
-    }
-
-    public void pageFinish(int page_no) {
-	String page_title = printer.getForm().getPage(page_no - 1).getTitle();
-	prompt_text.setText(String.format("第 %d 页（%s）打印完成！",
-		page_no, page_title));
-	int finish_pages = page_no - printer.getPageFrom() + 1;
-	progressbar.setSecondaryProgress(finish_pages * 100);
 	progressbar.setProgress(0);
 	progress_text.setText("");
     }
 
+    public void pageFinish(int page_no) {
+	String page_title = printer.getForm().getPage(page_no).getTitle();
+	prompt_text.setText(String.format("第 %d 页（%s）打印完成！",
+		page_no + 1, page_title));
+	int finish_pages = page_no - printer.getPageFrom() + 1;
+	progressbar.setSecondaryProgress(finish_pages * 100);
+    }
+
     public void paperReady(int page_no) {
-	String page_title = printer.getForm().getPage(page_no - 1).getTitle();
+	String page_title = printer.getForm().getPage(page_no).getTitle();
 	prompt_text.setText(String.format("纸张就绪，正在打印第 %d 页（%s）...",
-		page_no, page_title));
+		page_no + 1, page_title));
 	prompt_text.setTextColor(getResources().getColor(R.color.darkgray));
     }
 
-    public void fieldStart(int field_offset, String name) {
-	int field_step = progressbar.getMax() / page_field_count;
-	progressbar.setProgress(field_step * field_offset);
+    public void fieldStart(int field, String name) {
 	progress_text.setText(String.format("正在打印第 %d／%d 项：%s ",
-		field_offset, page_field_count, String.valueOf(field_offset)));
+		field + 1, field_count, name));
+    }
+
+    public void fieldFinish(int field, String name) {
+	progressbar.setProgress(field_step * (field + 1));
     }
 
 }
@@ -603,9 +612,6 @@ class PrinterProgressDialog extends Utils.DialogFragment
 
 public abstract class Printer extends Device
 {
-    static public final int PRINT_WIDTH_NORMAL = 0;
-    static public final int PRINT_WIDTH_HALF = 1;
-
     protected Form form;
     protected PrinterTask task;
     protected boolean is_task_paused;
@@ -680,19 +686,8 @@ public abstract class Printer extends Device
 	return is_task_paused;
     }
 
-    public class PrinterField
-    {
-	public String resid;
-	public String klass;
-	public String name;
-	public int x;
-	public int y;
-	public int spacing;
-	public int width;
-    }
-
     abstract public boolean waitForPaper();
-    abstract public boolean write(String text, PrinterField param);
+    abstract public boolean write(String text, PrinterField field);
 
     public class PrinterTask extends Device.Task<Void, Integer, Boolean>
     {
@@ -720,55 +715,54 @@ public abstract class Printer extends Device
 	@Override
 	protected Boolean doInBackground(Void... params) {
 	    String filepath = String.format("print/%s.xml", form.getClass().getName());
+	    SparseArray<ArrayList<PrinterField>> print_pages = null;
+	    PrinterXMLHandler handler = new PrinterXMLHandler(page_from, page_to);
 	    try {
-		Context context = EFormApplication.getContext();
-		File file = new File(context.getFilesDir(), filepath);
-		PrinterHandler handler = new PrinterHandler(page_from, page_to);
+		File file = new File(EFormApplication.getContext().getFilesDir(), filepath);
 		Xml.parse(new FileInputStream(file), Xml.Encoding.UTF_8, handler);
-		ArrayList<ArrayList<PrinterField>> page_fields = handler.pages;
+		print_pages = handler.getAllPages();
 	    } catch (FileNotFoundException e) {
 		LogActivity.writeLog(e);
-		LogActivity.writeLog("未找到打印配置文件 %s，请联系技术支持", filepath);
+		LogActivity.writeLog("未找到打印配置文件“%s”，请联系技术支持", filepath);
 		return false;
 	    } catch (IOException e) {
 		LogActivity.writeLog(e);
-		LogActivity.writeLog("不能读写打印配置文件 %s", filepath);
+		LogActivity.writeLog("不能读写打印配置文件”%s“", filepath);
 		return false;
 	    } catch (SAXException e) {
 		LogActivity.writeLog(e);
-		LogActivity.writeLog("打印配置文件 %s 格式错误", filepath);
+		LogActivity.writeLog("打印配置文件”%s“格式错误，错误位置为第%d行",
+			filepath, handler.getErrorLineNumber());
 		return false;
 	    }
 
-
-	    for (int page_no = page_from; page_no <= page_to; page_no++) {
-		ArrayList<PrinterField> fields = null;
-
+	    for (int page_no = page_from; page_no < page_to; page_no++) {
+		ArrayList<PrinterField> fields = print_pages.get(page_no);
 		if (fields == null || fields.size() == 0) {
-		    LogActivity.writeLog("页面 %d 没有配置可打印的内容", page_no);
+		    LogActivity.writeLog("打印页面“%d”没有配置打印数据", page_no);
 		    continue;
 		}
 
 		publishProgress(PROGRESS_PAGE_START, page_no, fields.size());
 
 		if (!waitForPaper()) {
-		    LogActivity.writeLog("等待插入纸张错误");
+		    LogActivity.writeLog("打印等待插入纸张错误");
 		    return false;
 		}
 		publishProgress(PROGRESS_PAPER_READY, page_no);
 
-		for (int field_no = 0; field_no < 100; field_no++) {
+		for (int field = 0; field < fields.size(); field++) {
 		    if (isCancelled()) {
 			break;
 		    }
 
-		    publishProgress(PROGRESS_FIELD_START, field_no);
+		    publishProgress(PROGRESS_FIELD_START, field);
 
 		    if (!write("", null)) {
 			LogActivity.writeLog("写入打印机错误");
 			return false;
 		    }
-		    publishProgress(PROGRESS_FIELD_FINISH, field_no);
+		    publishProgress(PROGRESS_FIELD_FINISH, field);
 
 		    while (is_task_paused) {
 			try {
@@ -817,22 +811,175 @@ public abstract class Printer extends Device
 		dialog.fieldStart(args[1].intValue(), "");
 		break;
 	    case PROGRESS_FIELD_FINISH:
+		dialog.fieldFinish(args[1].intValue(), "");
 		break;
 	    }
 	}
     }
 
-    class PrinterHandler extends DefaultHandler
+    public class PrinterField
+    {
+	static public final int WIDTH_NORMAL = 0;
+	static public final int WIDTH_HALF   = 1;
+
+	public String resid;
+	public String klass;
+	public String name;
+	public int x;
+	public int y;
+	public int spacing;
+	public int width;
+
+	boolean isValid() {
+	    if (resid == null) {
+		LogActivity.writeLog("打印字段的 resid 不能为空");
+		return false;
+	    }
+	    if (klass == null) {
+		LogActivity.writeLog("打印字段的 class 不能为空");
+		return false;
+	    }
+	    if (x < 0 || y < 0) {
+		LogActivity.writeLog("打印字段的x和y坐标必须大于0");
+		return false;
+	    }
+	    return true;
+	}
+    }
+
+    class PrinterXMLHandler extends DefaultHandler
     {
 	private int page_from;
 	private int page_to;
-	private ArrayList<ArrayList<PrinterField>> pages;
+	private SparseArray<ArrayList<PrinterField>> print_pages;
+	private ArrayList<PrinterField> curr_page;
+	private int level;
+	private Locator locator;
+	private int error_line;
 
-	public PrinterHandler(int page_from, int page_to) {
+	public PrinterXMLHandler(int page_from, int page_to) {
 	    this.page_from = page_from;
 	    this.page_to = page_to;
-	    pages = new ArrayList<ArrayList<PrinterField>>();
+	    print_pages = new SparseArray<ArrayList<PrinterField>>();
+	    curr_page = null;
+	    level = 0;
+	    error_line = 0;
 	}
+
+	public SparseArray<ArrayList<PrinterField>> getAllPages() {
+	    return print_pages;
+	}
+
+	@Override
+	public void setDocumentLocator(Locator locator) {
+	    this.locator = locator;
+	}
+
+	public int getErrorLineNumber() {
+	    return error_line;
+	}
+
+	@Override
+	public void startElement(String uri, String localName,
+		String qName, Attributes attrs) throws SAXException {
+	    if (level == 0 && !localName.equals("form")) {
+		error_line = locator.getLineNumber();
+		throw new SAXException("解析打印配置文件失败，根结点名称必须是'form'");
+	    }
+	    level++;
+
+	    if (localName.equals("form")) {
+		if (level != 1) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("元素'form'必须是根结点");
+		}
+		return;
+	    }
+
+	    if (localName.equals("page")) {
+		if (level != 2) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("元素'page'必须是二级结点");
+		}
+		int page_no = Integer.parseInt(attrs.getValue("", "index"));
+		if (page_no < 0) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("解析打印配置文件失败，页面索引'" + page_no + "'无效");
+		}
+		if (print_pages.indexOfKey(page_no) >= 0) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("解析打印配置文件失败，重复的页索引'" + page_no + "'");
+		}
+		if (page_no >= page_from && page_no < page_to) {
+		    curr_page = new ArrayList<PrinterField>();
+		    print_pages.put(page_no, curr_page);
+		}
+		return;
+	    }
+
+	    if (localName.equals("field")) {
+		if (level != 3) {
+		    error_line = locator.getLineNumber();
+		    throw new SAXException("解析打印配置文件失败，元素'field'必须是三级结点");
+		}
+
+		if (curr_page != null) {
+		    try {
+			PrinterField field = parseField(attrs);
+			if (!field.isValid()) {
+			    error_line = locator.getLineNumber();
+			    throw new SAXException("解析打印配置文件失败，'field'缺少某属性或某属性值错误");
+			}
+			curr_page.add(field);
+		    } catch (NumberFormatException e) {
+			error_line = locator.getLineNumber();
+			throw new SAXException(e);
+		    }
+		}
+		return;
+	    }
+
+	    LogActivity.writeLog("打印配置文件中有不可识别的元素”%s“（第%d行），忽略它",
+		    localName, locator.getLineNumber());
+	}
+
+	public void endElement(String uri, String localName, String qName) {
+	    level--;
+
+	    if (localName.equals("page")) {
+		curr_page = null;
+	    }
+	}
+
+	private PrinterField parseField(Attributes attrs) throws NumberFormatException {
+	    PrinterField field = new PrinterField();
+
+	    for (int i = 0; i < attrs.getLength(); i++) {
+		String name = attrs.getLocalName(i);
+		String value = attrs.getValue(i);
+
+		if (name.equals("resid")) {
+		    field.resid = value;
+		} else if (name.equals("class")) {
+		    field.klass = value;
+		} else if (name.equals("name")) {
+		    field.name = value;
+		} else if (name.equals("x")) {
+		    field.x = Integer.parseInt(value);
+		} else if (name.equals("y")) {
+		    field.y = Integer.parseInt(value);
+		} else if (name.equals("spacing")) {
+		    field.spacing = Integer.parseInt(value);
+		} else if (name.equals("width")) {
+		    field.width = Integer.parseInt(value);
+		} else {
+		    LogActivity.writeLog("打印配置“Field”元素有不可识别的属性“%s“（第%d行），忽略它",
+			    name, locator.getLineNumber());
+		}
+	    }
+	    return field;
+	}
+
     }
 }
 

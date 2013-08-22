@@ -123,13 +123,17 @@ public class ContactDialog extends Utils.DialogFragment implements OnTabChangeLi
 	if (name == null || name.length() == 0 || phone == null || phone.length() == 0) {
 	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_name_textview);
 	    textview.setText("售后服务联系信息尚未录入！");
+	    textview.setTextColor(getResources().getColor(R.color.fuchsia));
 	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_phone_textview);
-	    textview.setText("请在“系统设置”中录入售后服务联系信息。");
+	    textview.setText("请在“系统设置”中录入售后服务联系信息");
+	    textview.setTextColor(getResources().getColor(R.color.fuchsia));
 	} else {
 	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_name_textview);
 	    textview.setText("姓 名：" + name);
+	    textview.setTextColor(getResources().getColor(R.color.darkgray));
 	    textview = (TextView) getDialog().findViewById(R.id.aftermarket_phone_textview);
 	    textview.setText("电 话：" + phone);
+	    textview.setTextColor(getResources().getColor(R.color.darkgray));
 	}
     }
 

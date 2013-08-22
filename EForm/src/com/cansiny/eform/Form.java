@@ -273,14 +273,13 @@ public abstract class Form extends DefaultHandler
     }
 
     public void setPagesContents(String xmlstring) {
-	if (xmlstring == null) return;
-	if (pages == null) return;
+	if (xmlstring == null || pages == null)
+	    return;
 
 	try {
 	    Xml.parse(xmlstring, new XmlContentsHandler());
-	} catch (Exception e) {
+	} catch (SAXException e) {
 	    LogActivity.writeLog(e);
-	    return;
 	}
     }
 
@@ -293,63 +292,84 @@ public abstract class Form extends DefaultHandler
 	public void startElement(String uri, String localName,
 		String qName, Attributes attrs) throws SAXException {
 	    if (level == 0 && !localName.equals("form")) {
-		LogActivity.writeLog("解析页面内容失败，根结点名称必须是'form'");
-		throw new SAXException();
+		throw new SAXException("解析页面内容失败，根结点名称必须是'form'");
 	    }
+	    level++;
 
 	    if (localName.equals("form")) {
-		if (level != 0) {
-		    LogActivity.writeLog("元素'form'必须是根结点");
-		    throw new SAXException();
-		}
-	    } else if (localName.equals("page")) {
 		if (level != 1) {
-		    LogActivity.writeLog("元素'page'必须二级结点");
-		    throw new SAXException();
+		    throw new SAXException("解析页面内容失败，元素'form'必须是根结点");
+		}
+		return;
+	    }
+
+	    if (localName.equals("page")) {
+		if (level != 2) {
+		    throw new SAXException("解析页面内容失败，元素'page'必须二级结点");
 		}
 		int page_no = Integer.parseInt(attrs.getValue("", "index"));
 		if (page_no < 0 || page_no >= pages.size()) {
-		    LogActivity.writeLog("解析页面内容失败，页面索引%d超出范围%d", page_no, pages.size());
-		    throw new SAXException();
+		    throw new SAXException("解析页面内容失败，页面索引" + page_no
+			    + "超出范围" + pages.size());
 		}
 		page = pages.get(page_no);
-	    } else if (localName.equals("view")) {
-		if (level != 2) {
-		    LogActivity.writeLog("元素'page'必须三级结点");
-		    throw new SAXException();
+		return;
+	    }
+
+	    if (localName.equals("view")) {
+		if (level != 3) {
+		    throw new SAXException("解析页面内容失败，元素'view'必须三级结点");
 		}
 		if (page == null) {
-		    LogActivity.writeLog("解析页面内容失败，view元素必须是page元素的子元素");
-		    throw new SAXException();
+		    throw new SAXException("解析页面内容失败，'view'元素必须是'page'元素的子元素");
 		}
-
-		String resname = attrs.getValue("", "resname");
-		String restype = attrs.getValue("", "restype");
-		String respack = attrs.getValue("", "respack");
-		String vclass  = attrs.getValue("", "vclass");
-		String value   = attrs.getValue("", "value");
-		if (resname == null || restype == null || respack == null ||
-			vclass == null || value == null) {
-		    LogActivity.writeLog("元素view缺少某个属性，其中resname='%s', " +
-		    		"restype='%s', respack='%s', vclass='%s', value='%s'",
-		    		resname, restype, respack, vclass, value);
-		    return;
-		}
-		page.putValue(resname, restype, respack, vclass, value);
-	    } else {
-		LogActivity.writeLog("不可识别的元素 %s，暂时忽略", localName);
+		putViewValue(attrs);
+		return;
 	    }
-	    level++;
+
+	    LogActivity.writeLog("不可识别的元素 %s，暂时忽略", localName);
 	}
 
 	public void endElement(String uri, String localName, String qName) {
+	    level--;
+
 	    if (localName.equals("page")) {
 		if (page != null && page.getValueCount() > 0) {
 		    page.loadViewValues();
 		}
 		page = null;
 	    }
-	    level--;
+	}
+
+	private void putViewValue(Attributes attrs) throws SAXException {
+	    String resname = attrs.getValue("", "resname");
+	    if (resname == null) {
+		throw new SAXException("元素'view'缺少'resname'属性");
+	    }
+
+	    String restype = attrs.getValue("", "restype");
+	    if (restype == null) {
+		throw new SAXException("元素'view'缺少'restype'属性");
+	    }
+
+	    String respack = attrs.getValue("", "respack");
+	    if (respack == null) {
+		throw new SAXException("元素'view'缺少'respack'属性");
+	    }
+
+	    String vclass  = attrs.getValue("", "vclass");
+	    if (vclass == null) {
+		throw new SAXException("元素'view'缺少'vclass'属性");
+	    }
+
+	    String value   = attrs.getValue("", "value");
+	    if (value == null) {
+		throw new SAXException("元素'view'缺少'value'属性");
+	    }
+
+	    if (page != null) {
+		page.putValue(resname, restype, respack, vclass, value);
+	    }
 	}
     }
 
@@ -883,8 +903,8 @@ public abstract class Form extends DefaultHandler
 	    } else if (object instanceof CheckBox) {
 		builder.append("name=\"" + ((TextView) object).getText() + "\" ");
 	    }
-	    builder.append("page_order=\"" + order + "\" ");
-	    builder.append("x=\"\" y=\"\" space=\"\" width=\"\" ");
+//	    builder.append("page_order=\"" + order + "\" ");
+	    builder.append("x=\"0\" y=\"0\" spacing=\"0\" width=\"0\" ");
 	    builder.append("/>\n");
 	}
 
