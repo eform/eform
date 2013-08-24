@@ -149,7 +149,7 @@ class VoucherUpdateDialog extends VoucherDialog
 
 	builder.setTitle("更新凭条");
 	builder.setView(buildCommentLayout());
-	builder.setNegativeButton("放 弃", null);
+	builder.setNegativeButton("取 消", null);
 	builder.setPositiveButton("更 新", null);
 
 	return builder.create();

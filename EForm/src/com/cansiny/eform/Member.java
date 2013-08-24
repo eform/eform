@@ -600,7 +600,7 @@ class MemberDeleteDialog extends Utils.DialogFragment
 
 	builder.setTitle("注销会员");
 	builder.setView(buildLayout());
-	builder.setNegativeButton("放 弃", null);
+	builder.setNegativeButton("不注销", null);
 	builder.setPositiveButton("确认注销", null);
 
 	return builder.create();

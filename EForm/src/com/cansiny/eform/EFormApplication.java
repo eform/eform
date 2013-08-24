@@ -9,7 +9,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.util.Log;
 
 public class EFormApplication extends Application
 {
@@ -27,13 +26,18 @@ public class EFormApplication extends Application
 	return application.getSharedPreferences("settings", MODE_PRIVATE);
     }
 
+    public static boolean printer_first_print = true;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         application = this;
 
-        Log.d("EFormApplication", "onCreate 应用程序启动了");
+        LogActivity.writeLog("EFormApplication onCreate 应用程序启动了");
+
+        byte b = (byte) (700 % 256);
+        LogActivity.writeLog("%d, %d", b, b & 0xFF);
     }
 
     @Override

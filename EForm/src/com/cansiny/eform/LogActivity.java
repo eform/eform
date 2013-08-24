@@ -28,7 +28,7 @@ import android.widget.ScrollView;
 
 public class LogActivity extends Activity implements OnClickListener
 {
-    static final private String LOG_TAGNAME = "Log";
+    static final private String LOG_TAGNAME = "EFormLog";
 
     static private String log_filepath = 
 	EFormApplication.getContext().getCacheDir().getAbsolutePath() + 

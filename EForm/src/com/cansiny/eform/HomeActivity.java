@@ -434,6 +434,8 @@ public class HomeActivity extends Activity
     }
 
     private void checkForDevices() {
+	boolean printer_disconnect = ((device_check_flags & FLAG_PRINTER_DISCONNECTED) != 0);
+
 	checkForSingleDevice(Device.DEVICE_PRINTER,
 		FLAG_PRINTER_DRIVER_ERROR, FLAG_PRINTER_DISCONNECTED);
 	checkForSingleDevice(Device.DEVICE_MAGCARD,
@@ -441,6 +443,12 @@ public class HomeActivity extends Activity
 	checkForSingleDevice(Device.DEVICE_IDCARD,
 		FLAG_IDCARD_DRIVER_ERROR, FLAG_IDCARD_DISCONNECTED);
 
+	if (printer_disconnect) {
+	    if ((device_check_flags & FLAG_PRINTER_DISCONNECTED) == 0) {
+		LogActivity.writeLog("打印机刚刚连接好!");
+		EFormApplication.printer_first_print = true;
+	    }
+	}
 	updateUsbDeviceTips();
     }
 

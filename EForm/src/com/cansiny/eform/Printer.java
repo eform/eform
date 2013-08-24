@@ -37,7 +37,6 @@ import android.hardware.usb.UsbRequest;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
@@ -1009,32 +1008,40 @@ public abstract class Printer extends Device
 	static public final int WIDTH_NORMAL = 0;
 	static public final int WIDTH_HALF   = 1;
 
+	static public final int UNIT_POINT = 1;
+	static public final int UNIT_MM    = 2;
+
 	public String value;
 	public String name;
 	public String resid;
 	public String want;
-	public int x;
-	public int y;
+	public int unit;
+	public float x;
+	public float y;
 	public int spacing;
 	public int width;
 
 	boolean isValid() {
 	    if (name == null) {
 		if (BuildConfig.DEBUG) {
-		    LogActivity.writeLog("打印字段的 name 不能为空");
+		    LogActivity.writeLog("打印字段的“name“不能为空");
 		    return false;
 		}
 	    }
 	    if (resid == null) {
-		LogActivity.writeLog("打印字段的 resid 不能为空");
+		LogActivity.writeLog("打印字段的“resid“不能为空");
 		return false;
 	    }
 	    if (want == null) {
-		LogActivity.writeLog("打印字段的 want 不能为空");
+		LogActivity.writeLog("打印字段的“want“不能为空");
 		return false;
 	    }
-	    if (x < 0 || y < 0) {
-		LogActivity.writeLog("打印字段的x和y坐标不能小于0");
+	    if (unit != UNIT_MM && unit != UNIT_POINT) {
+		LogActivity.writeLog("打印字段的单位无效，将使用默认单位毫米");
+		unit = UNIT_MM;
+	    }
+	    if (x < 0.0 || y < 0.0) {
+		LogActivity.writeLog("打印字段的“x“或“y“坐标不能小于0");
 		return false;
 	    }
 	    return true;
@@ -1150,7 +1157,6 @@ public abstract class Printer extends Device
 
 	public void endElement(String uri, String localName, String qName) {
 	    level--;
-
 	    if (localName.equals("page")) {
 		curr_page = null;
 	    }
@@ -1165,20 +1171,26 @@ public abstract class Printer extends Device
 
 		if (name.equals("resid")) {
 		    field.resid = value;
-		} else if (name.equals("want")) {
-		    field.want = value;
 		} else if (name.equals("name")) {
 		    field.name = value;
+		} else if (name.equals("want")) {
+		    field.want = value;
+		} else if (name.equals("unit")) {
+		    if (value.equals("point") || value.equals("dpi")) {
+			field.unit = PrinterField.UNIT_POINT;
+		    } else if (value.equals("mm")) {
+			field.unit = PrinterField.UNIT_MM;
+		    }
 		} else if (name.equals("x")) {
-		    field.x = Integer.parseInt(value);
+		    field.x = Float.parseFloat(value);
 		} else if (name.equals("y")) {
-		    field.y = Integer.parseInt(value);
+		    field.y = Float.parseFloat(value);
 		} else if (name.equals("spacing")) {
 		    field.spacing = Integer.parseInt(value);
 		} else if (name.equals("width")) {
 		    field.width = Integer.parseInt(value);
 		} else {
-		    LogActivity.writeLog("打印配置“Field”元素有不可识别的属性“%s“（第%d行），忽略它",
+		    LogActivity.writeLog("打印配置“field”元素有不可识别的属性“%s“（第%d行），忽略它",
 			    name, locator.getLineNumber());
 		}
 	    }
@@ -1220,7 +1232,6 @@ class PrinterVirtual extends Printer
 	    LogActivity.writeLog("打印机未打开或已关闭");
 	    return false;
 	}
-
 	try {
 	    Thread.sleep(2000);
 	    return true;
@@ -1251,13 +1262,12 @@ class PrinterVirtual extends Printer
 	    LogActivity.writeLog("打印机未打开或已关闭");
 	    return false;
 	}
-
 	try {
-	    Thread.sleep(1000);
-	    Log.d("虚拟打印机", String.format("打印数据: 名称(%s), 值(%s), ID(%s), " +
-	    		"类型(%s), X(%d), Y(%d), 间隙(%d)，宽度(%d)",
+	    Thread.sleep(200);
+	    LogActivity.writeLog("虚拟打印机打印数据: 名称(%s), 值(%s), ID(%s), " +
+		    "类型(%s), X(%d), Y(%d), 间隙(%d)，宽度(%d)",
 		    field.name, field.value, field.resid, field.want,
-		    field.x, field.y, field.spacing, field.width));
+		    field.x, field.y, field.spacing, field.width);
 	    return true;
 	} catch (InterruptedException e) {
 	    e.printStackTrace();
@@ -1292,7 +1302,7 @@ class PrinterLQ90KP extends Printer
     protected boolean hasCapability(int capability) {
 	switch(capability) {
 	case CAPABILITY_AUTO_CHECK_PAPER:
-	    return false;
+	    return true;
 	default:
 	    return false;
 	}
@@ -1325,7 +1335,9 @@ class PrinterLQ90KP extends Printer
 	    return false;
 	}
 
-	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
+	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER) &&
+		EFormApplication.printer_first_print) {
+	    EFormApplication.printer_first_print = false;
 	    return waitForPaperExit();
 	} else {
 	    return true;
@@ -1394,13 +1406,24 @@ class PrinterLQ90KP extends Printer
 	    LogActivity.writeLog("没有要打印的数据");
 	    return true;
 	}
+
+	switch (field.unit) {
+	case PrinterField.UNIT_POINT:
+	    if (!setAbsVerticalPoint(field.y) || !setAbsHorizontalPoint(field.x)) {
+		return false;
+	    }
+	    break;
+	case PrinterField.UNIT_MM:
+	default:
+	    if (!setAbsVerticalMM(field.y) || !setAbsHorizontalMM(field.x)) {
+		return false;
+	    }
+	    break;
+	}
 	if (write(field.value) < 0) {
 	    return false;
 	}
-
-	byte[] bytes = new byte[1];
-	bytes[0] = 0x0D;
-	return (write(bytes, 1) < 0) ? false : true;
+	return carriageReturn();
     }
 
     @Override
@@ -1415,42 +1438,40 @@ class PrinterLQ90KP extends Printer
 
     private boolean waitForPaperExit() {
 	byte[] bytes = new byte[1];
+	bytes[0] = 0x0D;
 
-	bytes[0] = 0x20;
-	if (connection.bulkTransfer(endpoint, bytes, 1, 100) > 0) {
-	    bytes[0] = 0x0C;
-	    if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0)
-		return false;
+	if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0) {
+	    return true;
+	}
 
-	    bytes[0] = 0x0D;
-	    while (true) {
-		try {
-		    Thread.sleep(500);
-		    if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0) {
-			LogActivity.writeLog("发送数据错误，可能是纸张没有了");
-			return true;
-		    } else {
-			LogActivity.writeLog("还可以发送数据，可能还有纸张");
-		    }
-		} catch (InterruptedException e) {
-		    return false;
+	if (!formFeed()) {
+	    return false;
+	}
+
+	while (true) {
+	    try {
+		Thread.sleep(500);
+		if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0) {
+		    return true;
 		}
+	    } catch (InterruptedException e) {
+		return false;
 	    }
 	}
-	return true;
     }
 
     @Override
     protected boolean pageBegin() {
-	byte[] bytes = new byte[2];
-
-	bytes[0] = 0x18;
-	if (write(bytes, 1) < 0)
+	if (!cancelCondensedPrinting()) {
 	    return false;
-
-	bytes[0] = 0x1B;
-	bytes[1] = 0x40;
-	return (write(bytes, 2) < 0) ? false : true;
+	}
+	if (!initializePrinter()) {
+	    return false;
+	}
+	if (!setUnit()) {
+	    return false;
+	}
+	return true;
     }
 
     @Override
@@ -1458,10 +1479,77 @@ class PrinterLQ90KP extends Printer
 	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
 	    return waitForPaperExit();
 	} else {
-	    byte[] bytes = new byte[1];
-	    bytes[0] = 0x0C;
-	    return (write(bytes, 1) < 0) ? false : true;
+	    return formFeed();
 	}
+    }
+
+    private boolean carriageReturn() {
+	byte[] bytes = new byte[1];
+	bytes[0] = 0x0D;
+	return (write(bytes, 1) < 0) ? false : true;
+    }
+
+    private boolean formFeed() {
+	byte[] bytes = new byte[1];
+	bytes[0] = 0x0C;
+	return (write(bytes, 1) < 0) ? false : true;
+    }
+
+    private boolean cancelCondensedPrinting() {
+	byte[] bytes = new byte[1];
+	bytes[0] = 0x18;
+	return (write(bytes, 1) < 0) ? false : true;
+    }
+
+    private boolean initializePrinter() {
+	byte[] bytes = new byte[2];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x40;
+	return (write(bytes, 2) < 0) ? false : true;
+    }
+
+    private boolean setUnit() {
+	byte[] bytes = new byte[6];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x28;
+	bytes[2] = 0x55;
+	bytes[3] = 0x01;
+	bytes[4] = 0x00;
+	bytes[5] = 0x0A;
+	return (write(bytes, 6) < 0) ? false : true;
+    }
+
+    private boolean setAbsHorizontalPoint(float point) {
+	byte[] bytes = new byte[4];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x24;
+	bytes[2] = (byte) (point % 256);
+	bytes[3] = (byte) (point / 256);
+	LogActivity.writeLog("X的第一字节为 %d, 第二字节为: %d", bytes[2] & 0xFF, bytes[3]);
+	return (write(bytes, 4) < 0) ? false : true;
+    }
+
+    private boolean setAbsHorizontalMM(float mm) {
+	float point = Math.round(mm * 360 / 25.4);
+	LogActivity.writeLog("%f毫米=%f点", mm, point);
+	return setAbsHorizontalPoint(point);
+    }
+
+    private boolean setAbsVerticalPoint(float point) {
+	byte[] bytes = new byte[7];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x28;
+	bytes[2] = 0x56;
+	bytes[3] = 0x02;
+	bytes[4] = 0x00;
+	bytes[5] = (byte) (point % 256);
+	bytes[6] = (byte) (point / 256);
+	return (write(bytes, 7) < 0) ? false : true;
+    }
+
+    private boolean setAbsVerticalMM(float mm) {
+	float point = Math.round(mm * 360 / 25.4);
+	return setAbsVerticalPoint(point);
     }
 
 }
