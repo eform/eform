@@ -35,9 +35,6 @@ public class EFormApplication extends Application
         application = this;
 
         LogActivity.writeLog("EFormApplication onCreate 应用程序启动了");
-
-        byte b = (byte) (700 % 256);
-        LogActivity.writeLog("%d, %d", b, b & 0xFF);
     }
 
     @Override

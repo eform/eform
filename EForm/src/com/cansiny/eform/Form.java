@@ -898,7 +898,7 @@ public abstract class Form extends DefaultHandler
 		builder.append("want=\"" + object.getClass().getName() + "\" ");
 		builder.append("name=\"TODO\" ");
 	    }
-	    builder.append("x=\"0.0\" y=\"0.0\" spacing=\"0.0\" width=\"normal\" ");
+	    builder.append("x=\"0.0\" y=\"0.0\" spacing=\"0.0\" width=\"normal\" style=\"normal\" ");
 	    builder.append("/>\n");
 	}
 
