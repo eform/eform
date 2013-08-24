@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
@@ -458,6 +459,8 @@ class PrinterStopDialog extends Utils.DialogFragment
 	if (!printer.isTaskPaused()) {
 	    printer.pauseTask();
 	    need_resume = true;
+	} else {
+	    need_resume = false;
 	}
     }
 
@@ -500,6 +503,7 @@ class PrinterStopDialog extends Utils.DialogFragment
     }
 }
 
+
 class PrinterWaitPaperDialog extends Utils.DialogFragment
 {
     private Printer printer;
@@ -508,6 +512,7 @@ class PrinterWaitPaperDialog extends Utils.DialogFragment
 
     public PrinterWaitPaperDialog(Printer printer) {
 	this.printer = printer;
+	printer.pauseTask();
     }
 
     public void setMessage(CharSequence sequence) {
@@ -532,12 +537,10 @@ class PrinterWaitPaperDialog extends Utils.DialogFragment
 	if (message != null) {
 	    message_view.setText(message);
 	}
-	message_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	message_view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+	message_view.setPadding(10, 0, 0, 0);
 	message_view.setTextColor(getResources().getColor(R.color.purple));
-	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-		ViewGroup.LayoutParams.WRAP_CONTENT,
-		ViewGroup.LayoutParams.WRAP_CONTENT);
-	linear.addView(message_view, params);
+	linear.addView(message_view);
 
 	return linear;
     }
@@ -582,6 +585,7 @@ class PrinterWaitPaperDialog extends Utils.DialogFragment
 	});
     }
 }
+
 
 class PrinterProgressDialog extends Utils.DialogFragment
 {
@@ -757,8 +761,11 @@ public abstract class Printer extends Device
     protected int page_to;
 
     abstract boolean hasCapability(int capability);
-    abstract public boolean waitForPaper();
-    abstract public boolean write(String text, PrinterField field);
+    protected boolean waitForPaperReady() { return false; }
+    protected Object read() { return null; }
+    abstract protected boolean write(PrinterField field);
+    abstract protected boolean pageBegin();
+    abstract protected boolean pageEnd();
 
     public void setForm(Form form) {
 	this.form = form;
@@ -778,7 +785,7 @@ public abstract class Printer extends Device
     }
 
     @Override
-    public void startTask(FragmentManager manager, int flags) {
+    protected void startTask(FragmentManager manager, int flags) {
 	if (form == null) {
 	    Utils.showToast("没有需要打印的内容");
 	    return;
@@ -787,39 +794,36 @@ public abstract class Printer extends Device
 	dialog.show(manager, "PrinterSetupDialog");
     }
 
-    public void startTask(FragmentManager manager, int from, int to) {
-	if (!open()) {
-	    Utils.showToast("打开打印机失败", R.drawable.cry);
-	} else {
-	    page_from = from;
-	    page_to = to;
-	    task = new PrinterTask(this, manager);
-	    task.execute();
-	}
+    protected void startTask(FragmentManager manager, int from, int to) {
+	page_from = from;
+	page_to = to;
+	task = new PrinterTask(this, manager);
+	task.execute();
     }
 
     @Override
-    public void cancelTask() {
+    protected void cancelTask() {
 	if (task != null && !task.isCancelled()) {
 	    task.cancel(true);
 	    is_task_paused = false;
 	}
     }
 
-    public void pauseTask() {
+    protected void pauseTask() {
 	is_task_paused = true;
     }
 
-    public void resumeTask() {
+    protected void resumeTask() {
 	is_task_paused = false;
     }
 
-    public boolean isTaskPaused() {
+    protected boolean isTaskPaused() {
 	return is_task_paused;
     }
 
     public class PrinterTask extends Device.Task<Void, String, Boolean>
     {
+	private static final int PROGRESS_OPEN_FAILED   = 10;
 	private static final int PROGRESS_PAGE_START    = 1;
 	private static final int PROGRESS_PAGE_FINISH   = 2;
 	private static final int PROGRESS_PAPER_REQUEST = 3;
@@ -881,6 +885,11 @@ public abstract class Printer extends Device
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
+	    if (!open()) {
+		publishProgress(String.valueOf(PROGRESS_OPEN_FAILED));
+		return false;
+	    }
+
 	    SparseArray<ArrayList<PrinterField>> print_pages = parsePrintConfig();
 	    if (print_pages == null)
 		return false;
@@ -896,7 +905,7 @@ public abstract class Printer extends Device
 			String.valueOf(fields.size()));
 
 		if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
-		    if (!waitForPaper()) {
+		    if (!waitForPaperReady()) {
 			LogActivity.writeLog("打印等待插入纸张错误");
 			return false;
 		    }
@@ -904,6 +913,7 @@ public abstract class Printer extends Device
 		} else {
 		    pauseTask();
 		    publishProgress(String.valueOf(PROGRESS_PAPER_REQUEST), String.valueOf(page_no));
+		    publishProgress(String.valueOf(PROGRESS_PAPER_READY), String.valueOf(page_no));
 		}
 
 		if (!checkPause()) {
@@ -912,6 +922,8 @@ public abstract class Printer extends Device
 
 		form.readyPageForPrint(page_no);
 		Form.FormPage page = form.getPage(page_no);
+
+		pageBegin();
 
 		for (int field_no = 0; field_no < fields.size(); field_no++) {
 		    if (isCancelled()) {
@@ -923,10 +935,13 @@ public abstract class Printer extends Device
 			    String.valueOf(field_no), field.name);
 
 		    String value = page.getPrintString(field.resid, field.want);
-		    if (value != null && value.trim().length() > 0) {
-			if (!write(value.trim(), field)) {
-			    LogActivity.writeLog("写入打印机错误");
-			    return false;
+		    if (value != null) {
+			field.value = value.trim();
+			if (field.value.length() > 0) {
+			    if (!write(field)) {
+				LogActivity.writeLog("写入打印机错误");
+				return false;
+			    }
 			}
 		    } else {
 			LogActivity.writeLog("取“%s(%s)”的值失败，跳过", field.name, field.resid);
@@ -939,6 +954,8 @@ public abstract class Printer extends Device
 			return false;
 		    }
 		}
+		pageEnd();
+
 		publishProgress(String.valueOf(PROGRESS_PAGE_FINISH), String.valueOf(page_no));
 	    }
 	    return true;
@@ -962,6 +979,9 @@ public abstract class Printer extends Device
 	@Override
 	protected void onProgressUpdate(String... args) {
 	    switch (Integer.parseInt(args[0])) {
+	    case PROGRESS_OPEN_FAILED:
+		Utils.showToast("打开打印机失败", R.drawable.cry);
+		break;
 	    case PROGRESS_PAGE_START:
 		dialog.pageStart(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		break;
@@ -989,6 +1009,7 @@ public abstract class Printer extends Device
 	static public final int WIDTH_NORMAL = 0;
 	static public final int WIDTH_HALF   = 1;
 
+	public String value;
 	public String name;
 	public String resid;
 	public String want;
@@ -1178,23 +1199,23 @@ class PrinterVirtual extends Printer
     }
 
     @Override
-    boolean hasCapability(int capability) {
+    protected boolean hasCapability(int capability) {
 	return true;
     }
 
     @Override
-    public boolean open() {
+    protected boolean open() {
 	is_open = true;
 	return true;
     }
 
     @Override
-    public void close() {
+    protected void close() {
 	is_open = false;
     }
 
     @Override
-    public boolean waitForPaper() {
+    protected boolean waitForPaperReady() {
 	if (!is_open) {
 	    LogActivity.writeLog("打印机未打开或已关闭");
 	    return false;
@@ -1210,8 +1231,13 @@ class PrinterVirtual extends Printer
     }
 
     @Override
-    protected Object read() {
-	return null;
+    protected boolean pageBegin() {
+	return true;
+    }
+
+    @Override
+    protected boolean pageEnd() {
+	return true;
     }
 
     @Override
@@ -1220,7 +1246,7 @@ class PrinterVirtual extends Printer
     }
 
     @Override
-    public boolean write(String string, PrinterField field) {
+    protected boolean write(PrinterField field) {
 	if (!is_open) {
 	    LogActivity.writeLog("打印机未打开或已关闭");
 	    return false;
@@ -1228,9 +1254,9 @@ class PrinterVirtual extends Printer
 
 	try {
 	    Thread.sleep(1000);
-	    Log.d("虚拟打印机", String.format("打印数据: 名称(%s), ID(%s), 期盼(%s), " +
-		    "X(%d), Y(%d), 间隙(%d)，宽度(%d)",
-		    field.name, field.resid, field.want,
+	    Log.d("虚拟打印机", String.format("打印数据: 名称(%s), 值(%s), ID(%s), " +
+	    		"类型(%s), X(%d), Y(%d), 间隙(%d)，宽度(%d)",
+		    field.name, field.value, field.resid, field.want,
 		    field.x, field.y, field.spacing, field.width));
 	    return true;
 	} catch (InterruptedException e) {
@@ -1249,6 +1275,7 @@ class PrinterLQ90KP extends Printer
 
     private UsbDeviceConnection connection;
     private UsbInterface iface;
+    private UsbEndpoint endpoint;
     private UsbRequest request;
 
     @Override
@@ -1258,11 +1285,11 @@ class PrinterLQ90KP extends Printer
 
     @Override
     public boolean probeDevice() {
-	return (getUsbDevice(VID, PID) != null) ? true : false;
+	return (getUsbDevice(VID, PID) == null) ? false : true;
     }
 
     @Override
-    boolean hasCapability(int capability) {
+    protected boolean hasCapability(int capability) {
 	switch(capability) {
 	case CAPABILITY_AUTO_CHECK_PAPER:
 	    return false;
@@ -1272,7 +1299,7 @@ class PrinterLQ90KP extends Printer
     }
 
     @Override
-    public boolean open() {
+    protected boolean open() {
 	UsbDevice device = this.getUsbDevice(VID, PID);
 	if (device == null)
 	    return false;
@@ -1290,11 +1317,23 @@ class PrinterLQ90KP extends Printer
 	    LogActivity.writeLog("打印失败，申请USB接口独占访问失败");
 	    return false;
 	}
-	return true;
+
+	endpoint = iface.getEndpoint(0);
+	if (endpoint == null ||
+		endpoint.getDirection() != UsbConstants.USB_DIR_OUT) {
+	    LogActivity.writeLog("打印失败，设备端点选择错误");
+	    return false;
+	}
+
+	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
+	    return waitForPaperExit();
+	} else {
+	    return true;
+	}
     }
 
     @Override
-    public void close() {
+    protected void close() {
 	if (connection != null) {
 	    connection.releaseInterface(iface);
 	    connection.close();
@@ -1302,77 +1341,127 @@ class PrinterLQ90KP extends Printer
     }
 
     @Override
-    public void cancelTask() {
+    protected void cancelTask() {
 	super.cancelTask();
+
 	if (request != null) {
 	    if (!request.cancel()) {
 		close();
 		connection = null;
 	    }
 	}
-    }
+     }
 
-    @Override
-    protected String read() {
-	return null;
-    }
-
-    @Override
-    protected int write(String string) {
+    private int write(byte[] bytes, int length) {
 	if (connection == null) {
 	    return -1;
 	}
 
-	UsbEndpoint endpoint = iface.getEndpoint(0);
-	if (endpoint == null ||
-		endpoint.getDirection() != UsbConstants.USB_DIR_OUT) {
-	    LogActivity.writeLog("打印失败，设备端点选择错误");
+	if (task.isCancelled()) {
 	    return -1;
 	}
 
 	request = new UsbRequest();
 	if (!request.initialize(connection, endpoint)) {
-	    LogActivity.writeLog("打印失败，初始化请求错误");
+	    LogActivity.writeLog("打印失败，初始化USB请求错误");
+	    return -1;
+	}
+	if (!request.queue(ByteBuffer.wrap(bytes), length)) {
+	    request.close();
+	    LogActivity.writeLog("打印失败，打印请求排队错误");
 	    return -1;
 	}
 
+    	int result = (connection.requestWait() == request) ? length : -1;
+    	request.close();
+    	return result;
+    }
+
+    @Override
+    protected int write(String string) {
 	try {
 	    byte[] bytes = string.getBytes("GB2312");
-	    connection.bulkTransfer(endpoint, bytes, bytes.length, 30);
-//	    ByteBuffer buffer = ByteBuffer.wrap(bytes);
-//	    if (!request.queue(buffer, bytes.length)) {
-//		LogActivity.writeLog("打印失败，打印请求排队错误");
-//		return -1;
-//	    }
+	    return write(bytes, bytes.length);
 	} catch (UnsupportedEncodingException e) {
 	    LogActivity.writeLog(e);
 	    return -1;
 	}
-
-//	int result = -1;
-//    	if (connection.requestWait() == request) {
-//    	    if (!task.isCancelled()) {
-//    		result = 1;
-//    	    }
-//    	}
-//    	request.close();
-
-	return 100;
     }
 
     @Override
-    public boolean waitForPaper() {
-	return true;
-    }
-
-    @Override
-    public boolean write(String text, PrinterField field) {
-	if (text == null) {
+    protected boolean write(PrinterField field) {
+	if (field.value == null || field.value.length() == 0) {
 	    LogActivity.writeLog("没有要打印的数据");
+	    return true;
+	}
+	if (write(field.value) < 0) {
 	    return false;
 	}
-	write(text);
+
+	byte[] bytes = new byte[1];
+	bytes[0] = 0x0D;
+	return (write(bytes, 1) < 0) ? false : true;
+    }
+
+    @Override
+    protected boolean waitForPaperReady() {
+	if (connection == null) {
+	    return false;
+	}
+	byte[] bytes = new byte[1];
+	bytes[0] = 0x0D;
+	return (write(bytes, 1) < 0) ? false : true;
+    }
+
+    private boolean waitForPaperExit() {
+	byte[] bytes = new byte[1];
+
+	bytes[0] = 0x20;
+	if (connection.bulkTransfer(endpoint, bytes, 1, 100) > 0) {
+	    bytes[0] = 0x0C;
+	    if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0)
+		return false;
+
+	    bytes[0] = 0x0D;
+	    while (true) {
+		try {
+		    Thread.sleep(500);
+		    if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0) {
+			LogActivity.writeLog("发送数据错误，可能是纸张没有了");
+			return true;
+		    } else {
+			LogActivity.writeLog("还可以发送数据，可能还有纸张");
+		    }
+		} catch (InterruptedException e) {
+		    return false;
+		}
+	    }
+	}
 	return true;
+    }
+
+    @Override
+    protected boolean pageBegin() {
+	byte[] bytes = new byte[2];
+
+	bytes[0] = 0x18;
+	if (write(bytes, 1) < 0)
+	    return false;
+
+	bytes[0] = 0x1B;
+	bytes[1] = 0x40;
+	return (write(bytes, 2) < 0) ? false : true;
+    }
+
+    @Override
+    protected boolean pageEnd() {
+	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
+	    return waitForPaperExit();
+	} else {
+	    byte[] bytes = new byte[1];
+	    bytes[0] = 0x0C;
+	    return (write(bytes, 1) < 0) ? false : true;
+	}
     }
 
 }

@@ -581,8 +581,8 @@ public class Utils
 	    return null;
 	}
 
-	abstract public void startTask(FragmentManager manager, int flags);
-	abstract public void cancelTask();
+	abstract protected void startTask(FragmentManager manager, int flags);
+	abstract protected void cancelTask();
 
 	abstract protected boolean open();
 	abstract protected void close();

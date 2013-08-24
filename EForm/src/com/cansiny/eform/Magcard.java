@@ -139,7 +139,7 @@ public abstract class Magcard extends Utils.Device
     protected MagcardTask task;
 
     @Override
-    public void startTask(FragmentManager manager, int flags) {
+    protected void startTask(FragmentManager manager, int flags) {
 	if (!open()) {
 	    Utils.showToast("打开刷卡设备失败", R.drawable.cry);
 	} else {
@@ -149,7 +149,7 @@ public abstract class Magcard extends Utils.Device
     }
 
     @Override
-    public void cancelTask() {
+    protected void cancelTask() {
 	if (task != null && !task.isCancelled()) {
 	    task.cancel(true);
 	}
@@ -312,7 +312,7 @@ class MagcardWBT1372 extends Magcard
     }
 
     @Override
-    public void cancelTask() {
+    protected void cancelTask() {
 	super.cancelTask();
 
 	if (!request.cancel()) {
@@ -461,7 +461,7 @@ class MagcardWBT1370 extends Magcard
     }
 
     @Override
-    public void cancelTask() {
+    protected void cancelTask() {
 	super.cancelTask();
     }
 
