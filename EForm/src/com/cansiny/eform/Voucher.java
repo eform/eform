@@ -100,7 +100,7 @@ class VoucherInsertDialog extends VoucherDialog
 
 	builder.setTitle("保存凭条");
 	builder.setView(buildCommentLayout());
-	builder.setNegativeButton("放 弃", null);
+	builder.setNegativeButton("取 消", null);
 	builder.setPositiveButton("保 存", null);
 
 	return builder.create();

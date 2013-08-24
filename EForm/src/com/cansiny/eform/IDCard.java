@@ -225,7 +225,7 @@ class IDCardVirtual extends IDCard
     private boolean is_open;
 
     @Override
-    public boolean checkDevice() {
+    public boolean probeDevice() {
 	return true;
     }
 
@@ -313,7 +313,7 @@ class IDCardUSBGTICR100 extends IDCard
 
 
     @Override
-    public boolean checkDevice() {
+    public boolean probeDevice() {
 	return (getUsbDevice(VID, PID) != null) ? true : false;
     }
 

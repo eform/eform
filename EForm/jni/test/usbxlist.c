@@ -1,7 +1,10 @@
 #include <libusb.h>
 #include <stdio.h>
 
-#include "usbxfunc.c"
+static void usbx_strerror(int code)
+{
+  printf("%s(%s)\n", libusb_strerror(code), libusb_error_name(code));
+}
 
 static void usbx_check_capability()
 {
@@ -130,11 +133,20 @@ static void usbx_list_devices(libusb_context *context)
 
 int main()
 {
-  usbx_init(NULL);
+  libusb_context *context;
+
+  int rv = libusb_init(&context);
+  if (rv != 0)
+    {
+      usbx_strerror(rv);
+      return -1;
+    }
+  libusb_setlocale("zh");
+  libusb_set_debug(context, LIBUSB_LOG_LEVEL_DEBUG);
 
   usbx_check_capability();
-  usbx_list_devices(NULL);
+  usbx_list_devices(context);
 
-  usbx_exit(NULL);
+  libusb_exit(context);
   return 0;
 }

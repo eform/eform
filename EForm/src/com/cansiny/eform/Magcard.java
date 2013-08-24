@@ -206,40 +206,6 @@ public abstract class Magcard extends Utils.Device
 	}
     }
 
-    protected String extractCardno(String string) {
-	String[] fields = string.split("\\?", 4);
-
-	for (int i = 0; i < fields.length - 1; i++) {
-	    String track = fields[i].trim();
-
-	    if (track.startsWith("%B")) {	// Track I
-		String[] fields2 = fields[i].split("\\^");
-		if (fields2.length == 3) {
-		    String cardno = fields2[0].substring(3).trim();
-		    if (cardno.matches("[0-9]+")) {
-			return cardno;
-		    }
-		}
-	    } else if (track.startsWith(";")) {	// Track II
-		String[] fields2 = fields[i].split("=");
-		if (fields2.length == 2) {
-		    String cardno = fields2[0].substring(2).trim();
-		    if (cardno.matches("[0-9]+")) {
-			return cardno;
-		    }
-		}
-	    } else if (track.startsWith("+")) {	// Track III
-		String[] fields2 = fields[i].split("=");
-		if (fields2.length == 5) {
-		    String cardno = fields2[0].substring(4).trim();
-		    if (cardno.matches("[0-9]+")) {
-			return cardno;
-		    }
-		}
-	    }
-	}
-	return null;
-    }
 }
 
 
@@ -248,7 +214,7 @@ class MagcardVirtual extends Magcard
     private boolean is_open;
 
     @Override
-    public boolean checkDevice() {
+    public boolean probeDevice() {
 	return true;
     }
 
@@ -311,7 +277,7 @@ class MagcardWBT1372 extends Magcard
     }
 
     @Override
-    public boolean checkDevice() {
+    public boolean probeDevice() {
 	return (getUsbDevice(VID, PID) != null) ? true : false;
     }
 
@@ -357,12 +323,14 @@ class MagcardWBT1372 extends Magcard
 
     @Override
     protected String read() {
-	if (connection == null) return null;
+	if (connection == null) {
+	    return null;
+	}
 
 	UsbEndpoint endpoint = iface.getEndpoint(0);
 	if (endpoint == null ||
 		endpoint.getDirection() != UsbConstants.USB_DIR_IN) {
-	    LogActivity.writeLog("刷卡失败，端点选择错误");
+	    LogActivity.writeLog("刷卡失败，设备端点选择错误");
 	    return null;
 	}
 
@@ -381,7 +349,7 @@ class MagcardWBT1372 extends Magcard
     	String result = null;
     	if (connection.requestWait() == request) {
     	    if (!task.isCancelled()) {
-    		result = extractCardno(new String(buffer.array()));
+    		result = extract(buffer.array());
     	    }
     	}
     	request.close();
@@ -394,6 +362,57 @@ class MagcardWBT1372 extends Magcard
 	return 0;
     }
 
+    private String extract(byte[] bytes) {
+	if (bytes[0] != 0x02) {
+	    LogActivity.writeLog("刷卡失败，读取数据头不是“0x02”，而是“0x%02X”", bytes[0]);
+	    return null;
+	}
+
+	boolean endtag = false;
+	StringBuilder builder = new StringBuilder();
+	for (int i = 1; i < bytes.length; i++) {
+	    if (bytes[i] == 0x03) {
+		endtag = true;
+		break;
+	    }
+	    builder.append((char) bytes[i]);
+	}
+	if (!endtag) {
+	    LogActivity.writeLog("刷卡失败，数据结尾标志未找到");
+	    return null;
+	}
+
+	String[] tracks = builder.toString().split("[\\r\\n]+");
+
+	for (int i = 0; i < tracks.length; i++) {
+	    if (tracks[i].startsWith("%")) {		// Track I
+		String[] field = tracks[i].split("\\^");
+		if (field.length == 3) {
+		    String cardno = field[0].substring(2);
+		    if (cardno.matches("[0-9]+")) {
+			return cardno;
+		    }
+		}
+	    } else if (tracks[i].startsWith(";")) {	// Track II
+		String[] field = tracks[i].split("=");
+		if (field.length == 2) {
+		    String cardno = field[0].substring(1);
+		    if (cardno.matches("[0-9]+")) {
+			return cardno;
+		    }
+		}
+	    } else if (tracks[i].startsWith("+")) {	// Track III
+		String[] field = tracks[i].split("=");
+		if (field.length == 5) {
+		    String cardno = field[0].substring(3);
+		    if (cardno.matches("[0-9]+")) {
+			return cardno;
+		    }
+		}
+	    }
+	}
+	return null;
+    }
 }
 
 class MagcardWBT1370 extends Magcard

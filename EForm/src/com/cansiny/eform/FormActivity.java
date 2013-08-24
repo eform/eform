@@ -5,8 +5,6 @@
  */
 package com.cansiny.eform;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -507,15 +505,6 @@ public class FormActivity extends Activity implements
 	timeout_remains = TIMEOUT_VALUE;
 	setTimeoutTipVisible(false);
 
-	try {
-	    File cachedir = getCacheDir();
-	    String fname = voucher.getFormClass() + ".xml";
-	    FileOutputStream stream = new FileOutputStream(new File(cachedir, fname));
-	    stream.write(form.toPrintTemplate().getBytes("utf-8"));
-	} catch (Exception e) {
-	    LogActivity.writeLog(e);
-	}
-
 	int retval = form.verify(true, true);
 	if (retval > 0) {
 	    String message = "还剩 " + retval + " 个未填写项，是否继续打印？";
@@ -584,7 +573,6 @@ public class FormActivity extends Activity implements
 
     @Override
     public void onDeviceTaskStart(Device device) {
-	LogActivity.writeLog("任务开始");
 	if (device instanceof Printer) {
 	    timeout_remains = TIMEOUT_VALUE;
 	    print_in_progress = true;
@@ -594,7 +582,6 @@ public class FormActivity extends Activity implements
 
     @Override
     public void onDeviceTaskCancelled(Device device) {
-	LogActivity.writeLog("任务取消");
 	if (device instanceof Printer) {
 	    device.setListener(null);
 	    timeout_remains = TIMEOUT_VALUE;

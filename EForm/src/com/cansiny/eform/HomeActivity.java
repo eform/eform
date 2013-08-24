@@ -452,7 +452,7 @@ public class HomeActivity extends Activity
 	}
 	device_check_flags &= ~driver_flag;
 
-	if (device.checkDevice()) {
+	if (device.probeDevice()) {
 	    device_check_flags &= ~disconn_flag;
 	} else {
 	    device_check_flags |= disconn_flag;

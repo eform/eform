@@ -590,7 +590,7 @@ public class Utils
 	abstract protected int write(String string);
 
 	public int getDeviceType() { return DEVICE_TYPE_VIRTUAL; }
-	public boolean checkDevice() { return false; }
+	public boolean probeDevice() { return false; }
 
 	static interface DeviceListener
 	{

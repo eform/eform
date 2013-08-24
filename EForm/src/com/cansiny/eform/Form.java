@@ -909,7 +909,10 @@ public abstract class Form extends DefaultHandler
 	    }
 	    View view = findViewById(viewid);
 	    if (view == null) {
-		LogActivity.writeLog("找不到ID为“%d(%s)“的控件", viewid, resid);
+		if (BuildConfig.DEBUG) {
+		    LogActivity.writeLog("找不到ID为“%d(%s)“的控件，可能界面还没有装载",
+			    viewid, resid);
+		}
 		return null;
 	    }
 	    String key = String.valueOf(viewid);
@@ -921,21 +924,21 @@ public abstract class Form extends DefaultHandler
 		    return ((CheckBox) view).getText().toString();
 		} else {
 		    LogActivity.writeLog("不能处理打印字段 %s 期盼的类型 %s", resid, want);
-		    return "";
+		    return null;
 		}
 	    } else if (view instanceof EditText) {
 		if (want.equals(Boolean.class.getName())) {
 		    LogActivity.writeLog("打印字段 %s 不支持Boolean类型", resid);
-		    return "";
+		    return null;
 		} else if (want.equals(String.class.getName())) {
 		    return bundle.containsKey(key) ? bundle.getString(key) : "";
 		} else {
 		    LogActivity.writeLog("不能处理打印字段 %s 期盼的类型 %s", resid, want);
-		    return "";
+		    return null;
 		}
 	    } else {
 		LogActivity.writeLog("打印字段类型 %s 不支持，略过", view.getClass().getName());
-		return "";
+		return null;
 	    }
 	}
 
