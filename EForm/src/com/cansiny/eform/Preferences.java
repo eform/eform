@@ -322,8 +322,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        }
 	        @Override
 	        public void onDeviceTaskFailed(Device device) {
-	            LogActivity.writeLog("测试刷卡驱动'%s'失败！",
-	        	    prefs.getDeviceDriver(Device.DEVICE_MAGCARD));
+	            showToast("测试刷卡驱动失败！", R.drawable.cry);
 	        }
 	    });
 	    magcard.startTask(getFragmentManager(), Device.TASK_FLAG_MAGCARD_TEST);
@@ -334,6 +333,7 @@ class PreferencesDialog extends Utils.DialogFragment
 		showToast("测试失败！未找到打印机驱动", R.drawable.cry);
 		break;
 	    }
+	    ((Printer) printer).setForm(new FormPrintTest(getActivity(), "打印测试"));
 	    printer.setListener(new Device.DeviceListener() {
 	        @Override
 	        public void onDeviceTaskStart(Device device) {
@@ -347,8 +347,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        }
 	        @Override
 	        public void onDeviceTaskFailed(Device device) {
-	            LogActivity.writeLog("测试打印机驱动'%s'失败！",
-	        	    prefs.getDeviceDriver(Device.DEVICE_PRINTER));
+	            showToast("测试打印机驱动失败！", R.drawable.cry);
 	        }
 	    });
 	    printer.startTask(getFragmentManager(), 0);
@@ -373,8 +372,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	        }
 	        @Override
 	        public void onDeviceTaskFailed(Device device) {
-	            LogActivity.writeLog("测试身份证读卡器驱动'%s'失败！",
-	        	    prefs.getDeviceDriver(Device.DEVICE_IDCARD));
+	            showToast("测试身份证读卡器驱动失败！", R.drawable.cry);
 	        }
 	    });
 	    idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_TEST);

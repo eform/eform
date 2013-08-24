@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.AssetManager;
 import android.graphics.drawable.Drawable;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -763,8 +765,8 @@ public abstract class Printer extends Device
     protected boolean waitForPaperReady() { return false; }
     protected Object read() { return null; }
     abstract protected boolean write(PrinterField field);
-    abstract protected boolean pageBegin();
-    abstract protected boolean pageEnd();
+    abstract protected boolean pageBegin(int page_no);
+    abstract protected boolean pageEnd(int page_no);
 
     public void setForm(Form form) {
 	this.form = form;
@@ -849,8 +851,15 @@ public abstract class Printer extends Device
 	    String path = String.format("print/%s.print.xml", form.getClass().getName());
 	    PrinterXMLHandler handler = new PrinterXMLHandler(form, page_from, page_to);
 	    try {
+		InputStream stream;
 		File file = new File(EFormApplication.getContext().getFilesDir(), path);
-		Xml.parse(new FileInputStream(file), Xml.Encoding.UTF_8, handler);
+		if (file.exists()) {
+		    stream = new FileInputStream(file);
+		} else {
+		    AssetManager assets = EFormApplication.getContext().getAssets();
+		    stream = assets.open(path);
+		}
+		Xml.parse(stream, Xml.Encoding.UTF_8, handler);
 		return handler.getAllPages();
 	    } catch (FileNotFoundException e) {
 		LogActivity.writeLog(e);
@@ -922,7 +931,7 @@ public abstract class Printer extends Device
 		form.readyPageForPrint(page_no);
 		Form.FormPage page = form.getPage(page_no);
 
-		pageBegin();
+		pageBegin(page_no);
 
 		for (int field_no = 0; field_no < fields.size(); field_no++) {
 		    if (isCancelled()) {
@@ -953,7 +962,7 @@ public abstract class Printer extends Device
 			return false;
 		    }
 		}
-		pageEnd();
+		pageEnd(page_no);
 
 		publishProgress(String.valueOf(PROGRESS_PAGE_FINISH), String.valueOf(page_no));
 	    }
@@ -1005,11 +1014,20 @@ public abstract class Printer extends Device
 
     public class PrinterField
     {
-	static public final int WIDTH_NORMAL = 0;
-	static public final int WIDTH_HALF   = 1;
-
 	static public final int UNIT_POINT = 1;
 	static public final int UNIT_MM    = 2;
+
+	static public final int WIDTH_NORMAL        = 0;
+	static public final int WIDTH_HALF_WIDTH    = 1;
+	static public final int WIDTH_DOUBLE_WIDTH  = 2;
+	static public final int WIDTH_DOUBLE_HEIGHT = 3;
+	static public final int WIDTH_FOURFOLD      = 4;
+	static public final int WIDTH_SUPERSCRIPT   = 5;
+	static public final int WIDTH_SUBSCRIPT     = 6;
+
+	static public final int STYLE_NORMAL  = 0;
+	static public final int STYLE_ITALIC  = 1;
+	static public final int STYLE_BOLD    = 2;
 
 	public String value;
 	public String name;
@@ -1018,8 +1036,9 @@ public abstract class Printer extends Device
 	public int unit;
 	public float x;
 	public float y;
-	public int spacing;
+	public float spacing;
 	public int width;
+	public int style;
 
 	boolean isValid() {
 	    if (name == null) {
@@ -1085,13 +1104,13 @@ public abstract class Printer extends Device
 	@Override
 	public void startElement(String uri, String localName,
 		String qName, Attributes attrs) throws SAXException {
-	    if (level == 0 && !localName.equals("form")) {
+	    if (level == 0 && !localName.equalsIgnoreCase("form")) {
 		error_line = locator.getLineNumber();
 		throw new SAXException("解析打印配置文件失败，根结点名称必须是'form'");
 	    }
 	    level++;
 
-	    if (localName.equals("form")) {
+	    if (localName.equalsIgnoreCase("form")) {
 		if (level != 1) {
 		    error_line = locator.getLineNumber();
 		    throw new SAXException("元素'form'必须是根结点");
@@ -1101,14 +1120,14 @@ public abstract class Printer extends Device
 		    error_line = locator.getLineNumber();
 		    throw new SAXException("元素'form'缺少'klass'属性");
 		}
-		if (!klass.equals(form.getClass().getName())) {
+		if (!klass.equalsIgnoreCase(form.getClass().getName())) {
 		    error_line = locator.getLineNumber();
 		    throw new SAXException("打印配置文件和当前凭条类型不匹配");
 		}
 		return;
 	    }
 
-	    if (localName.equals("page")) {
+	    if (localName.equalsIgnoreCase("page")) {
 		if (level != 2) {
 		    error_line = locator.getLineNumber();
 		    throw new SAXException("元素'page'必须是二级结点");
@@ -1129,7 +1148,7 @@ public abstract class Printer extends Device
 		return;
 	    }
 
-	    if (localName.equals("field")) {
+	    if (localName.equalsIgnoreCase("field")) {
 		if (level != 3) {
 		    error_line = locator.getLineNumber();
 		    throw new SAXException("解析打印配置文件失败，元素'field'必须是三级结点");
@@ -1157,7 +1176,7 @@ public abstract class Printer extends Device
 
 	public void endElement(String uri, String localName, String qName) {
 	    level--;
-	    if (localName.equals("page")) {
+	    if (localName.equalsIgnoreCase("page")) {
 		curr_page = null;
 	    }
 	}
@@ -1169,26 +1188,57 @@ public abstract class Printer extends Device
 		String name = attrs.getLocalName(i);
 		String value = attrs.getValue(i);
 
-		if (name.equals("resid")) {
+		if (name.equalsIgnoreCase("resid")) {
 		    field.resid = value;
-		} else if (name.equals("name")) {
+		} else if (name.equalsIgnoreCase("name")) {
 		    field.name = value;
-		} else if (name.equals("want")) {
+		} else if (name.equalsIgnoreCase("want")) {
 		    field.want = value;
-		} else if (name.equals("unit")) {
-		    if (value.equals("point") || value.equals("dpi")) {
+		} else if (name.equalsIgnoreCase("unit")) {
+		    if (value.equalsIgnoreCase("point") || value.equalsIgnoreCase("dpi")) {
 			field.unit = PrinterField.UNIT_POINT;
-		    } else if (value.equals("mm")) {
+		    } else if (value.equalsIgnoreCase("mm")) {
+			field.unit = PrinterField.UNIT_MM;
+		    } else {
+			LogActivity.writeLog("打印单位“%s”无效，必须是“dip”或“mm”", value);
 			field.unit = PrinterField.UNIT_MM;
 		    }
-		} else if (name.equals("x")) {
+		} else if (name.equalsIgnoreCase("x")) {
 		    field.x = Float.parseFloat(value);
-		} else if (name.equals("y")) {
+		} else if (name.equalsIgnoreCase("y")) {
 		    field.y = Float.parseFloat(value);
-		} else if (name.equals("spacing")) {
-		    field.spacing = Integer.parseInt(value);
-		} else if (name.equals("width")) {
-		    field.width = Integer.parseInt(value);
+		} else if (name.equalsIgnoreCase("spacing")) {
+		    field.spacing = Float.parseFloat(value);
+		} else if (name.equalsIgnoreCase("width")) {
+		    if (value.equalsIgnoreCase("normal")) {
+			field.width = PrinterField.WIDTH_NORMAL;
+		    } else if (value.equalsIgnoreCase("half")) {
+			field.width = PrinterField.WIDTH_HALF_WIDTH;
+		    } else if (value.equalsIgnoreCase("double")) {
+			field.width = PrinterField.WIDTH_DOUBLE_WIDTH;
+		    } else if (value.equalsIgnoreCase("doubleheight")) {
+			field.width = PrinterField.WIDTH_DOUBLE_HEIGHT;
+		    } else if (value.equalsIgnoreCase("fourfold")) {
+			field.width = PrinterField.WIDTH_FOURFOLD;
+		    } else if (value.equalsIgnoreCase("superscript")) {
+			field.width = PrinterField.WIDTH_SUPERSCRIPT;
+		    } else if (value.equalsIgnoreCase("subscript")) {
+			field.width = PrinterField.WIDTH_SUBSCRIPT;
+		    } else {
+			LogActivity.writeLog("打印字段宽度“%s”无效，请参考手册", value);
+			field.width = PrinterField.WIDTH_NORMAL;
+		    }
+		} else if (name.equalsIgnoreCase("style")) {
+		    if (value.equalsIgnoreCase("normal")) {
+			field.style = PrinterField.STYLE_NORMAL;
+		    } else if (value.equalsIgnoreCase("bold")) {
+			field.style = PrinterField.STYLE_BOLD;
+		    } else if (value.equalsIgnoreCase("italic")) {
+			field.style = PrinterField.STYLE_ITALIC;
+		    } else {
+			LogActivity.writeLog("打印字段风格“%s”无效，请参考手册", value);
+			field.style = PrinterField.STYLE_NORMAL;
+		    }
 		} else {
 		    LogActivity.writeLog("打印配置“field”元素有不可识别的属性“%s“（第%d行），忽略它",
 			    name, locator.getLineNumber());
@@ -1203,7 +1253,7 @@ public abstract class Printer extends Device
 
 class PrinterVirtual extends Printer
 {
-    private boolean is_open;
+    private FileOutputStream stream;
 
     @Override
     public boolean probeDevice() {
@@ -1217,62 +1267,73 @@ class PrinterVirtual extends Printer
 
     @Override
     protected boolean open() {
-	is_open = true;
-	return true;
+	try {
+	    Context context = EFormApplication.getContext();
+	    File cachedir = context.getCacheDir();
+	    String filename = form.getClass().getName() + ".print";
+	    stream = new FileOutputStream(new File(cachedir, filename));
+	    return (stream == null) ? false : true;
+	} catch (FileNotFoundException e) {
+	    LogActivity.writeLog(e);
+	    return false;
+	}
     }
 
     @Override
     protected void close() {
-	is_open = false;
+	try {
+	    stream.close();
+	} catch (IOException e) {
+	    LogActivity.writeLog(e);
+	}
     }
 
     @Override
     protected boolean waitForPaperReady() {
-	if (!is_open) {
-	    LogActivity.writeLog("打印机未打开或已关闭");
+	if (stream == null) {
 	    return false;
 	}
 	try {
-	    Thread.sleep(2000);
+	    Thread.sleep(1000);
 	    return true;
 	} catch (InterruptedException e) {
-	    e.printStackTrace();
 	    return false;
 	}
     }
 
     @Override
-    protected boolean pageBegin() {
-	return true;
+    protected boolean pageBegin(int page_no) {
+	return (write(">>> 开始打印第 " + page_no + " 页\n\n") < 0) ? false : true;
     }
 
     @Override
-    protected boolean pageEnd() {
-	return true;
+    protected boolean pageEnd(int page_no) {
+	return (write(">>> 结束打印第 " + page_no + " 页\n\n") < 0) ? false : true;
     }
 
     @Override
     protected int write(String string) {
-	return 0;
+	try {
+	    byte[] bytes = string.getBytes("UTF-8");
+	    stream.write(bytes);
+	    return bytes.length;
+	} catch (Exception e) {
+	    LogActivity.writeLog(e);
+	    return -1;
+	}
     }
 
     @Override
     protected boolean write(PrinterField field) {
-	if (!is_open) {
+	if (stream == null) {
 	    LogActivity.writeLog("打印机未打开或已关闭");
 	    return false;
 	}
-	try {
-	    Thread.sleep(200);
-	    LogActivity.writeLog("虚拟打印机打印数据: 名称(%s), 值(%s), ID(%s), " +
-		    "类型(%s), X(%d), Y(%d), 间隙(%d)，宽度(%d)",
-		    field.name, field.value, field.resid, field.want,
-		    field.x, field.y, field.spacing, field.width);
-	    return true;
-	} catch (InterruptedException e) {
-	    e.printStackTrace();
-	    return false;
-	}
+	String contents = String.format("字段名称(%s)，值(%s)，ID(%s)，" +
+		"类型(%s)，单位(%d)，X(%.2f)，Y(%.2f)，间隙(%.2f)，宽度(%d)，风格(%d)\n",
+		field.name, field.value, field.resid, field.want, field.unit,
+		field.x, field.y, field.spacing, field.width, field.style);
+	return (write(contents) < 0) ? false : true;
     }
 
 }
@@ -1461,7 +1522,7 @@ class PrinterLQ90KP extends Printer
     }
 
     @Override
-    protected boolean pageBegin() {
+    protected boolean pageBegin(int page_no) {
 	if (!cancelCondensedPrinting()) {
 	    return false;
 	}
@@ -1475,7 +1536,7 @@ class PrinterLQ90KP extends Printer
     }
 
     @Override
-    protected boolean pageEnd() {
+    protected boolean pageEnd(int page_no) {
 	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
 	    return waitForPaperExit();
 	} else {
@@ -1525,13 +1586,11 @@ class PrinterLQ90KP extends Printer
 	bytes[1] = 0x24;
 	bytes[2] = (byte) (point % 256);
 	bytes[3] = (byte) (point / 256);
-	LogActivity.writeLog("X的第一字节为 %d, 第二字节为: %d", bytes[2] & 0xFF, bytes[3]);
 	return (write(bytes, 4) < 0) ? false : true;
     }
 
     private boolean setAbsHorizontalMM(float mm) {
-	float point = Math.round(mm * 360 / 25.4);
-	LogActivity.writeLog("%f毫米=%f点", mm, point);
+	float point = (float) (mm * 360 / 25.4);
 	return setAbsHorizontalPoint(point);
     }
 
@@ -1548,7 +1607,7 @@ class PrinterLQ90KP extends Printer
     }
 
     private boolean setAbsVerticalMM(float mm) {
-	float point = Math.round(mm * 360 / 25.4);
+	float point = (float) (mm * 360 / 25.4);
 	return setAbsVerticalPoint(point);
     }
 

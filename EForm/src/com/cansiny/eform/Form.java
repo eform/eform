@@ -890,6 +890,7 @@ public abstract class Form extends DefaultHandler
 		if (!name_set) {
 		    builder.append("name=\"TODO\" ");
 		}
+		builder.append("unit=\"mm\" ");
 	    } else if (object instanceof CheckBox) {
 		builder.append("want=\"" + Boolean.class.getName() + "\" ");
 		builder.append("name=\"" + ((CheckBox) object).getText() + "\" ");
@@ -897,7 +898,7 @@ public abstract class Form extends DefaultHandler
 		builder.append("want=\"" + object.getClass().getName() + "\" ");
 		builder.append("name=\"TODO\" ");
 	    }
-	    builder.append("x=\"0\" y=\"0\" spacing=\"0\" width=\"0\" ");
+	    builder.append("x=\"0.0\" y=\"0.0\" spacing=\"0.0\" width=\"normal\" ");
 	    builder.append("/>\n");
 	}
 

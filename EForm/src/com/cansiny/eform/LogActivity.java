@@ -31,8 +31,7 @@ public class LogActivity extends Activity implements OnClickListener
     static final private String LOG_TAGNAME = "EFormLog";
 
     static private String log_filepath = 
-	EFormApplication.getContext().getCacheDir().getAbsolutePath() + 
-	File.separator + "eform.log";
+	    EFormApplication.getContext().getCacheDir().getAbsolutePath() + File.separator + "eform.log";
 
     static public void writeLog(Exception e) {
 	if (e == null) return;

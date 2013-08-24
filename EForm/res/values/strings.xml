@@ -6,5 +6,6 @@
     <string name="choose_item">请选择要办理的业务</string>
     <string name="error_instantiation_exception">构造 Form 实例异常，可能是因为配置的类型错误</string>
     <string name="error_class_not_found">指定的类型没有找到，可能是因为程序配置错误</string>
+    <string name="form_title_print_test">打印测试</string>
     
     </resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+本文件是通过程序生成的模板，请根据需要进行修改
+Copyright © 2013 Cansiny Trade Co.,Ltd.
+
+本文件用于打印测试配置
+-->
+
+<form class="com.cansiny.eform.FormPrintTest" label="打印测试" >
+  <page index="0" >
+    <field resid="com.cansiny.eform:id/head"
+	   want="java.lang.String"
+	   name="标题"
+	   unit="mm"
+	   x="0"
+	   y="0"
+	   spacing="0"
+	   width="double"
+	   style="bold" />
+    <field resid="com.cansiny.eform:id/body"
+	   want="java.lang.String"
+	   name="正文"
+	   unit="mm"
+	   x="0"
+	   y="10"
+	   spacing="0"
+	   width="normal"
+	   style="normal" />
+    <field resid="com.cansiny.eform:id/foot"
+	   want="java.lang.String"
+	   name="脚注"
+	   unit="mm"
+	   x="0"
+	   y="30"
+	   spacing="0"
+	   width="normal"
+	   style="italic" />
+  </page>
+</form>
