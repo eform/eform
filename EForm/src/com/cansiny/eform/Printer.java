@@ -1030,9 +1030,7 @@ public abstract class Printer extends Device
 	static public final int STYLE_BOLD       = 2;
 	static public final int STYLE_BOLDITALIC = 3;
 	static public final int STYLE_UNDERLINE  = 4;
-	static public final int STYLE_MIDLINE    = 5;
-	static public final int STYLE_UPPERLINE  = 6;
-	static public final int STYLE_BACKGROUND = 7;
+	static public final int STYLE_BACKGROUND = 5;
 
 	public String value;
 	public String name;
@@ -1244,10 +1242,6 @@ public abstract class Printer extends Device
 			field.style = PrinterField.STYLE_BOLDITALIC;
 		    } else if (value.equalsIgnoreCase("underline")) {
 			field.style = PrinterField.STYLE_UNDERLINE;
-		    } else if (value.equalsIgnoreCase("midline")) {
-			field.style = PrinterField.STYLE_MIDLINE;
-		    } else if (value.equalsIgnoreCase("upperline")) {
-			field.style = PrinterField.STYLE_UPPERLINE;
 		    } else if (value.equalsIgnoreCase("background")) {
 			field.style = PrinterField.STYLE_BACKGROUND;
 		    } else {
@@ -1500,24 +1494,25 @@ class PrinterLQ90KP extends Printer
 	if (!setFieldWidth(field.width) || !setFieldStyle(field.style)) {
 	    return false;
 	}
+
 	if (write(field.value) < 0 || !carriageReturn()) {
 	    return false;
 	}
 
-	if (!cancelBoldFont() || !cancelItalicFont() || !unsetUnderline()) {
+	if (!cancelBoldFont() || !cancelItalicFont() ||
+		!unsetUnderline() || !unsetBackground()) {
 	    return false;
 	}
 	return true;
     }
 
     private boolean setFieldWidth(int width) {
+	boolean retval = true;
 	switch (width) {
 	case PrinterField.WIDTH_HALF_WIDTH:
 	    break;
 	case PrinterField.WIDTH_DOUBLE_WIDTH:
-	    if (!setSingleLineDoubleWidth()) {
-		return false;
-	    }
+	    retval = setSingleLineDoubleWidth();
 	    break;
 	case PrinterField.WIDTH_DOUBLE_HEIGHT:
 	    break;
@@ -1528,43 +1523,35 @@ class PrinterLQ90KP extends Printer
 	case PrinterField.WIDTH_SUBSCRIPT:
 	    break;
 	default:
+	    retval = true;
 	    break;
 	}
-	return true;
+	return retval;
     }
 
     private boolean setFieldStyle(int style) {
+	boolean retval;
 	switch (style) {
 	case PrinterField.STYLE_ITALIC:
-	    if (!selectItalicFont()) {
-		return false;
-	    }
+	    retval = selectItalicFont();
 	    break;
 	case PrinterField.STYLE_BOLD:
-	    if (!selectBoldFont()) {
-		return false;
-	    }
+	    retval = selectBoldFont();
 	    break;
 	case PrinterField.STYLE_BOLDITALIC:
-	    if (!selectBoldFont() || !selectItalicFont()) {
-		return false;
-	    }
+	    retval = (selectBoldFont() && selectItalicFont());
 	    break;
 	case PrinterField.STYLE_UNDERLINE:
-	    if (!setUnderline()) {
-		return false;
-	    }
-	    break;
-	case PrinterField.STYLE_MIDLINE:
-	    break;
-	case PrinterField.STYLE_UPPERLINE:
+	    retval = setUnderline();
 	    break;
 	case PrinterField.STYLE_BACKGROUND:
+	    retval = setBackground();
 	    break;
 	default:
+	    retval = true;
 	    break;
 	}
-	return true;
+	return retval;
     }
 
     @Override
@@ -1727,27 +1714,70 @@ class PrinterLQ90KP extends Printer
     }
 
     private boolean setUnderline() {
-	byte[] bytes = new byte[8];
-	bytes[0] = 0x1B;
-	bytes[1] = 0x28;
-	bytes[2] = 0x2D;
-	bytes[3] = 0x03;
-	bytes[4] = 0x00;
-	bytes[5] = 0x01;
-	bytes[6] = 0x02;
-	bytes[7] = 0x02;
-	return (write(bytes, 8) < 0) ? false : true;
+	byte[] bytes = new byte[3];
+	bytes[0] = 0x1C;
+	bytes[1] = 0x2D;
+	bytes[2] = 0x01;
+	return (write(bytes, 3) < 0) ? false : true;
     }
 
     private boolean unsetUnderline() {
+	byte[] bytes = new byte[3];
+	bytes[0] = 0x1C;
+	bytes[1] = 0x2D;
+	bytes[2] = 0x00;
+	return (write(bytes, 3) < 0) ? false : true;
+    }
+
+//    Don't Work
+//    private boolean setUnderline() {
+//	byte[] bytes = new byte[8];
+//	bytes[0] = 0x1B;
+//	bytes[1] = 0x28;
+//	bytes[2] = 0x2D;
+//	bytes[3] = 0x03;
+//	bytes[4] = 0x00;
+//	bytes[5] = 0x01;
+//	bytes[6] = 0x01;
+//	bytes[7] = 0x01;
+//	return (write(bytes, 8) < 0) ? false : true;
+//    }
+//
+//    private boolean unsetUnderline() {
+//	byte[] bytes = new byte[8];
+//	bytes[0] = 0x1B;
+//	bytes[1] = 0x28;
+//	bytes[2] = 0x2D;
+//	bytes[3] = 0x03;
+//	bytes[4] = 0x00;
+//	bytes[5] = 0x01;
+//	bytes[6] = 0x01;
+//	bytes[7] = 0x00;
+//	return (write(bytes, 8) < 0) ? false : true;
+//    }
+
+    private boolean setBackground() {
 	byte[] bytes = new byte[8];
 	bytes[0] = 0x1B;
 	bytes[1] = 0x28;
-	bytes[2] = 0x2D;
+	bytes[2] = 0x58;
 	bytes[3] = 0x03;
 	bytes[4] = 0x00;
-	bytes[5] = 0x01;
-	bytes[6] = 0x02;
+	bytes[5] = 0x00;
+	bytes[6] = 0x03;
+	bytes[7] = 0x00;
+	return (write(bytes, 8) < 0) ? false : true;
+    }
+
+    private boolean unsetBackground() {
+	byte[] bytes = new byte[8];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x28;
+	bytes[2] = 0x58;
+	bytes[3] = 0x03;
+	bytes[4] = 0x00;
+	bytes[5] = 0x00;
+	bytes[6] = 0x00;
 	bytes[7] = 0x00;
 	return (write(bytes, 8) < 0) ? false : true;
     }
