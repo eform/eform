@@ -100,7 +100,7 @@ public class FormActivity extends Activity implements
 	setContentView(R.layout.activity_form);
 
 	/* set activity background */
-	HomeInfo home_info = HomeInfo.getHomeInfo();
+	Customer home_info = Customer.getCurrentCustomer();
 	findViewById(R.id.form_layout).setBackgroundResource(home_info.background);
 
 	/* show today date */

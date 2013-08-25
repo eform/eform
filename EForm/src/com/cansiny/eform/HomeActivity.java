@@ -5,6 +5,8 @@
  */
 package com.cansiny.eform;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cansiny.eform.Administrator.AdministratorListener;
@@ -22,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,7 +64,7 @@ public class HomeActivity extends Activity
     static public final int ITEM_ACTIVITY_REQUEST_CODE = 1;
 	
     private AtomicInteger atomic_int;
-    private HomeInfo home_info;
+    private Customer home_info;
     private int curr_slogan = 0;
     private long slogan_lasttime;
     private long admin_logintime;
@@ -104,14 +107,13 @@ public class HomeActivity extends Activity
 	    if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
 		Object device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 		if (device != null) {
-		    LogActivity.writeLog("设备断开连接");
 		    checkForDevices();
 		}
 		return;
 	    }
 	}
     };
-    private int device_check_flags;
+    private int device_check_flags = 0;
 
     static private final int FLAG_PRINTER_DISCONNECTED = 0x0001;
     static private final int FLAG_PRINTER_DRIVER_ERROR = 0x0002;
@@ -127,7 +129,7 @@ public class HomeActivity extends Activity
 	Log.d("HomeActivity", "onCreate");
 
 	atomic_int = new AtomicInteger(HOME_VIEW_ID_BASE);
-	home_info = HomeInfo.getHomeInfo();
+	home_info = Customer.getCurrentCustomer();
 
 	LogActivity.clearLog();
 
@@ -308,17 +310,17 @@ public class HomeActivity extends Activity
 	table.addView(table_row);
 
 	int curr_column = 1;
-	for (HomeInfo.HomeItem item : home_info.items) {
+	for (Customer.HomeItem item : home_info.items) {
 	    LinearLayout button = buildImageButton(item);
 	    TableRow.LayoutParams row_params = new TableRow.LayoutParams(
 		    ViewGroup.LayoutParams.MATCH_PARENT,
 		    ViewGroup.LayoutParams.WRAP_CONTENT);
-	    if (curr_column < home_info.item_columns) {
+	    if (curr_column < home_info.item_column_count) {
 		row_params.rightMargin = (int) Utils.convertDpToPixel(80);
 	    }
 	    table_row.addView(button, row_params);
 
-	    if (++curr_column > home_info.item_columns) {
+	    if (++curr_column > home_info.item_column_count) {
 		table_row = new TableRow(getApplicationContext());
 		table_row.setGravity(Gravity.CENTER_HORIZONTAL);
 		TableLayout.LayoutParams params = new TableLayout.LayoutParams(
@@ -329,9 +331,9 @@ public class HomeActivity extends Activity
 		curr_column = 1;
 	    }
 	}
-	if (home_info.items.size() % home_info.item_columns != 0) {
-	    int paddings = home_info.item_columns - 
-		    (home_info.items.size() % home_info.item_columns);
+	if (home_info.items.size() % home_info.item_column_count != 0) {
+	    int paddings = home_info.item_column_count - 
+		    (home_info.items.size() % home_info.item_column_count);
 	    for (int i = 0; i < paddings; i++) {
 		View view = new View(this);
 		view.setVisibility(View.INVISIBLE);
@@ -347,7 +349,7 @@ public class HomeActivity extends Activity
     }
 
 	
-    private LinearLayout buildImageButton(HomeInfo.HomeItem item) {
+    private LinearLayout buildImageButton(Customer.HomeItem item) {
 	LinearLayout button_layout = new LinearLayout(getApplicationContext());
 	button_layout.setId(atomic_int.incrementAndGet());
 	button_layout.setOrientation(LinearLayout.VERTICAL);
@@ -445,10 +447,11 @@ public class HomeActivity extends Activity
 
 	if (printer_disconnect) {
 	    if ((device_check_flags & FLAG_PRINTER_DISCONNECTED) == 0) {
-		LogActivity.writeLog("打印机刚刚连接好!");
 		EFormApplication.printer_first_print = true;
 	    }
 	}
+	checkForUDisk();
+
 	updateUsbDeviceTips();
     }
 
@@ -467,6 +470,30 @@ public class HomeActivity extends Activity
 	}
     }
 
+    private void checkForUDisk() {
+	int count = 0;
+
+	UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+	HashMap<String, UsbDevice> devices = manager.getDeviceList();
+	Iterator<UsbDevice> iterator = devices.values().iterator();
+	while (iterator.hasNext()) {
+	    UsbDevice device = iterator.next();
+	    if (device.getVendorId() == 0x0204 && device.getProductId() == 0x6025) {
+		count++;
+	    }
+	    if (device.getVendorId() == 0x0951 && device.getProductId() == 0x1642) {
+		count++;
+	    }
+	}
+	int udisk_count = EFormApplication.getInstance().getUDiskCount();
+	if (count > udisk_count) {
+	    Utils.showToast("U盘已插入");
+	} else if (count < udisk_count) {
+	    Utils.showToast("U盘已拔出");
+	}
+	EFormApplication.getInstance().setUDiskCount(count);
+    }
+
     public void onDeviceCheckButtonClick(View view) {
 	checkForDevices();
     }
@@ -475,11 +502,11 @@ public class HomeActivity extends Activity
     public void onClick(View view) {
 	if (view.getClass() == ImageButton.class) {
 	    Object object = view.getTag();
-	    if (object == null || !(object instanceof HomeInfo.HomeItem)) {
+	    if (object == null || !(object instanceof Customer.HomeItem)) {
 		Log.e("HomeActivity", "程序错误: 主页按钮缺少 class Tag");
 		return;
 	    }
-	    HomeInfo.HomeItem item = (HomeInfo.HomeItem) object;
+	    Customer.HomeItem item = (Customer.HomeItem) object;
 
 	    Voucher voucher = new Voucher();
 
@@ -553,6 +580,12 @@ public class HomeActivity extends Activity
     public void onMemberVoucherButtonClick(View view) {
 	Member member = Member.getMember();
 	member.listVouchers(getFragmentManager());
+    }
+
+
+    public void onMemberImportButtonClick(View view) {
+	Member member = Member.getMember();
+	member.importAndExport(getFragmentManager());
     }
 
 

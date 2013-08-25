@@ -162,6 +162,30 @@
                     android:textSize="20sp" />
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/member_import_button"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/usb"
+                    android:onClick="onMemberImportButtonClick" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="0dp"
+                    android:text="导入导出"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
             <View
                 android:layout_width="60dp"
                 android:layout_height="1dp"

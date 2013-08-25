@@ -89,7 +89,7 @@
           <TextView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="合肥市长欣宜科贸发展有限公司"
+              android:text="合肥市长欣宜科贸有限公司"
               android:textSize="24sp" />
 
           <TextView

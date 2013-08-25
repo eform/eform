@@ -28,13 +28,20 @@ public class EFormApplication extends Application
 
     public static boolean printer_first_print = true;
 
+    private int udisk_count = 0;
+
+    public void setUDiskCount(int count) {
+	udisk_count = count;
+    }
+
+    public int getUDiskCount() {
+	return udisk_count;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
-
         application = this;
-
-        LogActivity.writeLog("EFormApplication onCreate 应用程序启动了");
     }
 
     @Override

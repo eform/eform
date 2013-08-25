@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -996,6 +997,46 @@ class MemberVouchersDialog extends Utils.DialogFragment
 }
 
 
+class MemberImportExportDialog extends Utils.DialogFragment
+{
+    private View buildLayout() {
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.VERTICAL);
+	linear.setPadding(20, 10, 20, 10);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("请将U盘插入设备USB接口，然后选择导入或导出数据");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	linear.addView(textview);
+
+	textview = new TextView(getActivity());
+	textview.setText("导入和导出的文件名为“EFormCIBMember.dat”，" +
+			"这是二进制格式文件，不能使用普通编辑器编辑；\n" +
+			"请不要修改导出的文件名称，否则在导入时将提示找不到文件；");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+	textview.setLineSpacing(1, 1.2f);
+	textview.setPadding(0, 40, 0, 0);
+	linear.addView(textview);
+
+	return linear;
+    }
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+	super.onCreateDialog(savedInstanceState);
+
+	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	builder.setTitle("导入/导出");
+	builder.setView(buildLayout());
+	builder.setNegativeButton("取 消", null);
+	builder.setNeutralButton("导 入", null);
+	builder.setPositiveButton("导 出", null);
+
+	return builder.create();
+    }
+}
+
+
 public class Member
 {
     static private Member _singleInstance = null;
@@ -1128,6 +1169,13 @@ public class Member
 	if (is_login) {
 	    MemberVouchersDialog dialog = new MemberVouchersDialog();
 	    dialog.show(manager, "MemberVouchersDialog");
+	}
+    }
+
+    public void importAndExport(FragmentManager manager) {
+	if (is_login) {
+	    MemberImportExportDialog dialog = new MemberImportExportDialog();
+	    dialog.show(manager, "MemberImportExportDialog");
 	}
     }
 

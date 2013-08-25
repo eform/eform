@@ -83,19 +83,20 @@ public abstract class Customer
 	public int image;
 	public int label;
 	public int label_size;
-		
-	public HomeItem(String klass, int image, int label) {
-	    this.klass = EFormApplication.getContext().getPackageName() + "." + klass;
-	    this.image = image;
-	    this.label = label;
-	    this.label_size = 21;
-	}
-		
-	public HomeItem(String klass, int image, int label, int label_size) {
+
+	private void initial(String klass, int image, int label, int label_size) {
 	    this.klass = EFormApplication.getContext().getPackageName() + "." + klass;
 	    this.image = image;
 	    this.label = label;
 	    this.label_size = label_size;
+	}
+
+	public HomeItem(String klass, int image, int label, int label_size) {
+	    initial(klass, image, label, label_size);
+	}
+
+	public HomeItem(String klass, int image, int label) {
+	    initial(klass, image, label, 21);
 	}
     }
 }
@@ -152,6 +153,11 @@ class CustomerCCB extends Customer
 {
     public CustomerCCB() {
 	super();
+
 	name = "CCB";
+
+	slogans.add("客服热线：95533");
+	slogans.add("网上银行：http://www.ccb.com.cn");
+	slogans.add("手机银行：http://wap.ccb.com.cn");
     }
 }

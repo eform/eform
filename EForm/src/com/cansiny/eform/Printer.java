@@ -14,6 +14,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
@@ -897,6 +900,15 @@ public abstract class Printer extends Device
 	    return true;
 	}
 
+	private void sortFields(ArrayList<PrinterField> fields) {
+	    Collections.sort(fields, new Comparator<PrinterField>() {
+		@Override
+		public int compare(PrinterField field1, PrinterField field2) {
+		    return (field1.y > field2.y) ? 1 : (field1.y == field2.y) ? 0 : -1;
+		}
+	    });
+	}
+
 	@Override
 	protected Boolean doInBackground(Void... params) {
 	    if (!open()) {
@@ -918,6 +930,8 @@ public abstract class Printer extends Device
 
 		publishProgress(String.valueOf(PROGRESS_PAGE_START), String.valueOf(page_no),
 			String.valueOf(fields.size()));
+
+		sortFields(fields);
 
 		if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {
 		    if (!waitForPaperReady()) {
@@ -1482,11 +1496,6 @@ class PrinterLQ90KP extends Printer
 	}
 
 	boolean is_chinese = field.value.matches("[a-z0-9A-Z \\t]+") ? false : true;
-	if (is_chinese) {
-	    LogActivity.writeLog("进入中文模式");
-	} else {
-	    LogActivity.writeLog("进入英文模式");
-	}
 	if (!switchMode(is_chinese)) {
 	    return false;
 	}

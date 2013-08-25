@@ -3,12 +3,16 @@
 <!-- Copyright © 2013 Hefei Cansiny Co.,Ltd. -->
 
 <resources>
-  <!-- vendor and product ID for VOTI WBT-1372 VER 2.1 -->
+  <!-- VOTI WBT-1372 VER 2.1 -->
   <usb-device vendor-id="5824" product-id="1770" />
 
-  <!-- vendor and product ID for Epson LQ-90KP Printer -->
+  <!-- Epson LQ-90KP Printer -->
   <usb-device vendor-id="1208" product-id="5" />
 
-  <!-- vendor and product ID for -->
+  <!-- Chipsbank Microelectronics CBM2080 Flash drive controller -->
+  <usb-device vendor-id="516" product-id="24613" />
+
+  <!-- Kingston Technology DT101 G2 -->
+  <usb-device vendor-id="2385" product-id="5698" />
 
 </resources>
