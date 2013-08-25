@@ -463,9 +463,9 @@ public class Utils
 
 	    if (BuildConfig.DEBUG) {
 		products.add(new Product("模拟设备", "com.cansiny.eform.MagcardVirtual"));
-		products.add(new Product("WBT-1370（串口）", "com.cansiny.eform.MagcardWBT1370"));
+		products.add(new Product("WBT-1370 串口", "com.cansiny.eform.MagcardWBT1370"));
 	    }
-	    products.add(new Product("WBT-1372（USB）", "com.cansiny.eform.MagcardWBT1372"));
+	    products.add(new Product("WBT-1372 USB", "com.cansiny.eform.MagcardWBT1372"));
 	}
     }
 
@@ -490,7 +490,7 @@ public class Utils
 	    if (BuildConfig.DEBUG) {
 		products.add(new Product("模拟设备", "com.cansiny.eform.PrinterVirtual"));
 	    }
-	    products.add(new Product("LP90PK", "com.cansiny.eform.PrinterLQ90KP"));
+	    products.add(new Product("LQ-90KP ESC/PK", "com.cansiny.eform.PrinterLQ90KP"));
 	}
     }
 

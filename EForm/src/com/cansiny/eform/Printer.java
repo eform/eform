@@ -703,7 +703,11 @@ class PrinterProgressDialog extends Utils.DialogFragment
 	}
     }
 
-    public void pageStart(int page_no, int field_count) {
+    public void onParseFile() {
+	prompt_text.setText("正在解析打印配置文件，请稍候 ...");
+    }
+
+    public void onPageStart(int page_no, int field_count) {
 	this.field_count = field_count;
 	field_step = Math.round(progressbar.getMax() / field_count);
 	String page_title = printer.getForm().getPage(page_no).getTitle();
@@ -714,33 +718,34 @@ class PrinterProgressDialog extends Utils.DialogFragment
 	progress_text.setText("");
     }
 
-    public void pageFinish(int page_no) {
+    public void onPageFinish(int page_no) {
 	String page_title = printer.getForm().getPage(page_no).getTitle();
 	prompt_text.setText(String.format("第 %d 页(%s)打印完成！",
 		page_no + 1, page_title));
 	int finish_pages = page_no - printer.getPageFrom() + 1;
 	progressbar.setSecondaryProgress(finish_pages * 10000);
+	progress_text.setText("数据已发送到打印机，正在等待处理...");
     }
 
-    public void paperRequest(int page_no) {
+    public void onPaperRequest(int page_no) {
 	wait_paper_dialog = new PrinterWaitPaperDialog(printer);
 	wait_paper_dialog.setMessage(prompt_text.getText());
 	wait_paper_dialog.show(getFragmentManager(), "PrinterWaitPaperDialog");
     }
 
-    public void paperReady(int page_no) {
+    public void onPaperReady(int page_no) {
 	String page_title = printer.getForm().getPage(page_no).getTitle();
 	prompt_text.setText(String.format("纸张就绪，正在打印第 %d 页（%s）...",
 		page_no + 1, page_title));
 	prompt_text.setTextColor(getResources().getColor(R.color.darkgray));
     }
 
-    public void fieldStart(int field, String name) {
+    public void onFieldStart(int field, String name) {
 	progress_text.setText(String.format("正在打印第 %d／%d 项：%s ",
 		field + 1, field_count, name));
     }
 
-    public void fieldFinish(int field, String name) {
+    public void onFieldFinish(int field, String name) {
 	if (field + 1 == field_count) {
 	    progressbar.setProgress(progressbar.getMax());
 	} else {
@@ -831,6 +836,7 @@ public abstract class Printer extends Device
 	private static final int PROGRESS_PAPER_READY   = 4;
 	private static final int PROGRESS_FIELD_START   = 5;
 	private static final int PROGRESS_FIELD_FINISH  = 6;
+	private static final int PROGRESS_PARSE_FILE    = 7;
 
 	private FragmentManager manager;
 	private PrinterProgressDialog dialog;
@@ -897,6 +903,7 @@ public abstract class Printer extends Device
 		publishProgress(String.valueOf(PROGRESS_OPEN_FAILED));
 		return false;
 	    }
+	    publishProgress(String.valueOf(PROGRESS_PARSE_FILE));
 
 	    SparseArray<ArrayList<PrinterField>> print_pages = parsePrintConfig();
 	    if (print_pages == null)
@@ -962,9 +969,8 @@ public abstract class Printer extends Device
 			return false;
 		    }
 		}
-		pageEnd(page_no);
-
 		publishProgress(String.valueOf(PROGRESS_PAGE_FINISH), String.valueOf(page_no));
+		pageEnd(page_no);
 	    }
 	    return true;
 	}
@@ -990,23 +996,26 @@ public abstract class Printer extends Device
 	    case PROGRESS_OPEN_FAILED:
 		Utils.showToast("打开打印机失败", R.drawable.cry);
 		break;
+	    case PROGRESS_PARSE_FILE:
+		dialog.onParseFile();
+		break;
 	    case PROGRESS_PAGE_START:
-		dialog.pageStart(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+		dialog.onPageStart(Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 		break;
 	    case PROGRESS_PAGE_FINISH:
-		dialog.pageFinish(Integer.parseInt(args[1]));
+		dialog.onPageFinish(Integer.parseInt(args[1]));
 		break;
 	    case PROGRESS_PAPER_REQUEST:
-		dialog.paperRequest(Integer.parseInt(args[1]));
+		dialog.onPaperRequest(Integer.parseInt(args[1]));
 		break;
 	    case PROGRESS_PAPER_READY:
-		dialog.paperReady(Integer.parseInt(args[1]));
+		dialog.onPaperReady(Integer.parseInt(args[1]));
 		break;
 	    case PROGRESS_FIELD_START:
-		dialog.fieldStart(Integer.parseInt(args[1]), args[2]);
+		dialog.onFieldStart(Integer.parseInt(args[1]), args[2]);
 		break;
 	    case PROGRESS_FIELD_FINISH:
-		dialog.fieldFinish(Integer.parseInt(args[1]), args[2]);
+		dialog.onFieldFinish(Integer.parseInt(args[1]), args[2]);
 		break;
 	    }
 	}
@@ -1404,6 +1413,11 @@ class PrinterLQ90KP extends Printer
 	    LogActivity.writeLog("打印失败，设备端点选择错误");
 	    return false;
 	}
+	request = new UsbRequest();
+	if (!request.initialize(connection, endpoint)) {
+	    LogActivity.writeLog("打印失败，初始化USB请求错误");
+	    return false;
+	}
 
 	if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER) &&
 		EFormApplication.printer_first_print) {
@@ -1419,6 +1433,7 @@ class PrinterLQ90KP extends Printer
 	if (connection != null) {
 	    connection.releaseInterface(iface);
 	    connection.close();
+	    connection = null;
 	}
     }
 
@@ -1428,8 +1443,7 @@ class PrinterLQ90KP extends Printer
 
 	if (request != null) {
 	    if (!request.cancel()) {
-		close();
-		connection = null;
+		this.close();
 	    }
 	}
      }
@@ -1438,25 +1452,15 @@ class PrinterLQ90KP extends Printer
 	if (connection == null) {
 	    return -1;
 	}
-
 	if (task.isCancelled()) {
-	    return -1;
-	}
-
-	request = new UsbRequest();
-	if (!request.initialize(connection, endpoint)) {
-	    LogActivity.writeLog("打印失败，初始化USB请求错误");
+	    request.close();
 	    return -1;
 	}
 	if (!request.queue(ByteBuffer.wrap(bytes), length)) {
-	    request.close();
 	    LogActivity.writeLog("打印失败，打印请求排队错误");
 	    return -1;
 	}
-
-    	int result = (connection.requestWait() == request) ? length : -1;
-    	request.close();
-    	return result;
+	return (connection.requestWait() == request) ? length : -1;
     }
 
     @Override
@@ -1477,21 +1481,52 @@ class PrinterLQ90KP extends Printer
 	    return true;
 	}
 
+	boolean is_chinese = field.value.matches("[a-z0-9A-Z \\t]+") ? false : true;
+	if (is_chinese) {
+	    LogActivity.writeLog("进入中文模式");
+	} else {
+	    LogActivity.writeLog("进入英文模式");
+	}
+	if (!switchMode(is_chinese)) {
+	    return false;
+	}
+	if (!is_chinese) {
+	    if (!setEngPrintQuality() || !selectEngFont()) {
+		return false;
+	    }
+	    if (!selectEngCPI(true)) {
+		return false;
+	    }
+	}
+
 	switch (field.unit) {
 	case PrinterField.UNIT_POINT:
+	    if (field.spacing > 0.0) {
+		if (!setSpacingPoint(field.spacing, is_chinese)) {
+		    return false;
+		}
+	    }
 	    if (!setAbsVerticalPoint(field.y) || !setAbsHorizontalPoint(field.x)) {
 		return false;
 	    }
 	    break;
 	case PrinterField.UNIT_MM:
 	default:
+	    if (field.spacing > 0.0) {
+		if (!setSpacingMM(field.spacing, is_chinese)) {
+		    return false;
+		}
+	    }
 	    if (!setAbsVerticalMM(field.y) || !setAbsHorizontalMM(field.x)) {
 		return false;
 	    }
 	    break;
 	}
 
-	if (!setFieldWidth(field.width) || !setFieldStyle(field.style)) {
+	if (!setFieldStyle(field.style, is_chinese)) {
+	    return false;
+	}
+	if (!setFieldWidth(field.width, is_chinese)) {
 	    return false;
 	}
 
@@ -1499,28 +1534,43 @@ class PrinterLQ90KP extends Printer
 	    return false;
 	}
 
-	if (!cancelBoldFont() || !cancelItalicFont() ||
-		!unsetUnderline() || !unsetBackground()) {
+	if (!is_chinese) {
+	    selectEngCPI(false);
+	}
+	if (!setBoldFont(false) || !setItalicFont(false) ||
+		!setUnderline(false, is_chinese) ||
+		!setBackground(false) ||
+		!setDoubleHeight(false, is_chinese) ||
+		!setFourfold(false, is_chinese) ||
+		!setHalfWidth(false, is_chinese) ||
+		!setSuperscript(false, is_chinese) ||
+		!setSubscript(false, is_chinese) ||
+		!setSpacingPoint(0.0f, is_chinese)) {
 	    return false;
 	}
 	return true;
     }
 
-    private boolean setFieldWidth(int width) {
+    private boolean setFieldWidth(int width, boolean chinese_mode) {
 	boolean retval = true;
 	switch (width) {
 	case PrinterField.WIDTH_HALF_WIDTH:
+	    retval = setHalfWidth(true, chinese_mode);
 	    break;
 	case PrinterField.WIDTH_DOUBLE_WIDTH:
 	    retval = setSingleLineDoubleWidth();
 	    break;
 	case PrinterField.WIDTH_DOUBLE_HEIGHT:
+	    retval = setDoubleHeight(true, chinese_mode);
 	    break;
 	case PrinterField.WIDTH_FOURFOLD:
+	    retval = setFourfold(true, chinese_mode);
 	    break;
 	case PrinterField.WIDTH_SUPERSCRIPT:
+	    retval = setSuperscript(true, chinese_mode);
 	    break;
 	case PrinterField.WIDTH_SUBSCRIPT:
+	    retval = setSubscript(true, chinese_mode);
 	    break;
 	default:
 	    retval = true;
@@ -1529,23 +1579,23 @@ class PrinterLQ90KP extends Printer
 	return retval;
     }
 
-    private boolean setFieldStyle(int style) {
+    private boolean setFieldStyle(int style, boolean chinese_mode) {
 	boolean retval;
 	switch (style) {
 	case PrinterField.STYLE_ITALIC:
-	    retval = selectItalicFont();
+	    retval = setItalicFont(true);
 	    break;
 	case PrinterField.STYLE_BOLD:
-	    retval = selectBoldFont();
+	    retval = setBoldFont(true);
 	    break;
 	case PrinterField.STYLE_BOLDITALIC:
-	    retval = (selectBoldFont() && selectItalicFont());
+	    retval = (setBoldFont(true) && setItalicFont(true));
 	    break;
 	case PrinterField.STYLE_UNDERLINE:
-	    retval = setUnderline();
+	    retval = setUnderline(true, chinese_mode);
 	    break;
 	case PrinterField.STYLE_BACKGROUND:
-	    retval = setBackground();
+	    retval = setBackground(true);
 	    break;
 	default:
 	    retval = true;
@@ -1571,11 +1621,9 @@ class PrinterLQ90KP extends Printer
 	if (connection.bulkTransfer(endpoint, bytes, 1, 100) < 0) {
 	    return true;
 	}
-
 	if (!formFeed()) {
 	    return false;
 	}
-
 	while (true) {
 	    try {
 		Thread.sleep(500);
@@ -1593,10 +1641,7 @@ class PrinterLQ90KP extends Printer
 	if (!cancelCondensedPrinting()) {
 	    return false;
 	}
-	if (!initializePrinter()) {
-	    return false;
-	}
-	if (!setUnit()) {
+	if (!initializePrinter() || !setUnit()) {
 	    return false;
 	}
 	return true;
@@ -1609,6 +1654,37 @@ class PrinterLQ90KP extends Printer
 	} else {
 	    return formFeed();
 	}
+    }
+
+    private boolean switchMode(boolean chinese_mode) {
+	byte[] bytes = new byte[2];
+	bytes[0] = 0x1C;
+	bytes[1] = chinese_mode ? (byte)0x26 : (byte)0x2E;
+	return (write(bytes, 2) < 0) ? false : true;
+    }
+
+    private boolean setEngPrintQuality() {
+	byte[] bytes = new byte[3];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x78;
+	bytes[2] = 0x01;
+	return (write(bytes, 3) < 0) ? false : true;
+    }
+
+    private boolean selectEngFont() {
+	byte[] bytes = new byte[3];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x6B;
+	bytes[2] = 0x00;
+	return (write(bytes, 3) < 0) ? false : true;
+    }
+
+    private boolean selectEngCPI(boolean on) {
+	byte[] bytes = new byte[3];
+	bytes[0] = 0x1B;
+	bytes[1] = 0x70;
+	bytes[2] = on ? (byte)0x01 : (byte)0x00;
+	return (write(bytes, 3) < 0) ? false : true;
     }
 
     private boolean carriageReturn() {
@@ -1678,54 +1754,31 @@ class PrinterLQ90KP extends Printer
 	return setAbsVerticalPoint(point);
     }
 
-    private boolean selectItalicFont() {
+    private boolean setItalicFont(boolean on) {
 	byte[] bytes = new byte[2];
 	bytes[0] = 0x1B;
-	bytes[1] = 0x34;
+	bytes[1] = on ? (byte)0x34 : (byte)0x35;
 	return (write(bytes, 2) < 0) ? false : true;
     }
 
-    private boolean cancelItalicFont() {
+    private boolean setBoldFont(boolean on) {
 	byte[] bytes = new byte[2];
 	bytes[0] = 0x1B;
-	bytes[1] = 0x35;
+	bytes[1] = on ? (byte)0x45 : (byte)0x46;
 	return (write(bytes, 2) < 0) ? false : true;
     }
 
-    private boolean selectBoldFont() {
-	byte[] bytes = new byte[2];
-	bytes[0] = 0x1B;
-	bytes[1] = 0x45;
-	return (write(bytes, 2) < 0) ? false : true;
-    }
-
-    private boolean cancelBoldFont() {
-	byte[] bytes = new byte[2];
-	bytes[0] = 0x1B;
-	bytes[1] = 0x46;
-	return (write(bytes, 2) < 0) ? false : true;
-    }
-
-    private boolean setSingleLineDoubleWidth() {
-	byte[] bytes = new byte[2];
-	bytes[0] = 0x1B;
-	bytes[1] = 0x0E;
-	return (write(bytes, 2) < 0) ? false : true;
-    }
-
-    private boolean setUnderline() {
+    private boolean setUnderline(boolean on, boolean chinese_mode) {
 	byte[] bytes = new byte[3];
-	bytes[0] = 0x1C;
-	bytes[1] = 0x2D;
-	bytes[2] = 0x01;
-	return (write(bytes, 3) < 0) ? false : true;
-    }
-
-    private boolean unsetUnderline() {
-	byte[] bytes = new byte[3];
-	bytes[0] = 0x1C;
-	bytes[1] = 0x2D;
-	bytes[2] = 0x00;
+	if (chinese_mode) {
+	    bytes[0] = 0x1C;
+	    bytes[1] = 0x2D;
+	    bytes[2] = on ? (byte)0x01 : (byte)0x00;
+	} else {
+	    bytes[0] = 0x1B;
+	    bytes[1] = 0x2D;
+	    bytes[2] = on ? (byte)0x01 : (byte)0x00;
+	}
 	return (write(bytes, 3) < 0) ? false : true;
     }
 
@@ -1756,7 +1809,7 @@ class PrinterLQ90KP extends Printer
 //	return (write(bytes, 8) < 0) ? false : true;
 //    }
 
-    private boolean setBackground() {
+    private boolean setBackground(boolean on) {
 	byte[] bytes = new byte[8];
 	bytes[0] = 0x1B;
 	bytes[1] = 0x28;
@@ -1764,22 +1817,142 @@ class PrinterLQ90KP extends Printer
 	bytes[3] = 0x03;
 	bytes[4] = 0x00;
 	bytes[5] = 0x00;
-	bytes[6] = 0x03;
+	bytes[6] = on ? (byte)0x03 : (byte)0x00;
 	bytes[7] = 0x00;
 	return (write(bytes, 8) < 0) ? false : true;
     }
 
-    private boolean unsetBackground() {
-	byte[] bytes = new byte[8];
+    private boolean setSingleLineDoubleWidth() {
+	byte[] bytes = new byte[2];
 	bytes[0] = 0x1B;
-	bytes[1] = 0x28;
-	bytes[2] = 0x58;
-	bytes[3] = 0x03;
-	bytes[4] = 0x00;
-	bytes[5] = 0x00;
-	bytes[6] = 0x00;
-	bytes[7] = 0x00;
-	return (write(bytes, 8) < 0) ? false : true;
+	bytes[1] = 0x0E;
+	return (write(bytes, 2) < 0) ? false : true;
     }
 
+    private boolean setDoubleHeight(boolean on, boolean chinese_mode) {
+	byte[] bytes = new byte[3];
+
+	if (chinese_mode) {
+	    if (on) {
+		if (!setFourfold(true, chinese_mode)) {
+		    return false;
+		}
+		bytes[0] = 0x1B;
+		bytes[1] = 0x57;
+		bytes[2] = 0x00;
+		return (write(bytes, 3) < 0) ? false : true;
+	    } else {
+		return setFourfold(false, chinese_mode);
+	    }
+	} else {
+	    bytes[0] = 0x1B;
+	    bytes[1] = 0x77;
+	    bytes[2] = on ? (byte)0x01 : (byte)0x00;
+	    return (write(bytes, 3) < 0) ? false : true;
+	}
+    }
+
+    private boolean setFourfold(boolean on, boolean chinese_mode) {
+	byte[] bytes = new byte[3];
+
+	if (chinese_mode) {
+	    bytes[0] = 0x1C;
+	    bytes[1] = 0x57;
+	    bytes[2] = on ? (byte)0x01 : (byte)0x00;
+	    return (write(bytes, 3) < 0) ? false : true;
+	} else {
+	    if (!setDoubleHeight(on, chinese_mode)) {
+		return false;
+	    }
+	    bytes[0] = 0x0E;
+	    return (write(bytes, 1) < 0) ? false : true;
+	}
+    }
+
+    private boolean setHalfWidth(boolean on, boolean chinese_mode) {
+	byte[] bytes = new byte[2];
+
+	if (chinese_mode) {
+	    bytes[0] = 0x1C;
+	    bytes[1] = on ? (byte)0x0F : (byte)0x12;
+	    return (write(bytes, 2) < 0) ? false : true;
+	} else {
+	    bytes[0] = on ? (byte)0x0F : (byte)0x12;
+	    return (write(bytes, 1) < 0) ? false : true;
+	}
+    }
+
+    private boolean setSuperscript(boolean on, boolean chinese_mode) {
+	byte[] bytes = new byte[3];
+
+	if (chinese_mode) {
+	    bytes[0] = 0x1C;
+	    bytes[1] = on ? (byte)0x72 : (byte)0x12;
+	    if (on) {
+		bytes[2] = 0x00;
+		return (write(bytes, 3) < 0) ? false : true;
+	    } else {
+		return (write(bytes, 2) < 0) ? false : true;
+	    }
+	} else {
+	    bytes[0] = 0x1B;
+	    bytes[1] = on ? (byte)0x53 : (byte)0x54;
+	    if (on) {
+		bytes[2] = 0x00;
+		return (write(bytes, 3) < 0) ? false : true;
+	    } else {
+		return (write(bytes, 2) < 0) ? false : true;
+	    }
+	}
+    }
+
+    private boolean setSubscript(boolean on, boolean chinese_mode) {
+	byte[] bytes = new byte[3];
+
+	if (chinese_mode) {
+	    bytes[0] = 0x1C;
+	    bytes[1] = on ? (byte)0x72 : (byte)0x12;
+	    if (on) {
+		bytes[2] = 0x01;
+		return (write(bytes, 3) < 0) ? false : true;
+	    } else {
+		return (write(bytes, 2) < 0) ? false : true;
+	    }
+	} else {
+	    bytes[0] = 0x1B;
+	    bytes[1] = on ? (byte)0x53 : (byte)0x54;
+	    if (on) {
+		bytes[2] = 0x01;
+		return (write(bytes, 3) < 0) ? false : true;
+	    } else {
+		return (write(bytes, 2) < 0) ? false : true;
+	    }
+	}
+    }
+
+    private boolean setSpacingPoint(float point, boolean chinese_mode) {
+	byte[] bytes = new byte[4];
+
+	if (chinese_mode) {
+	    bytes[0] = 0x1C;
+	    bytes[1] = 0x53;
+	    bytes[2] = (point <= 127) ? 0x00 : (byte)(((int) point - 127) % 127);
+	    bytes[3] = (point == 0.0f) ? 0x03 : (byte) Math.min(point, 127);;
+	    if (write(bytes, 4) < 0) {
+		return false;
+	    }
+	    bytes[1] = (byte) ((point > 0.0f) ? 0x55 : 0x56);
+	    return (write(bytes, 2) < 0) ? false : true;
+	} else {
+	    bytes[0] = 0x1B;
+	    bytes[1] = 0x20;
+	    bytes[2] = (byte) Math.min(point, 127);
+	    return (write(bytes, 3) < 0) ? false : true;
+	}
+    }
+
+    private boolean setSpacingMM(float mm, boolean chinese_mode) {
+	float point = (float) (mm * 180 / 25.4);
+	return setSpacingPoint(point, chinese_mode);
+    }
 }

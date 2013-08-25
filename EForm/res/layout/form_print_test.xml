@@ -1,246 +1,293 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+	      android:layout_width="match_parent"
+	      android:layout_height="match_parent"
+	      android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/head"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="电子填单系统打印测试页" />
+  <EditText
+      android:id="@+id/head"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ems="10"
+      android:inputType="text"
+      android:text="电子填单系统打印测试页" />
 
-    <EditText
-        android:id="@+id/foot"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="(C) 2013 合肥市长欣宜科贸有限公司。" />
+  <EditText
+      android:id="@+id/company"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ems="10"
+      android:inputType="text"
+      android:text="(C) 2013 合肥市长欣宜科贸有限公司。" />
 
-    <EditText
-        android:id="@+id/body"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="恭喜！您看到本内容表示打印机硬件及相应的驱动程序都工作正常！" />
+  <EditText
+      android:id="@+id/body"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ems="10"
+      android:inputType="text"
+      android:text="恭喜！您看到本内容表示打印机硬件及相应驱动程序工作正常！" />
 
-    <EditText
-        android:id="@+id/printtest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="打印样式测试" />
+  <EditText
+      android:id="@+id/test"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:ems="10"
+      android:inputType="text"
+      android:text="------ 打印测试样例 ------" />
 
-    <TableLayout
+  <TableLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" >
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <EditText
+          android:id="@+id/bold"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="粗体" />
+
+      <EditText
+          android:id="@+id/italic"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="斜体" >
+
+        <requestFocus />
+      </EditText>
+
+      <EditText
+          android:id="@+id/bolditalic"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="粗斜体" />
+
+      <EditText
+          android:id="@+id/underline"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="下划线" />
+
+      <EditText
+          android:id="@+id/background"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="背景" />
+
+      <EditText
+          android:id="@+id/digit"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="数字1234567890" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <EditText
+          android:id="@+id/bold_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Bold" />
+
+      <EditText
+          android:id="@+id/italic_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Italic" />
+
+      <EditText
+          android:id="@+id/bolditalic_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Bold Italic" />
+
+      <EditText
+          android:id="@+id/underline_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Underline" />
+
+      <EditText
+          android:id="@+id/background_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Background" />
+
+      <EditText
+          android:id="@+id/digit_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Digit1234567890" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <EditText
+          android:id="@+id/doublewidth"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="number"
+          android:text="倍宽字体" />
+
+      <EditText
+          android:id="@+id/doubleheight"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="number"
+          android:text="倍高字体" />
+
+      <EditText
+          android:id="@+id/fourfold"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="四倍字体" />
+
+      <EditText
+          android:id="@+id/halfwidth"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="number"
+          android:text="半宽字体" />
+
+      <EditText
+          android:id="@+id/superscript"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="上标" />
+
+      <EditText
+          android:id="@+id/subscript"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="下标" />
+
+    </TableRow>
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+      <EditText
+          android:id="@+id/doublewidth_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Double" />
+
+      <EditText
+          android:id="@+id/doubleheight_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Double Heigth" />
+
+      <EditText
+          android:id="@+id/fourfold_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Fourfold" />
+
+      <EditText
+          android:id="@+id/halfwidth_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Half Width" />
+
+      <EditText
+          android:id="@+id/superscript_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Superscript" />
+
+      <EditText
+          android:id="@+id/subscript_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="Subscript" />
+
+    </TableRow>
+    <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+      <EditText
+          android:id="@+id/spacing"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="汉字及数字12345字间距调整" />
 
-            <EditText
-                android:id="@+id/bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="粗体" />
+      <EditText
+          android:id="@+id/spacing_en"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="5"
+          android:inputType="text"
+          android:text="English and Digit 12345 Spacing" />
 
-            <EditText
-                android:id="@+id/italic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="斜体" >
+    </TableRow>
+    
+  </TableLayout>
 
-                <requestFocus />
-            </EditText>
-
-            <EditText
-                android:id="@+id/bolditalic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="粗斜体" />
-
-            <EditText
-                android:id="@+id/underline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="下划线" />
-
-            <EditText
-                android:id="@+id/background"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="背景" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <EditText
-                android:id="@+id/bold_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Bold" />
-
-            <EditText
-                android:id="@+id/italic_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Italic" />
-
-            <EditText
-                android:id="@+id/bolditalic_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Bold Italic" />
-
-            <EditText
-                android:id="@+id/underline_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Underline" />
-
-            <EditText
-                android:id="@+id/background_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Background" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-
-            <EditText
-                android:id="@+id/doublewidth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="倍宽" />
-
-            <EditText
-                android:id="@+id/halfwidth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="半宽" />
-
-            <EditText
-                android:id="@+id/doubleheight"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="倍高" />
-
-            <EditText
-                android:id="@+id/fourfold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="四倍" />
-
-            <EditText
-                android:id="@+id/superscript"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="上标" />
-
-            <EditText
-                android:id="@+id/subscript"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="下标" />
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
-            <EditText
-                android:id="@+id/doublewidth_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Double Width" />
-
-            <EditText
-                android:id="@+id/halfwidth_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Half Width" />
-
-            <EditText
-                android:id="@+id/doubleheight_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Double Heigth" />
-
-            <EditText
-                android:id="@+id/fourfold_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Fourfold" />
-
-            <EditText
-                android:id="@+id/superscript_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Superscript" />
-
-            <EditText
-                android:id="@+id/subscript_en"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ems="5"
-                android:inputType="text"
-                android:text="Subscript" />
-
-        </TableRow>
-    </TableLayout>
+  <EditText
+      android:id="@+id/over"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:ems="5"
+      android:inputType="text"
+      android:text="------ 打印测试结束 ------" />
 
 </LinearLayout>
