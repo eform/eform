@@ -5,12 +5,14 @@
  */
 package com.cansiny.eform;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import com.cansiny.eform.IDCard.IDCardInfo;
 import com.cansiny.eform.Utils.Device;
 
 import android.app.Activity;
@@ -21,6 +23,13 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -33,11 +42,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -523,19 +532,19 @@ class MemberProfileDialog extends Utils.DialogFragment
 
 	    idcard.setListener(new Device.DeviceListener() {
 		@Override
-		public void onDeviceTaskSuccessed(Device device, Object result) {
-		    IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
-		    userid_edittext.setText(info.idno);
-		    username_edittext.setText(info.name);
+		public void onDeviceTaskStart(Device device) {
 		}
 		@Override
-		public void onDeviceTaskStart(Device device) {
+		public void onDeviceTaskCancelled(Device device) {
 		}
 		@Override
 		public void onDeviceTaskFailed(Device device) {
 		}
 		@Override
-		public void onDeviceTaskCancelled(Device device) {
+		public void onDeviceTaskSuccessed(Device device, Object result) {
+		    IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
+		    userid_edittext.setText(info.idno);
+		    username_edittext.setText(info.name);
 		}
 	    });
 	    idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_MEMBER);
@@ -567,8 +576,8 @@ class MemberDeleteDialog extends Utils.DialogFragment
 	linear.addView(linear2);
 
 	TextView textview = new TextView(getActivity());
-	textview.setText("您真的要注销当前登录的会员吗？");
-	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	textview.setText("确定要注销当前登录的会员吗？");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 	linear2.addView(textview);
 
 	textview = new TextView(getActivity());
@@ -577,11 +586,11 @@ class MemberDeleteDialog extends Utils.DialogFragment
 	params = new LinearLayout.LayoutParams(
 		ViewGroup.LayoutParams.MATCH_PARENT,
 		ViewGroup.LayoutParams.WRAP_CONTENT);
-	params.topMargin = 20;
+	params.topMargin = 5;
 	linear2.addView(textview, params);
 
 	textview = new TextView(getActivity());
-	textview.setText("您必须明白这是不可逆的操作，会员数据一旦删除将无法找回，请务必在注销前做好数据备份！");
+	textview.setText("注销会员是不可逆的操作，会员数据在会员注销后将彻底删除，请务必在注销前做好数据备份！");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	textview.setTextColor(getResources().getColor(R.color.red));
 	params = new LinearLayout.LayoutParams(
@@ -823,8 +832,41 @@ class MemberVouchersDialog extends Utils.DialogFragment
 	    return false;
 
 	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-	builder.setTitle("删除凭条");
-	builder.setMessage("\n确认要删除选择的凭条吗？\n");
+	builder.setTitle("确认删除凭条");
+
+	LinearLayout linear = new LinearLayout(getActivity());
+	linear.setOrientation(LinearLayout.HORIZONTAL);
+	linear.setPadding(10, 10, 10, 20);
+
+	ImageView image = new ImageView(getActivity());
+	image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+	image.setImageResource(R.drawable.warning);
+	LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+		(int) Utils.convertDpToPixel(60),
+		(int) Utils.convertDpToPixel(60));
+	params.leftMargin = 20;
+	params.rightMargin = 20;
+	linear.addView(image, params);
+
+	LinearLayout linear2 = new LinearLayout(getActivity());
+	linear2.setOrientation(LinearLayout.VERTICAL);
+	linear.addView(linear2);
+
+	TextView textview = new TextView(getActivity());
+	textview.setText("确定要删除选择的凭条吗？");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+	linear2.addView(textview);
+
+	textview = new TextView(getActivity());
+	textview.setText("凭条信息一旦删除将无法恢复！");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+	params = new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.MATCH_PARENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT);
+	params.topMargin = 5;
+	linear2.addView(textview, params);
+
+	builder.setView(linear);
 	builder.setNegativeButton("取 消", null);
 	builder.setPositiveButton("删 除", new DialogInterface.OnClickListener() {
 	    @Override
@@ -883,10 +925,11 @@ class MemberVouchersDialog extends Utils.DialogFragment
 
 	@Override
 	public int getCount() {
-	    if (vouchers == null || vouchers.size() == 0)
+	    if (vouchers == null || vouchers.size() == 0) {
 		return 1;
-	    else
+	    } else {
 		return vouchers.size();
+	    }
 	}
 
 	public int getVoucherCount() {
@@ -997,17 +1040,31 @@ class MemberVouchersDialog extends Utils.DialogFragment
 }
 
 
-class MemberImportExportDialog extends Utils.DialogFragment
+class MemberUDiskDialog extends Utils.DialogFragment implements DatabaseErrorHandler
 {
+    static private final String UDISK_DBPATH = String.format("/mnt/usbhost1/EForm%sMember.dat",
+	    Customer.getCurrentCustomer().getName());
+
+    private LinearLayout main_layout;
+    private LinearLayout step1_layout;
+    private LinearLayout step2_layout;
+    private MemberUDiskTask task;
+
+    public MemberUDiskDialog() {
+	task = null;
+    }
+
     private View buildLayout() {
-	LinearLayout linear = new LinearLayout(getActivity());
-	linear.setOrientation(LinearLayout.VERTICAL);
-	linear.setPadding(20, 10, 20, 10);
+	main_layout = new LinearLayout(getActivity());
+	main_layout.setPadding(20, 10, 20, 10);
+
+	step1_layout = new LinearLayout(getActivity());
+	step1_layout.setOrientation(LinearLayout.VERTICAL);
 
 	TextView textview = new TextView(getActivity());
 	textview.setText("请将U盘插入设备USB接口，然后选择导入或导出数据");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-	linear.addView(textview);
+	step1_layout.addView(textview);
 
 	textview = new TextView(getActivity());
 	textview.setText("导入和导出的文件名为“EFormCIBMember.dat”，" +
@@ -1016,9 +1073,39 @@ class MemberImportExportDialog extends Utils.DialogFragment
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	textview.setLineSpacing(1, 1.2f);
 	textview.setPadding(0, 40, 0, 0);
-	linear.addView(textview);
+	step1_layout.addView(textview);
 
-	return linear;
+	step2_layout = new LinearLayout(getActivity());
+	step2_layout.setOrientation(LinearLayout.VERTICAL);
+	step2_layout.setGravity(Gravity.CENTER_HORIZONTAL);
+
+	ProgressBar progressbar = new ProgressBar(getActivity(), null,
+		android.R.attr.progressBarStyleLargeInverse);
+	progressbar.setIndeterminate(false);
+	step2_layout.addView(progressbar);
+
+	textview = new TextView(getActivity());
+	textview.setText("操作中，请稍候 ...");
+	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+	textview.setPadding(0, 10, 0, 0);
+	step2_layout.addView(textview, new LinearLayout.LayoutParams(
+		ViewGroup.LayoutParams.WRAP_CONTENT,
+		ViewGroup.LayoutParams.WRAP_CONTENT));
+
+	main_layout.addView(step1_layout);
+	return main_layout;
+    }
+
+    private void showLayoutForStep(int step) {
+	main_layout.removeAllViews();
+
+	if (step == 1) {
+	    main_layout.addView(step1_layout);
+	} else if (step == 2) {
+	    main_layout.addView(step2_layout, new LinearLayout.LayoutParams(
+		    ViewGroup.LayoutParams.MATCH_PARENT,
+		    ViewGroup.LayoutParams.WRAP_CONTENT));
+	}
     }
 
     @Override
@@ -1034,6 +1121,329 @@ class MemberImportExportDialog extends Utils.DialogFragment
 
 	return builder.create();
     }
+
+    @Override
+    public void onStart() {
+	super.onStart();
+
+	AlertDialog dialog = (AlertDialog) getDialog();
+
+	Button button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		File file = new File(UDISK_DBPATH);
+		if (!file.exists()) {
+		    showToast("文件未找到！\n\n请检查U盘是否插好以及文件是否存在", R.drawable.cry);
+		    return;
+		}
+		startTask(false);
+	    }
+	});
+
+	button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	button.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View v) {
+		File file = new File(UDISK_DBPATH);
+		if (!file.exists()) {
+		    startTask(true);
+		    return;
+		}
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setTitle("确认导出");
+
+		LinearLayout linear = new LinearLayout(getActivity());
+		linear.setOrientation(LinearLayout.HORIZONTAL);
+		linear.setPadding(10, 10, 10, 20);
+
+		ImageView image = new ImageView(getActivity());
+		image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		image.setImageResource(R.drawable.warning);
+		LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+			(int) Utils.convertDpToPixel(60),
+			(int) Utils.convertDpToPixel(60));
+		params.leftMargin = 20;
+		params.rightMargin = 20;
+		linear.addView(image, params);
+
+		LinearLayout linear2 = new LinearLayout(getActivity());
+		linear2.setOrientation(LinearLayout.VERTICAL);
+		linear.addView(linear2);
+
+		TextView textview = new TextView(getActivity());
+		textview.setText("在U盘中发现同名文件，继续导出吗？");
+		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+		textview.setTextColor(getResources().getColor(R.color.black));
+		linear2.addView(textview);
+
+		textview = new TextView(getActivity());
+		textview.setText("可能您之前已通过本U盘导出数据且没将导出文件转移，" +
+			"选择继续导出将更新U盘中已保存的信息！");
+		textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+		textview.setLineSpacing(1, 1.2f);
+		params = new LinearLayout.LayoutParams(
+			ViewGroup.LayoutParams.MATCH_PARENT,
+			ViewGroup.LayoutParams.WRAP_CONTENT);
+		params.topMargin = 5;
+		linear2.addView(textview, params);
+
+		builder.setView(linear);
+		builder.setNegativeButton("取 消", null);
+		builder.setPositiveButton("继续导出", new DialogInterface.OnClickListener() {
+		    @Override
+		    public void onClick(DialogInterface dialog, int which) {
+			startTask(true);
+		    }
+		});
+		Dialog confirm = builder.create();
+
+		confirm.setOnShowListener(new DialogInterface.OnShowListener() {
+		    @Override
+		    public void onShow(DialogInterface dialog) {
+			Button button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_NEGATIVE);
+			button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+			button = ((AlertDialog) dialog).getButton(Dialog.BUTTON_POSITIVE);
+			button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+		    }
+		});
+		confirm.show();
+	    }
+	});
+    }
+
+    @Override
+    public void onCorruption(SQLiteDatabase dbObj) {
+	LogActivity.writeLog("导入导出失败，数据库文件%s已损坏", UDISK_DBPATH);
+	if (task != null) {
+	    task.cancel(true);
+	}
+    }
+
+    private void startTask(boolean export) {
+	if (export) {
+	    Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
+	    idcard.setListener(new Device.DeviceListener() {
+	        @Override
+	        public void onDeviceTaskStart(Device device) {
+	            Utils.showToast("请提供会员身份证件");
+	        }
+	        @Override
+	        public void onDeviceTaskSuccessed(Device device, Object result) {
+	            IDCard.IDCardInfo info = (IDCardInfo) result;
+	            Member.MemberProfile profile = Member.getMember().getProfile();
+	            if (info.idno.equals(profile.userid)) {
+	        	if (task == null) {
+	        	    task = new MemberUDiskTask();
+	        	    task.execute(true);
+	        	}
+	            } else {
+	        	showToast("身份证件不符，导出失败！");
+	            }
+	        }
+	        @Override
+	        public void onDeviceTaskFailed(Device device) {
+	            showToast("会员必须提供身份证件方可导出数据！");
+	        }
+	        @Override
+	        public void onDeviceTaskCancelled(Device device) {
+	            showToast("会员必须提供身份证件方可导出数据！");
+	        }
+	    });
+	    idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_MEMBER);
+	} else {
+	    if (task == null) {
+		task = new MemberUDiskTask();
+		task.execute(export);
+	    }
+	}
+    }
+
+    private class MemberUDiskTask extends AsyncTask<Boolean, Void, Integer>
+    {
+	private MemberUDiskSQLite sqlite;
+
+	@Override
+	protected void onPreExecute() {
+	    showLayoutForStep(2);
+
+	    AlertDialog dialog = (AlertDialog) getDialog();
+
+	    Button button = dialog.getButton(Dialog.BUTTON_NEUTRAL);
+	    button.setEnabled(false);
+	    button = dialog.getButton(Dialog.BUTTON_POSITIVE);
+	    button.setEnabled(false);
+	    button = dialog.getButton(Dialog.BUTTON_NEGATIVE);
+	    button.setEnabled(false);
+
+	    sqlite = new MemberUDiskSQLite(getActivity(), UDISK_DBPATH, null,
+		    MemberUDiskSQLite.VERSION, MemberUDiskDialog.this);
+	}
+
+	@Override
+	protected Integer doInBackground(Boolean... args) {
+	    Boolean export = args[0].booleanValue();
+	    return sqlite.process(export);
+	}
+
+	@Override
+	protected void onPostExecute(Integer result) {
+	    if (result.intValue() >= 0) {
+		Utils.showToast("操作成功！共处理 " + result + "条数据", R.drawable.smile);
+	    } else {
+		String errmsg = sqlite.getErrmsg();
+		if (errmsg != null) {
+		    errmsg = String.format("处理失败，%s！", errmsg);
+		} else {
+		    errmsg = "处理失败！";
+		}
+		Utils.showToast(errmsg, R.drawable.cry);
+	    }
+	    sqlite.close();
+	    dismiss();
+	}
+
+	@Override
+	protected void onCancelled(Integer result) {
+	    Utils.showToast("处理失败，操作被取消！", R.drawable.cry);
+	    dismiss();
+	}
+    }
+
+
+    class MemberUDiskSQLite extends SQLiteOpenHelper
+    {
+        static public final int VERSION = 1;
+
+        private String errmsg;
+
+        public MemberUDiskSQLite(Context context, String name, CursorFactory factory,
+        	int version, DatabaseErrorHandler errorHandler) {
+            super(context, name, factory, version, errorHandler);
+            errmsg = null;
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS summary ("
+ 		   + "customer  TEXT NOT NULL,"
+ 		   + "userid    TEXT NOT NULL,"
+  		   + "ctime     INTEGER NOT NULL,"
+ 		   + "mtime     INTEGER NOT NULL,"
+ 		   + "checksum  TEXT NOT NULL"
+ 		   + ");");
+            db.execSQL("CREATE TABLE IF NOT EXISTS voucher ("
+ 		   + "_id       INTEGER PRIMARY KEY,"
+ 		   + "comment   TEXT NOT NULL,"
+ 		   + "formclass TEXT NOT NULL,"
+ 		   + "formlabel TEXT NOT NULL,"
+ 		   + "formimage TEXT NOT NULL,"
+ 		   + "contents  BLOB NOT NULL,"
+ 		   + "ctime     INTEGER NOT NULL,"
+ 		   + "mtime     INTEGER NOT NULL,"
+ 		   + "atime     INTEGER NOT NULL"
+ 		   + ");");
+
+            ContentValues values = new ContentValues();
+
+            values.put("customer", Customer.getCurrentCustomer().getName());
+            Member member = Member.getMember();
+    	    Member.MemberProfile profile = member.getProfile();
+    	    if (profile != null) {
+    		values.put("userid", profile.userid);
+    	    }
+            long currtime = System.currentTimeMillis();
+            values.put("ctime", currtime);
+            values.put("mtime", currtime);
+            values.put("checksum", "");
+
+            if (db.insert("summary", null, values) == -1) {
+        	LogActivity.writeLog("导入导出失败，建立数据库失败");
+            }
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        }
+
+        public int process(boolean export) {
+    	    Member member = Member.getMember();
+    	    Member.MemberProfile profile = member.getProfile();
+    	    if (!member.isLogin() || profile == null) {
+    		errmsg = "导入导出数据失败，会员未登录";
+    		return -1;
+    	    }
+
+    	    try {
+        	if (!checkDatabase(profile)) {
+        	    return -1;
+        	}
+        	SQLiteDatabase database;
+        	int retval;
+
+        	if (export) {
+        	    database = this.getWritableDatabase();
+        	    retval = EFormSQLite.Voucher.export(getActivity(),
+        		    profile.password, profile.rowid, database);
+        	    if (retval >= 0) {
+        		ContentValues values = new ContentValues();
+        		values.put("mtime", System.currentTimeMillis());
+        		database.update("summary", values, null, null);
+        	    }
+        	} else {
+        	    database = this.getReadableDatabase();
+        	    retval = EFormSQLite.Voucher.Import(getActivity(), database);
+        	}
+        	database.close();
+                return retval;
+            } catch (Exception e) {
+        	LogActivity.writeLog(e);
+        	errmsg = "未知错误，详细信息请查看日志";
+        	return -1;
+            }
+        }
+
+        private boolean checkDatabase(Member.MemberProfile profile) throws SQLiteException {
+            SQLiteDatabase database = this.getReadableDatabase();
+            if (database == null) {
+        	errmsg = "导入导出数据失败，无效的数据库文件";
+        	return false;
+            }
+            Cursor cursor = database.query("summary",
+        	    new String[] { "customer", "userid", "ctime", "mtime", "checksum" },
+        	    null, null, null, null, null);
+            if (cursor == null || cursor.getCount() != 1) {
+        	errmsg = "导入导出数据失败，无效的数据库格式";
+        	database.close();
+        	return false;
+            }
+            cursor.moveToFirst();
+
+            String customer = cursor.getString(0);
+            if (!customer.equals(Customer.getCurrentCustomer().getName())) {
+        	LogActivity.writeLog("导入导出数据失败，客户信息“%s”不匹配“%s”", customer,
+        		Customer.getCurrentCustomer().getName());
+        	errmsg = "导入导出数据失败，非本机构数据不能导入";
+        	database.close();
+        	return false;
+            }
+
+            String userid = cursor.getString(1);
+            if (!userid.equals(profile.userid)) {
+        	errmsg = "导入导出数据失败，数据中证件号码与会员证件号码不符";
+        	database.close();
+        	return false;
+            }
+            database.close();
+            return true;
+        }
+
+        public String getErrmsg() {
+            return errmsg;
+        }
+    }
+
 }
 
 
@@ -1174,7 +1584,7 @@ public class Member
 
     public void importAndExport(FragmentManager manager) {
 	if (is_login) {
-	    MemberImportExportDialog dialog = new MemberImportExportDialog();
+	    MemberUDiskDialog dialog = new MemberUDiskDialog();
 	    dialog.show(manager, "MemberImportExportDialog");
 	}
     }

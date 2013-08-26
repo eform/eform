@@ -174,18 +174,14 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, null,
 		    "userid=0 and role=0", null , null, null, null);
-
 	    if (cursor == null) {
 		sqlite.close();
 		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
 		return false;
 	    }
-
 	    int count = cursor.getCount();
-
 	    cursor.close();
 	    sqlite.close();
-
 	    return (count > 0) ? true : false;
 	}
 
@@ -210,13 +206,11 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, new String[] { COLUMN_ID },
 		    "userid=0 and role=0", null , null, null, null);
-
 	    if (cursor == null) {
 		sqlite.close();
 		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
 		return false;
 	    }
-
 	    long rowid = -1;
 	    if (cursor.getCount() > 0) {
 		cursor.moveToFirst();
@@ -289,13 +283,11 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, new String[] { COLUMN_PASSWORD },
 		    "userid=0 and role=0", null , null, null, null);
-
 	    if (cursor == null) {
 		sqlite.close();
 		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
 		return -1;
 	    }
-
 	    if (cursor.getCount() == 0) {
 		cursor.close();
 		sqlite.close();
@@ -304,10 +296,8 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    cursor.moveToFirst();
 	    String encoded_password = cursor.getString(0);
-
 	    cursor.close();
 	    sqlite.close();
-
 	    return encoded_password.equals(SHAPassword(password)) ? 0 : -1;
 	}
 
@@ -341,13 +331,11 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, new String[] { COLUMN_ID },
 		    "userid=?", new String[]{ userid }, null, null, null);
-
 	    if (cursor == null) {
 		sqlite.close();
 		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
 		return -1;
 	    }
-
 	    if (cursor.getCount() > 0) {
 		LogActivity.writeLog("会员 '%s' 已经存在。", userid);
 		cursor.close();
@@ -398,7 +386,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, columns,
 		    "userid=?", new String[]{ userid }, null, null, null);
-
 	    if (cursor == null || cursor.getCount() <= 0) {
 		sqlite.close();
 		return null;
@@ -410,7 +397,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 		sqlite.close();
 		return null;
 	    }
-
 	    ContentValues values = new ContentValues();
 
 	    values.put(COLUMN_ID, cursor.getLong(0));
@@ -422,7 +408,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    cursor.close();
 	    sqlite.close();
-
 	    return values;
 	}
 
@@ -434,18 +419,14 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, columns,
 		    "userid=?", new String[]{ userid }, null, null, null);
-
 	    if (cursor == null || cursor.getCount() <= 0) {
 		sqlite.close();
 		return -1;
 	    }
 	    cursor.moveToFirst();
-
 	    long rowid = cursor.getLong(0);
-
 	    cursor.close();
 	    sqlite.close();
-
 	    return rowid;
 	}
 
@@ -624,7 +605,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		} while(false);
 	    } finally {
 		database.endTransaction();
-		database.close();
+		sqlite.close();
 	    }
 	    return retval;
 	}
@@ -638,7 +619,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    Cursor cursor = database.query(TABLE_NAME, columns,
 		    null, null, null, null, "_id ASC");
-
 	    if (cursor == null || cursor.getCount() <= 0) {
 		sqlite.close();
 		return null;
@@ -659,7 +639,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 	    cursor.close();
 	    sqlite.close();
-
 	    return members;
 	}
 
@@ -667,21 +646,16 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
 	    SQLiteDatabase database = sqlite.getReadableDatabase();
 
-	    Cursor cursor = database.query(TABLE_NAME, null,
-		    "_id=?", new String[] { String.valueOf(rowid) },
-		    null, null, null);
-
+	    Cursor cursor = database.query(TABLE_NAME, null, "_id=?",
+		    new String[] { String.valueOf(rowid) }, null, null, null);
 	    if (cursor == null) {
 		sqlite.close();
 		LogActivity.writeLog("查询 " + TABLE_NAME + " 错误，返回cursor == null");
 		return false;
 	    }
-
 	    int count = cursor.getCount();
-
 	    cursor.close();
 	    sqlite.close();
-
 	    return (count > 0) ? true : false;
 	}
     }
@@ -758,7 +732,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 		LogActivity.writeLog("更新凭证失败，没有提供会员密码");
 		return false;
 	    }
-
 	    ContentValues values = new ContentValues();
 
 	    if (contents != null && contents.length() > 0) {
@@ -774,7 +747,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    if (comment != null && comment.length() > 0) {
 		values.put(COLUMN_COMMENT, comment);
 	    }
-
 	    if (values.size() == 0) {
 		LogActivity.writeLog("凭证没有需要更新的数据");
 		return true;
@@ -840,7 +812,6 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 	    cursor.close();
 	    sqlite.close();
-
 	    return vouchers;
 	}
 
@@ -863,11 +834,82 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	    int rows = database.delete(TABLE_NAME, "_id=?",
 		    new String[] { String.valueOf(rowid) });
-	    database.close();
-
+	    sqlite.close();
 	    return (rows == 1) ? true : false;
 	}
 
+	static public int export(Context context,
+		String member_password, long userid, SQLiteDatabase externaldb) {
+	    if (member_password == null || userid < 0 || externaldb == null) {
+		LogActivity.writeLog("不能导出数据，因为提供的会员信息无效");
+		return -1;
+	    }
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getReadableDatabase();
+
+	    String[] columns = { COLUMN_FORMCLASS, COLUMN_FORMLABEL,
+		    COLUMN_FORMIMAGE, COLUMN_CONTENTS, COLUMN_COMMENT,
+		    COLUMN_CTIME, COLUMN_MTIME, COLUMN_ATIME };
+
+	    Cursor cursor = database.query(TABLE_NAME, columns, "userid=?",
+		    new String[] { String.valueOf(userid) }, null, null, null);
+	    if (cursor == null) {
+		sqlite.close();
+		return -1;
+	    }
+	    if (cursor.getCount() == 0) {
+		sqlite.close();
+		return 0;
+	    }
+
+	    externaldb.beginTransaction();
+	    int retval = 0;
+	    try {
+		ContentValues values = new ContentValues();
+
+		while(cursor.moveToNext()) {
+		    byte[] utf8_contents = AESDecrypt(MD5Hash(member_password), cursor.getBlob(3));
+		    if (utf8_contents == null) {
+			LogActivity.writeLog("导出数据失败，解密会员数据失败");
+			retval = -1;
+			break;
+		    }
+		    values.clear();
+		    values.put(COLUMN_FORMCLASS, cursor.getString(0));
+		    values.put(COLUMN_FORMLABEL, cursor.getString(1));
+		    values.put(COLUMN_FORMIMAGE, cursor.getString(2));
+		    values.put(COLUMN_CONTENTS, utf8_contents);
+		    values.put(COLUMN_COMMENT, cursor.getString(4));
+		    values.put(COLUMN_CTIME, cursor.getLong(5));
+		    values.put(COLUMN_MTIME, cursor.getLong(6));
+		    values.put(COLUMN_ATIME, cursor.getLong(7));
+
+		    int rows = externaldb.update(TABLE_NAME, values,
+			    "formclass=? and ctime=? and mtime=?", new String[] {
+			    	cursor.getString(0), cursor.getString(5), cursor.getString(6)
+			    });
+		    if (rows == 0) {
+			if (externaldb.insert(TABLE_NAME, null, values) == -1) {
+			    LogActivity.writeLog("导出数据失败，插入数据库错误");
+			    retval = -1;
+			    break;
+			}
+			retval++;
+		    }
+		}
+		if (retval >= 0) {
+		    externaldb.setTransactionSuccessful();
+		}
+	    } finally {
+		externaldb.endTransaction();
+		sqlite.close();
+	    }
+	    return retval;
+	}
+
+	static public int Import(Context context, SQLiteDatabase externaldb) {
+	    return -1;
+	}
     }
 
 }
