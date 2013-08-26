@@ -1056,7 +1056,7 @@ class MemberUDiskDialog extends Utils.DialogFragment implements DatabaseErrorHan
 
     private View buildLayout() {
 	main_layout = new LinearLayout(getActivity());
-	main_layout.setPadding(20, 10, 20, 10);
+	main_layout.setPadding(20, 20, 20, 10);
 
 	step1_layout = new LinearLayout(getActivity());
 	step1_layout.setOrientation(LinearLayout.VERTICAL);
@@ -1064,12 +1064,15 @@ class MemberUDiskDialog extends Utils.DialogFragment implements DatabaseErrorHan
 	TextView textview = new TextView(getActivity());
 	textview.setText("请将U盘插入设备USB接口，然后选择导入或导出数据");
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+	textview.setTextColor(getResources().getColor(R.color.black));
 	step1_layout.addView(textview);
 
 	textview = new TextView(getActivity());
-	textview.setText("导入和导出的文件名为“EFormCIBMember.dat”，" +
-			"这是二进制格式文件，不能使用普通编辑器编辑；\n" +
-			"请不要修改导出的文件名称，否则在导入时将提示找不到文件；");
+	textview.setText(String.format("会员可通过导入／导出功能在不同网点间转移数据；\n" +
+		"导入／导出的文件名为“EForm%sMember.dat”，" +
+		"文件以二进制格式存储， 不能使用普通编辑器编辑；\n" +
+		"请不要修改导出的文件名称，否则在导入时将提示找不到文件；\n" +
+		"会员必须提供身份证件方可导出数据；", Customer.getCurrentCustomer().getName()));
 	textview.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
 	textview.setLineSpacing(1, 1.2f);
 	textview.setPadding(0, 40, 0, 0);

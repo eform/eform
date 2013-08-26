@@ -33,10 +33,19 @@
             android:baselineAligned="false"
             android:orientation="vertical" >
 
+          <CheckBox
+              android:id="@+id/voice_tips_checkbox"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:checked="true"
+	      android:text="打开语音提示"
+	      android:textSize="18sp" />
+
           <Button
               android:id="@+id/aftermarket_contact_button"
-              android:layout_width="wrap_content"
+              android:layout_width="180dp"
               android:layout_height="wrap_content"
+              android:layout_marginTop="20dp"
               android:text="售后服务联系方式" />
 
           <TextView

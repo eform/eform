@@ -159,8 +159,6 @@ class PreferencesDialog extends Utils.DialogFragment
     }
 
     private void onMemberPasswordButtonClick() {
-	showToast("请提供会员注册时的身份证件");
-
 	Device idcard = Device.getDevice(Device.DEVICE_IDCARD);
 	if (idcard == null) {
 	    showToast("不能打开身份证阅读器，请联系管理员检查设备配置", R.drawable.cry);
@@ -168,6 +166,10 @@ class PreferencesDialog extends Utils.DialogFragment
 	}
 
 	idcard.setListener(new Device.DeviceListener() {
+	    @Override
+	    public void onDeviceTaskStart(Device device) {
+		showToast("请提供会员注册时的身份证件");
+	    }
 	    @Override
 	    public void onDeviceTaskSuccessed(Device device, Object result) {
 		IDCard.IDCardInfo info = (IDCard.IDCardInfo) result;
@@ -186,19 +188,18 @@ class PreferencesDialog extends Utils.DialogFragment
 		    ((TextView) userid_view).setText(info.idno);
 		    table.setVisibility(View.VISIBLE);
 		} else {
-		    showToast("没有证件号码为“" + info.idno + "”的会员！");
+		    showToast("此证件不和任何会员关联，请检查后重试！");
 		    ((TextView) userid_view).setText("");
 		    table.setVisibility(View.GONE);
 		}
 	    }
 	    @Override
-	    public void onDeviceTaskStart(Device device) {
-	    }
-	    @Override
 	    public void onDeviceTaskFailed(Device device) {
+		showToast("修改会员密码必须提供会员注册时使用的身份证件！", R.drawable.tips);
 	    }
 	    @Override
 	    public void onDeviceTaskCancelled(Device device) {
+		showToast("修改会员密码必须提供会员注册时使用的身份证件！", R.drawable.tips);
 	    }
 	});
 	idcard.startTask(getFragmentManager(), Device.TASK_FLAG_IDCARD_TEST);
@@ -419,6 +420,15 @@ class PreferencesDialog extends Utils.DialogFragment
 	    View time_edittext = dialog.findViewById(R.id.auto_logout_time_edittext);
 	    time_edittext.setEnabled(isChecked);
 	    prefs.setAdministratorAutoLogout(isChecked);
+	case R.id.voice_tips_checkbox:
+	    prefs.setVoiceTips(isChecked);
+
+	    EFormApplication app = EFormApplication.getInstance();
+	    if (isChecked) {
+		app.startTTS();
+	    } else {
+		app.stopTTS();
+	    }
 	    break;
 	}
     }
@@ -471,6 +481,12 @@ class PreferencesDialog extends Utils.DialogFragment
 	    button.setTag(Utils.DialogFragment.CLEAR_BUTTON_TAG);
 	    button.setOnClickListener(this);
 	}
+
+	Preferences prefs = Preferences.getPreferences();
+
+	CheckBox checkbox = (CheckBox) dialog.findViewById(R.id.voice_tips_checkbox);
+	checkbox.setOnCheckedChangeListener(this);
+	checkbox.setChecked(prefs.getVoiceTips());
 
 	View view = dialog.findViewById(R.id.aftermarket_contact_table);
 	view.setVisibility(View.GONE);
@@ -1085,6 +1101,14 @@ public class Preferences
     public int getPageTopMargin(Form form, int page_no) {
 	String key = form.getClass().getName() + "." + page_no + ".top";
 	return prefs.getInt(key, 0);
+    }
+
+    public void setVoiceTips(boolean on) {
+	putObject("VoiceTips", on);
+    }
+
+    public boolean getVoiceTips() {
+	return prefs.getBoolean("VoiceTips", true);
     }
 
 }

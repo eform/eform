@@ -166,6 +166,7 @@ public abstract class IDCard extends Utils.Device
 	    super.onPreExecute();
 	    dialog = new IDCardDialog(IDCard.this, flags);
 	    dialog.show(manager, "IDCardDialog");
+	    EFormApplication.getInstance().speak("请读身份证");
 	}
 
 	@Override

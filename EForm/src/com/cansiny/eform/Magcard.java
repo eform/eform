@@ -172,6 +172,7 @@ public abstract class Magcard extends Utils.Device
 	    super.onPreExecute();
 	    dialog = new MagcardDialog(Magcard.this, flags);
 	    dialog.show(manager, "MagcardDialog");
+	    EFormApplication.getInstance().speak("请刷卡");
 	}
 
 	@Override
