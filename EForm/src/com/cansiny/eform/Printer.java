@@ -931,6 +931,8 @@ public abstract class Printer extends Device
 		publishProgress(String.valueOf(PROGRESS_PAGE_START), String.valueOf(page_no),
 			String.valueOf(fields.size()));
 
+		EFormApplication.getInstance().speak(String.format("请放纸打印第%d页", page_no + 1));
+
 		sortFields(fields);
 
 		if (hasCapability(CAPABILITY_AUTO_CHECK_PAPER)) {

@@ -111,7 +111,9 @@ public class EFormApplication extends Application
 
     public void speak(String text) {
 	if (!tts_ready || tts == null) {
-	    LogActivity.writeLog("TTS 还未准备好！");
+	    if (BuildConfig.DEBUG) {
+		LogActivity.writeLog("TTS未允许或未准备好！");
+	    }
 	    return;
 	}
 	tts.stop();
