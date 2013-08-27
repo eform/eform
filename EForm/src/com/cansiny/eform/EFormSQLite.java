@@ -16,6 +16,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.cansiny.eform.Member.MemberProfile;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -130,11 +131,11 @@ public class EFormSQLite extends SQLiteOpenHelper
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Voucher.TABLE_NAME + " ("
 		   + "_id       INTEGER PRIMARY KEY,"
 		   + "userid    INTEGER NOT NULL,"
-		   + "comment   TEXT NOT NULL,"
 		   + "formclass TEXT NOT NULL,"
 		   + "formlabel TEXT NOT NULL,"
 		   + "formimage TEXT NOT NULL,"
 		   + "contents  BLOB NOT NULL,"
+		   + "comment   TEXT NOT NULL,"
 		   + "ctime     INTEGER NOT NULL,"
 		   + "mtime     INTEGER NOT NULL,"
 		   + "atime     INTEGER NOT NULL"
@@ -536,18 +537,20 @@ public class EFormSQLite extends SQLiteOpenHelper
 			break;
 		    }
 		    int update_rows = 0;
+		    byte[] old_hash = MD5Hash(old_password);
+		    byte[] new_hash = MD5Hash(new_password);
 		    while (cursor.moveToNext()) {
 			byte[] contents = cursor.getBlob(1);
 			if (contents == null) {
 			    LogActivity.writeLog("更新会员信息失败，不能得到会员保存的信息");
 			    break;
 			}
-			byte[] cleartext = AESDecrypt(MD5Hash(old_password), contents);
+			byte[] cleartext = AESDecrypt(old_hash, contents);
 			if (cleartext == null) {
 			    LogActivity.writeLog("更新会员信息失败，解密会员存储信息失败");
 			    break;
 			}
-			byte[] ciphetext = AESEncrypt(MD5Hash(new_password), cleartext);
+			byte[] ciphetext = AESEncrypt(new_hash, cleartext);
 			if (ciphetext == null) {
 			    LogActivity.writeLog("更新会员信息失败，加密会员存储信息失败");
 			    break;
@@ -667,11 +670,11 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 	static final public String COLUMN_ID = "_id";
 	static final public String COLUMN_USERID = "userid";
-	static final public String COLUMN_COMMENT = "comment";
 	static final public String COLUMN_FORMCLASS = "formclass";
 	static final public String COLUMN_FORMLABEL = "formlabel";
 	static final public String COLUMN_FORMIMAGE = "formimage";
 	static final public String COLUMN_CONTENTS = "contents";
+	static final public String COLUMN_COMMENT = "comment";
 	static final public String COLUMN_CTIME = "ctime";
 	static final public String COLUMN_MTIME = "mtime";
 	static final public String COLUMN_ATIME = "atime";
@@ -791,9 +794,10 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    }
 
 	    ArrayList<com.cansiny.eform.Voucher> vouchers = new ArrayList<com.cansiny.eform.Voucher>();
+	    byte[] md5_hash = MD5Hash(member_password);
 	    while(cursor.moveToNext()) {
 		try {
-		    byte[] utf8_contents = AESDecrypt(MD5Hash(member_password), cursor.getBlob(4));
+		    byte[] utf8_contents = AESDecrypt(md5_hash, cursor.getBlob(4));
 		    if (utf8_contents == null) {
 			LogActivity.writeLog("解密会员数据失败");
 			continue;
@@ -866,9 +870,9 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    int retval = 0;
 	    try {
 		ContentValues values = new ContentValues();
-
+		byte[] md5_hash = MD5Hash(member_password);
 		while(cursor.moveToNext()) {
-		    byte[] utf8_contents = AESDecrypt(MD5Hash(member_password), cursor.getBlob(3));
+		    byte[] utf8_contents = AESDecrypt(md5_hash, cursor.getBlob(3));
 		    if (utf8_contents == null) {
 			LogActivity.writeLog("导出数据失败，解密会员数据失败");
 			retval = -1;
@@ -886,8 +890,8 @@ public class EFormSQLite extends SQLiteOpenHelper
 
 		    int rows = externaldb.update(TABLE_NAME, values,
 			    "formclass=? and ctime=? and mtime=?", new String[] {
-			    	cursor.getString(0), cursor.getString(5), cursor.getString(6)
-			    });
+			    cursor.getString(0), cursor.getString(5), cursor.getString(6)
+		    });
 		    if (rows == 0) {
 			if (externaldb.insert(TABLE_NAME, null, values) == -1) {
 			    LogActivity.writeLog("导出数据失败，插入数据库错误");
@@ -907,8 +911,92 @@ public class EFormSQLite extends SQLiteOpenHelper
 	    return retval;
 	}
 
-	static public int Import(Context context, SQLiteDatabase externaldb) {
-	    return -1;
+	static public int Import(Context context,
+		String member_password, long userid, SQLiteDatabase externaldb) {
+	    if (member_password == null || userid < 0 || externaldb == null) {
+		LogActivity.writeLog("不能导出数据，因为提供的会员信息无效");
+		return -1;
+	    }
+
+	    String[] columns = { COLUMN_FORMCLASS, COLUMN_FORMLABEL,
+		    COLUMN_FORMIMAGE, COLUMN_CONTENTS, COLUMN_COMMENT,
+		    COLUMN_CTIME, COLUMN_MTIME, COLUMN_ATIME };
+
+	    Cursor cursor = externaldb.query(TABLE_NAME, columns, null, null, null, null, null);
+	    if (cursor == null) {
+		return -1;
+	    }
+	    if (cursor.getCount() == 0) {
+		return 0;
+	    }
+
+	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
+	    SQLiteDatabase database = sqlite.getReadableDatabase();
+
+	    database.beginTransaction();
+	    int retval = 0;
+	    try {
+		ContentValues values = new ContentValues();
+		byte[] md5_hash = MD5Hash(member_password);
+		while(cursor.moveToNext()) {
+		    // check class name and class type
+		    String formclass = cursor.getString(0);
+		    try {
+			Object object = Class.forName(formclass).
+				getConstructor(Activity.class, String.class).newInstance(context, null);
+			if (!(object instanceof Form)) {
+			    LogActivity.writeLog("“%s”不是Form类，略过", formclass);
+			    continue;
+			}
+		    } catch (Exception e) {
+			LogActivity.writeLog("“%s”不是一个有效的类名，略过", formclass);
+			LogActivity.writeLog(e);
+			continue;
+		    }
+
+		    // skip when conflict with exists record
+		    Cursor cursor2 = database.query(TABLE_NAME, new String[] { COLUMN_ID },
+			    "userid=? and formclass=? and ctime=? and mtime=?",
+			    new String[] { String.valueOf(userid), formclass,
+			    	cursor.getString(5), cursor.getString(6) }, null, null, null);
+		    if (cursor2 == null) {
+			LogActivity.writeLog("查询凭条数据库失败???");
+			continue;
+		    }
+		    if (cursor2.getCount() > 1) {
+			LogActivity.writeLog("userid, formclass, ctime, mtime组合不是唯一索引???");
+			continue;
+		    }
+		    if (cursor2.getCount() == 1) {
+			continue;
+		    }
+
+		    values.clear();
+		    values.put(COLUMN_USERID, userid);
+		    values.put(COLUMN_FORMCLASS, cursor.getString(0));
+		    values.put(COLUMN_FORMLABEL, cursor.getString(1));
+		    values.put(COLUMN_FORMIMAGE, cursor.getString(2));
+		    values.put(COLUMN_CONTENTS, AESEncrypt(md5_hash, cursor.getBlob(3)));
+		    values.put(COLUMN_COMMENT, cursor.getString(4));
+		    values.put(COLUMN_CTIME, cursor.getLong(5));
+		    values.put(COLUMN_MTIME, cursor.getLong(6));
+		    values.put(COLUMN_ATIME, cursor.getLong(7));
+
+		    if (database.insert(TABLE_NAME, null, values) == -1) {
+			LogActivity.writeLog("导入数据失败，插入凭条数据库错误");
+			retval = -1;
+			break;
+		    }
+		    retval++;
+		}
+		if (retval >= 0) {
+		    database.setTransactionSuccessful();
+		}
+	    } finally {
+		database.endTransaction();
+		sqlite.close();
+	    }
+	    return retval;
 	}
     }
 

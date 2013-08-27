@@ -577,7 +577,9 @@ public class Utils
 		    return device;
 		}
 	    }
-	    LogActivity.writeLog("找不到设备(VID=0x%04X, PID=0x%04X)", vid, pid);
+	    if (BuildConfig.DEBUG) {
+		LogActivity.writeLog("找不到设备(VID=0x%04X, PID=0x%04X)", vid, pid);
+	    }
 	    return null;
 	}
 

@@ -422,7 +422,6 @@ class PreferencesDialog extends Utils.DialogFragment
 	    prefs.setAdministratorAutoLogout(isChecked);
 	case R.id.voice_tips_checkbox:
 	    prefs.setVoiceTips(isChecked);
-
 	    EFormApplication app = EFormApplication.getInstance();
 	    if (isChecked) {
 		app.startTTS();

@@ -35,7 +35,6 @@ public class FormCIB01 extends Form
 	verify_edittexts.add(R.id.p1_idno_edittext);
     }
 
-	
     @Override
     public void onPageStart(int page_no) {
 	/* call super method */

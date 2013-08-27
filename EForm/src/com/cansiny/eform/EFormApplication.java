@@ -6,8 +6,10 @@
 package com.cansiny.eform;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -86,8 +88,6 @@ public class EFormApplication extends Application
 
     @SuppressLint("NewApi")
     public void startTTS() {
-	stopTTS();
-
 	tts = new TextToSpeech(this, this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -103,10 +103,30 @@ public class EFormApplication extends Application
 	}
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onInit(int status) {
 	tts_ready = true;
-	speak("欢迎光临");
+
+	switch (tts.isLanguageAvailable(Locale.CHINA)) {
+	case TextToSpeech.LANG_MISSING_DATA:
+	    Utils.showToast("文字转语音错误：系统未安装中文语音数据包", R.drawable.cry);
+	    break;
+	case TextToSpeech.LANG_NOT_SUPPORTED:
+	    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+		tts.shutdown();
+		tts = new TextToSpeech(this, this, "com.iflytek.tts");
+		return;
+	    }
+	    Utils.showToast("文字转语音错误：系统引擎不支持中文，请检查系统设置", R.drawable.cry);
+	    break;
+	case TextToSpeech.LANG_AVAILABLE:
+	case TextToSpeech.LANG_COUNTRY_AVAILABLE:
+	case TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE:
+	    tts.setLanguage(Locale.CHINA);
+	    speak("欢迎光临");
+	    break;
+	}
     }
 
     public void speak(String text) {

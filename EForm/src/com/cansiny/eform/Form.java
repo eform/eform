@@ -702,8 +702,10 @@ public abstract class Form extends DefaultHandler
 
 	public FormPage(Context context, int title_id, int layout) {
 	    super(context);
-	    String title = activity.getResources().getString(title_id);
-	    initialize(title, layout);
+	    if (activity != null) {
+		String title = activity.getResources().getString(title_id);
+		initialize(title, layout);
+	    }
 	}
 
 	public String getTitle() {

@@ -1338,11 +1338,11 @@ class MemberUDiskDialog extends Utils.DialogFragment implements DatabaseErrorHan
  		   + ");");
             db.execSQL("CREATE TABLE IF NOT EXISTS voucher ("
  		   + "_id       INTEGER PRIMARY KEY,"
- 		   + "comment   TEXT NOT NULL,"
  		   + "formclass TEXT NOT NULL,"
  		   + "formlabel TEXT NOT NULL,"
  		   + "formimage TEXT NOT NULL,"
  		   + "contents  BLOB NOT NULL,"
+ 		   + "comment   TEXT NOT NULL,"
  		   + "ctime     INTEGER NOT NULL,"
  		   + "mtime     INTEGER NOT NULL,"
  		   + "atime     INTEGER NOT NULL"
@@ -1396,7 +1396,8 @@ class MemberUDiskDialog extends Utils.DialogFragment implements DatabaseErrorHan
         	    }
         	} else {
         	    database = this.getReadableDatabase();
-        	    retval = EFormSQLite.Voucher.Import(getActivity(), database);
+        	    retval = EFormSQLite.Voucher.Import(getActivity(),
+        		    profile.password, profile.rowid, database);
         	}
         	database.close();
                 return retval;
