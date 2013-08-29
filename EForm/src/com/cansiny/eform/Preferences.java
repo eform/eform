@@ -403,6 +403,8 @@ class PreferencesDialog extends Utils.DialogFragment
 	    admin.setPassword(getFragmentManager());
 	    break;
 	case R.id.upgrade_button:
+	    Upgrader upgrader = Upgrader.getUpgrader();
+	    upgrader.show(getFragmentManager(), "Upgrader");
 	    break;
 	case R.id.system_settings_button:
 	    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
@@ -484,6 +486,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	Preferences prefs = Preferences.getPreferences();
 
 	CheckBox checkbox = (CheckBox) dialog.findViewById(R.id.voice_tips_checkbox);
+	checkbox.setPadding(24, 0, 0, 2);
 	checkbox.setOnCheckedChangeListener(this);
 	checkbox.setChecked(prefs.getVoiceTips());
 
@@ -661,6 +664,7 @@ class PreferencesDialog extends Utils.DialogFragment
 	}
 
 	CheckBox checkbox = (CheckBox) dialog.findViewById(R.id.auto_logout_checkbox);
+	checkbox.setPadding(24, 0, 0, 2);
 	checkbox.setOnCheckedChangeListener(this);
 	checkbox.setChecked(prefs.getAdministratorAutoLogout());
 

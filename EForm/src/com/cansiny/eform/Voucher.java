@@ -538,8 +538,9 @@ public class Voucher implements Parcelable
     }
 
     public void fireOnCommentTextChanged() {
-	if (dialog_listener != null)
+	if (dialog_listener != null) {
 	    dialog_listener.onCommentTextChanged();
+	}
     }
 
     public interface VoucherListener

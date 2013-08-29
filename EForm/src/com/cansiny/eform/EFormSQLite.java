@@ -845,7 +845,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	static public int export(Context context,
 		String member_password, long userid, SQLiteDatabase externaldb) {
 	    if (member_password == null || userid < 0 || externaldb == null) {
-		LogActivity.writeLog("不能导出数据，因为提供的会员信息无效");
+		LogActivity.writeLog("不能导出凭条数据，因为提供的会员信息无效");
 		return -1;
 	    }
 	    EFormSQLite sqlite = EFormSQLite.getSQLite(context);
@@ -874,7 +874,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		while(cursor.moveToNext()) {
 		    byte[] utf8_contents = AESDecrypt(md5_hash, cursor.getBlob(3));
 		    if (utf8_contents == null) {
-			LogActivity.writeLog("导出数据失败，解密会员数据失败");
+			LogActivity.writeLog("导出数据失败，解密会员凭条数据失败");
 			retval = -1;
 			break;
 		    }
@@ -894,7 +894,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		    });
 		    if (rows == 0) {
 			if (externaldb.insert(TABLE_NAME, null, values) == -1) {
-			    LogActivity.writeLog("导出数据失败，插入数据库错误");
+			    LogActivity.writeLog("导出数据失败，插入凭条到输出数据库错误");
 			    retval = -1;
 			    break;
 			}
@@ -914,7 +914,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 	static public int Import(Context context,
 		String member_password, long userid, SQLiteDatabase externaldb) {
 	    if (member_password == null || userid < 0 || externaldb == null) {
-		LogActivity.writeLog("不能导出数据，因为提供的会员信息无效");
+		LogActivity.writeLog("不能导入凭条数据，因为提供的会员信息无效");
 		return -1;
 	    }
 
@@ -983,7 +983,7 @@ public class EFormSQLite extends SQLiteOpenHelper
 		    values.put(COLUMN_ATIME, cursor.getLong(7));
 
 		    if (database.insert(TABLE_NAME, null, values) == -1) {
-			LogActivity.writeLog("导入数据失败，插入凭条数据库错误");
+			LogActivity.writeLog("导入数据失败，插入凭条到本地数据库错误");
 			retval = -1;
 			break;
 		    }

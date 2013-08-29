@@ -798,22 +798,25 @@ public class Utils
 
 	@Override
 	public void afterTextChanged(Editable editable) {
-	    if (listener != null)
+	    if (listener != null) {
 		listener.afterTextChanged(textview, editable);
+	    }
 	}
 
 	@Override
 	public void beforeTextChanged(CharSequence sequence,
 				      int start, int count, int after) {
-	    if (listener != null)
+	    if (listener != null) {
 		listener.beforeTextChanged(textview, sequence, start, count, after);
+	    }
 	}
 
 	@Override
 	public void onTextChanged(CharSequence sequence,
 				  int start, int before, int count) {
-	    if (listener != null)
+	    if (listener != null) {
 		listener.onTextChanged(textview, sequence, start, before, count);
+	    }
 	}
 
 	public interface TextWatcherListener

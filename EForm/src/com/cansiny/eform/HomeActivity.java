@@ -404,7 +404,7 @@ public class HomeActivity extends Activity
 	}
 	if ((device_check_flags & FLAG_PRINTER_DISCONNECTED) != 0) {
 	    tips_text.setText("设备故障：打印机已断开连接");
-	    tips_second_text.setText("请检查设备电缆是否松动，或设备是否已损坏，或设备驱动是否正确配置");
+	    tips_second_text.setText("请检查设备电源是否打开，电缆是否松动，或设备驱动是否正确配置");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
@@ -416,7 +416,7 @@ public class HomeActivity extends Activity
 	}
 	if ((device_check_flags & FLAG_MAGCARD_DISCONNECTED) != 0) {
 	    tips_text.setText("设备故障：刷卡器已断开连接");
-	    tips_second_text.setText("请检查设备电缆是否松动，或设备是否已损坏，或设备驱动是否正确配置");
+	    tips_second_text.setText("请检查设备电缆是否松动，或设备驱动是否正确配置");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
@@ -428,7 +428,7 @@ public class HomeActivity extends Activity
 	}
 	if ((device_check_flags & FLAG_IDCARD_DISCONNECTED) != 0) {
 	    tips_text.setText("设备故障：身份证阅读器已断开连接");
-	    tips_second_text.setText("请检查设备电缆是否松动，或设备是否已损坏，或设备驱动是否正确配置");
+	    tips_second_text.setText("请检查设备电缆是否松动，或设备驱动是否正确配置");
 	    tips_layout.setVisibility(View.VISIBLE);
 	    return;
 	}
@@ -503,7 +503,7 @@ public class HomeActivity extends Activity
 	if (view.getClass() == ImageButton.class) {
 	    Object object = view.getTag();
 	    if (object == null || !(object instanceof Customer.HomeItem)) {
-		Log.e("HomeActivity", "程序错误: 主页按钮缺少 class Tag");
+		LogActivity.writeLog("程序错误: 主页按钮缺少 class Tag");
 		return;
 	    }
 	    Customer.HomeItem item = (Customer.HomeItem) object;
